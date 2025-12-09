@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ChatGPT Full-Page + Single-Message PDF Export Helper
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.3
 // @description  Teljes oldal vagy egy konkrét üzenet nyomtatása/PDF-be mentése a chatgpt.com-on, layout szétcseszése nélkül.
 // @author       Mr_HumanRebel
 // @match        https://chatgpt.com/*
@@ -271,17 +271,24 @@
         // Csak assistant üzenetekre
         if (messageEl.getAttribute('data-message-author-role') !== 'assistant') return;
 
-        // Ne duplikáljunk
-        if (messageEl.dataset.gptPdfAttached === '1') return;
-        messageEl.dataset.gptPdfAttached = '1';
+        // Ha már van PDF gomb, vagy egyszer már raktunk rá, ne csináljuk újra
+        if (messageEl.dataset.gptPdfAttached === '1' ||
+            messageEl.querySelector('.gpt-pdf-btn')) {
+            messageEl.dataset.gptPdfAttached = '1';
+            return;
+        }
 
         var turnRoot =
             messageEl.closest('.agent-turn') ||
             messageEl.parentElement ||
             messageEl;
 
+        // Várjuk meg, amíg a "More actions" gomb megjelenik (ez jelzi, hogy kész az üzenet)
         var moreBtn = turnRoot.querySelector('button[aria-label="More actions"]');
-        if (!moreBtn) return;
+        if (!moreBtn) {
+            // még streamel, majd a következő MutationObserver ciklusban újrapróbáljuk
+            return;
+        }
 
         var btn = document.createElement('button');
         btn.type = 'button';
@@ -295,35 +302,25 @@
         });
 
         moreBtn.insertAdjacentElement('afterend', btn);
+
+        // CSAK MOST jelöljük, hogy már kezeltük
+        messageEl.dataset.gptPdfAttached = '1';
     }
 
-    function processExistingMessages() {
-        var messages = document.querySelectorAll('div[data-message-author-role="assistant"]');
+    function processExistingMessages(root) {
+        var scope = root || document;
+        var messages = scope.querySelectorAll('div[data-message-author-role="assistant"]');
         messages.forEach(addPdfButtonToMessage);
-        tagUtilityButtons(document);
+        tagUtilityButtons(scope);
     }
 
     function startObservers() {
-        processExistingMessages();
+        processExistingMessages(document);
         addFullPagePdfButton();
 
         var observer = new MutationObserver(function (mutations) {
-            for (var mutation of mutations) {
-                mutation.addedNodes.forEach(function (node) {
-                    if (!(node instanceof HTMLElement)) return;
-
-                    if (node.matches && node.matches('div[data-message-author-role="assistant"]')) {
-                        addPdfButtonToMessage(node);
-                        tagUtilityButtons(node);
-                    } else if (node.querySelectorAll) {
-                        node
-                            .querySelectorAll('div[data-message-author-role="assistant"]')
-                            .forEach(addPdfButtonToMessage);
-                        tagUtilityButtons(node);
-                    }
-                });
-            }
-            // ha a header újra-renderelődik (chat váltás), újra próbáljuk a gombot
+            // Bármilyen DOM változásnál frissítjük a gombokat
+            processExistingMessages(document);
             addFullPagePdfButton();
         });
 
