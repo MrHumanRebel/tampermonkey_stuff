@@ -1,0 +1,101 @@
+# Apple (MDM / ABM / Apple Business Essentials) — tipikusan ezeket látod “Remote Management / Automated Device Enrollment” közben
+*.push.apple.com
+deviceenrollment.apple.com
+deviceservices-external.apple.com
+gdmf.apple.com
+identity.apple.com
+iprofiles.apple.com
+mdmenrollment.apple.com
+setup.icloud.com
+vpp.itunes.apple.com
+*.appattest.apple.com
+axm-servicediscovery.apple.com
+
+# Apple Business Manager / Apple School Manager (admin + API)
+*.business.apple.com
+*.school.apple.com
+appleid.cdn-apple.com
+idmsa.apple.com
+api-business.apple.com
+api-school.apple.com
+
+# Apple Business Essentials (ABE) device management
+axm-adm-enroll.apple.com
+axm-adm-mdm.apple.com
+axm-adm-scep.apple.com
+axm-app.apple.com
+*.apple-mapkit.com
+icons.axm-usercontent-apple.com
+
+# Apple időszinkron / “alap” hálózati függőségek (gyakran együtt látszanak MDM forgalommal)
+time-ios.apple.com
+time.apple.com
+time-macos.apple.com
+doh.dns.apple.com
+
+# Apple tanúsítvány-ellenőrzés (OCSP/CRL) — proxy/SSL inspection itt gyakran gondot okoz
+certs.apple.com
+crl.apple.com
+crl3.digicert.com
+crl4.digicert.com
+ocsp.apple.com
+ocsp2.apple.com
+ocsp.digicert.cn
+ocsp.digicert.com
+valid.apple.com
+
+# Apple szoftverfrissítés / katalógus (MDM “managed updates” esetén is előjön)
+appldnld.apple.com
+configuration.apple.com
+gg.apple.com
+gs.apple.com
+ig.apple.com
+mesu.apple.com
+oscdn.apple.com
+
+# Microsoft Intune (macOS MDM + azonosítás)
+*.manage.microsoft.com
+manage.microsoft.com
+*.dm.microsoft.com
+EnterpriseEnrollment.manage.microsoft.com
+login.microsoftonline.com
+graph.windows.net
+
+# Microsoft Intune Remote Help (ha ezt használjátok)
+remotehelp.microsoft.com
+*.webpubsub.azure.com
+
+# Kandji (tenant-specifikus domainek is vannak!)
+# US régió
+kandji-prd.s3.amazonaws.com
+kandji-prd-managed-library-items.s3.amazonaws.com
+managed-library.kandji.io
+UUID.web-api.kandji.io
+UUID.devices.us-1.kandji.io
+subdomain.web-api.kandji.io
+subdomain.kandji.io
+*.iot.kandji.io
+browser-intake-datadoghq.com
+events.launchdarkly.com
+
+# EU régió
+kandji-prd-eu.s3.amazonaws.com
+kandji-prd-eu-managed-library-items.s3.amazonaws.com
+managed-library.eu.kandji.io
+UUID.web-api.eu.kandji.io
+UUID.devices.eu.kandji.io
+subdomain.web-api.eu.kandji.io
+subdomain.eu.kandji.io
+*.iot.eu.kandji.io
+
+# Addigy (alap allowlist)
+*.addigy.com
+
+# Cisco Meraki Systems Manager
+ios.meraki.com
+*.meraki.com
+*.meraki.net
+
+# Teya Remote Management
+mycompanymdm.jamfcloud.com
+*.mycompanymdm.jamfcloud.com
