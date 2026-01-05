@@ -1,3 +1,6 @@
+# Apple MDM / ADE
+push.apple.com
+appattest.apple.com
 deviceenrollment.apple.com
 deviceservices-external.apple.com
 gdmf.apple.com
@@ -6,12 +9,22 @@ iprofiles.apple.com
 mdmenrollment.apple.com
 axm-servicediscovery.apple.com
 vpp.itunes.apple.com
+
+# Apple Business Manager / School Manager
+business.apple.com
+school.apple.com
+appleid.cdn-apple.com
+idmsa.apple.com
+
+# Apple Business Essentials (ABE)
 axm-adm-enroll.apple.com
 axm-adm-mdm.apple.com
 axm-adm-scep.apple.com
 axm-app.apple.com
 icons.axm-usercontent-apple.com
+apple-mapkit.com
 
+# Apple cert validation (OCSP/CRL)
 certs.apple.com
 crl.apple.com
 crl3.digicert.com
@@ -22,15 +35,22 @@ ocsp.digicert.com
 ocsp.digicert.cn
 valid.apple.com
 
+# Apple time / DNS
 time.apple.com
 time-macos.apple.com
 doh.dns.apple.com
 
-appleid.cdn-apple.com
-idmsa.apple.com
+# Apple App Store / CDN (gyakori függőségek)
+itunes.apple.com
+mzstatic.com
 
+# Meraki Systems Manager
 ios.meraki.com
+meraki.com
+meraki.net
 
+# Kandji (alap + CDN/telemetry, tenant-függők nélkül)
+kandji.io
 kandji-prd.s3.amazonaws.com
 kandji-prd-managed-library-items.s3.amazonaws.com
 managed-library.kandji.io
@@ -43,38 +63,19 @@ auth.kandji.io
 auth.eu.kandji.io
 adcsconn.kandji.io
 adcsconn.eu.kandji.io
+auth0.com
 
+# Microsoft Intune (alap)
 manage.microsoft.com
+dm.microsoft.com
 EnterpriseEnrollment.manage.microsoft.com
 
-(^|\.)push\.apple\.com$
-(^|\.)appattest\.apple\.com$
-(^|\.)business\.apple\.com$
-(^|\.)school\.apple\.com$
-(^|\.)itunes\.apple\.com$
-(^|\.)mzstatic\.com$
-(^|\.)apple-mapkit\.com$
-(^|\.)vertexsmb\.com$
+# Addigy
+addigy.com
 
-(^|\.)addigy\.com$
+# (Opcionális) Apple SMB relay / enterprise infra (ha tényleg előjön nálatok)
+vertexsmb.com
 
-(^|\.)meraki\.com$
-(^|\.)meraki\.net$
-
-(^|\.)web-api\.kandji\.io$
-(^|\.)web-api\.eu\.kandji\.io$
-(^|\.)devices\.us-1\.kandji\.io$
-(^|\.)devices\.eu\.kandji\.io$
-(^|\.)iot\.kandji\.io$
-(^|\.)iot\.eu\.kandji\.io$
-(^|\.)clients\.us-1\.kandji\.io$
-(^|\.)clients\.eu\.kandji\.io$
-(^|\.)auth0\.com$
-
-(^|\.)manage\.microsoft\.com$
-(^|\.)dm\.microsoft\.com$
-
-
-# Teya Remote Management
+# Jamf Cloud (TEYA Remote Management példa)
 mycompanymdm.jamfcloud.com
-(^|\.)mycompanymdm.jamfcloud.com
+jamfcloud.com
