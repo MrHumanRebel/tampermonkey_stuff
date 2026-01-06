@@ -1,3 +1,71 @@
+# Apple – APNs
+push.apple.com
+*.push.apple.com
+
+# Apple – Device management / ADE
+deviceenrollment.apple.com
+deviceservices-external.apple.com
+mdmenrollment.apple.com
+iprofiles.apple.com
+identity.apple.com
+gdmf.apple.com
+axm-servicediscovery.apple.com
+
+# Apple – App Attest
+appattest.apple.com
+appattest.cdn-apple.com
+appattest-*.apple.com
+
+# Apple Business Manager / School Manager
+business.apple.com
+school.apple.com
+appleid.cdn-apple.com
+idmsa.apple.com
+
+# Apple Business Essentials (ABE)
+axm-adm-enroll.apple.com
+axm-adm-mdm.apple.com
+axm-adm-scep.apple.com
+axm-app.apple.com
+icons.axm-usercontent-apple.com
+apple-mapkit.com
+
+# Apple – App Store / CDN (opcionális, nálad már van)
+itunes.apple.com
+mzstatic.com
+
+# 3rd party MDM
+meraki.com
+meraki.net
+ios.meraki.com
+
+kandji.io
+auth.kandji.io
+auth.eu.kandji.io
+adcsconn.kandji.io
+adcsconn.eu.kandji.io
+managed-library.kandji.io
+managed-library.eu.kandji.io
+kandji-prd.s3.amazonaws.com
+kandji-prd-managed-library-items.s3.amazonaws.com
+kandji-prd-eu.s3.amazonaws.com
+kandji-prd-eu-managed-library-items.s3.amazonaws.com
+events.launchdarkly.com
+browser-intake-datadoghq.com
+auth0.com
+
+manage.microsoft.com
+dm.microsoft.com
+EnterpriseEnrollment.manage.microsoft.com
+
+addigy.com
+
+jamfcloud.com
+mycompanymdm.jamfcloud.com
+
+# opcionális (ha tényleg kell)
+vertexsmb.com
+
 # Apple MDM / ADE
 push.apple.com
 appattest.apple.com
