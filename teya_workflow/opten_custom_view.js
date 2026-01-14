@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.2.0
+// @version      1.2.1
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
 // @match        https://opten.hu/*
+// @match        https://greip.io/*
 // @run-at       document-idle
 // @grant        GM_setClipboard
 // @grant        GM_xmlhttpRequest
@@ -25,6 +26,18 @@
   const INSERTED_LI_ID = "teya-onboarding-li";
   const INSERTED_A_ID  = "teya-onboarding-link";
   const GREIP_RECAPTCHA_SITE_KEY = "6LeGgMokAAAAAE_Arl354mmiDoYSSYQ8c1Lo74rk";
+  const GREIP_ALLOWED_PARENT_ORIGINS = new Set(["https://opten.hu", "https://www.opten.hu"]);
+  const GREIP_TOKEN_REQUEST_TIMEOUT_MS = 8000;
+  const GREIP_IFRAME_URL = "https://greip.io/tools/IBAN-Validation";
+  const IS_GREIP_HOST = window.location.hostname.endsWith("greip.io");
+
+  let greipRecaptchaPromise = null;
+  let greipTokenRequestPromise = null;
+
+  if (IS_GREIP_HOST) {
+    setupGreipTokenRelay();
+    return;
+  }
 
   const SELECTORS = {
     companyName: "#parsedNameTitle",
@@ -46,7 +59,6 @@
   let cachedDataPromise = null;
   let cachedData = null;
   let currentData = null;
-  let greipRecaptchaPromise = null;
 
   const MCC_DB_SOURCE_EN = `
 Category\tBusiness Activity\tMCC Code\tMCC Description
@@ -1163,7 +1175,21 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return greipRecaptchaPromise;
   }
 
-  async function requestGreipToken() {
+  function setupGreipTokenRelay() {
+    window.addEventListener("message", async (event) => {
+      if (!GREIP_ALLOWED_PARENT_ORIGINS.has(event.origin)) return;
+      const data = event.data || {};
+      if (data.type !== "TEYA_GREIP_TOKEN_REQUEST" || !data.requestId) return;
+      const token = await requestGreipTokenLocal();
+      event.source?.postMessage({
+        type: "TEYA_GREIP_TOKEN_RESPONSE",
+        requestId: data.requestId,
+        token: token || ""
+      }, event.origin);
+    });
+  }
+
+  async function requestGreipTokenLocal() {
     const grecaptcha = await loadGreipRecaptcha();
     if (!grecaptcha?.execute || !grecaptcha?.ready) {
       return "";
@@ -1188,6 +1214,61 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
           });
       });
     });
+  }
+
+  function requestGreipTokenViaIframe() {
+    if (greipTokenRequestPromise) {
+      return greipTokenRequestPromise;
+    }
+    greipTokenRequestPromise = new Promise((resolve) => {
+      const requestId = `greip-token-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const iframe = document.createElement("iframe");
+      iframe.src = GREIP_IFRAME_URL;
+      iframe.style.cssText = "display:none;width:0;height:0;border:0;";
+      let timeoutId = null;
+
+      const cleanup = () => {
+        window.removeEventListener("message", onMessage);
+        if (iframe.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        greipTokenRequestPromise = null;
+      };
+
+      const onMessage = (event) => {
+        if (event.origin !== "https://greip.io") return;
+        const data = event.data || {};
+        if (data.type !== "TEYA_GREIP_TOKEN_RESPONSE" || data.requestId !== requestId) return;
+        cleanup();
+        resolve(data.token || "");
+      };
+
+      window.addEventListener("message", onMessage);
+      timeoutId = setTimeout(() => {
+        cleanup();
+        resolve("");
+      }, GREIP_TOKEN_REQUEST_TIMEOUT_MS);
+
+      iframe.onload = () => {
+        iframe.contentWindow?.postMessage({
+          type: "TEYA_GREIP_TOKEN_REQUEST",
+          requestId
+        }, "https://greip.io");
+      };
+
+      (document.body || document.documentElement).appendChild(iframe);
+    });
+    return greipTokenRequestPromise;
+  }
+
+  async function requestGreipToken() {
+    if (IS_GREIP_HOST) {
+      return requestGreipTokenLocal();
+    }
+    return requestGreipTokenViaIframe();
   }
 
   function requestIbanFromCalculator(account, countryCode = "HU") {
@@ -1230,6 +1311,10 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
           method: "GET",
           url: url.toString(),
           anonymous: true,
+          headers: {
+            Accept: "text/html",
+            Referer: GREIP_IFRAME_URL
+          },
           onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
           onerror: () => reject(new Error("IBAN checker failed"))
         });
