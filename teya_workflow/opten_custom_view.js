@@ -649,6 +649,8 @@
           .catch(() => {})
       );
     }
+    return "";
+  }
 
     if (cegriportUrl) {
       requests.push(
@@ -801,30 +803,6 @@
     return "";
   }
 
-  function requestIbanFromCalculator(account, countryCode = "HU") {
-    return new Promise((resolve) => {
-      if (typeof GM_xmlhttpRequest !== "function") {
-        resolve("");
-        return;
-      }
-      const url = "https://www.iban.hu/calculate-iban";
-      const data = new URLSearchParams({
-        country: countryCode,
-        account
-      }).toString();
-      GM_xmlhttpRequest({
-        method: "POST",
-        url,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        data,
-        onload: (response) => resolve(parseIbanFromHtml(response.responseText || "")),
-        onerror: () => resolve("")
-      });
-    });
-  }
-
     const body = document.getElementById(DRAWER_IDS.body);
     if (!body) return;
     body.innerHTML = "";
@@ -935,18 +913,34 @@
     }
   }
 
+  function findReportLink() {
+    const byId = document.getElementById(MENU_ANCHOR_ID);
+    if (byId) return byId;
+    const byHref = document.querySelector("a[href*='/cegtar/cegriport/']");
+    if (byHref) return byHref;
+    const byTitle = Array.from(document.querySelectorAll("a")).find((link) =>
+      normalizeSpace(link.textContent).toLowerCase() === "riport"
+    );
+    return byTitle || null;
+  }
+
+  function findSidebarList() {
+    return (
+      document.querySelector("ul.sidebar-menu-group") ||
+      document.querySelector("#sidebar-menu-blocks ul") ||
+      document.querySelector(".sidebar-menu-blocks ul")
+    );
+  }
+
   function insertMenuItem() {
     // már beszúrtuk?
     if (document.getElementById(INSERTED_LI_ID)) return;
 
-    const reportLink = document.getElementById(MENU_ANCHOR_ID);
-    if (!reportLink) return;
-
-    const ul = reportLink.closest("ul.sidebar-menu-group");
+    const reportLink = findReportLink();
+    const ul = reportLink?.closest("ul.sidebar-menu-group") || findSidebarList();
     if (!ul) return;
 
-    const reportLi = reportLink.closest("li.list-group-item");
-    if (!reportLi) return;
+    const reportLi = reportLink?.closest("li.list-group-item");
 
     const li = document.createElement("li");
     li.className = "list-group-item";
@@ -961,8 +955,12 @@
       </a>
     `.trim();
 
-    // beszúrás Riport elé
-    ul.insertBefore(li, reportLi);
+    // beszúrás Riport elé, ha találjuk
+    if (reportLi) {
+      ul.insertBefore(li, reportLi);
+    } else {
+      ul.appendChild(li);
+    }
 
     // click handler (nem navigál)
     const a = li.querySelector("a");
