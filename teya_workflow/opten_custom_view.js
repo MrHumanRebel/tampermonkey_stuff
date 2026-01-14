@@ -1135,7 +1135,12 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Servicesâ
       }
       const url = new URL("https://greip.io/tools/IBAN-Validation");
       const normalized = normalizeAccount(iban).toUpperCase();
-      url.searchParams.set("iban", normalized);
+      const params = new URLSearchParams({
+        iban: normalized,
+        GreCapToken: "",
+        submit: ""
+      });
+      url.search = params.toString();
       GM_xmlhttpRequest({
         method: "GET",
         url: url.toString(),
