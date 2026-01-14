@@ -58,6 +58,39 @@
     return (value || "").replace(/[\s-]+/g, "");
   }
 
+  function parseHungarianAmount(value) {
+    if (!value) return null;
+    const normalized = normalizeSpace(value);
+    const unitMatch = normalized.match(/\b(eFt|mFt)\b/i);
+    const unit = unitMatch ? unitMatch[1].toLowerCase() : "";
+    let numberText = normalized.replace(/[^\d.,-]/g, "");
+    if (!numberText) return null;
+    if (numberText.includes(",") && numberText.includes(".")) {
+      numberText = numberText.replace(/\./g, "").replace(",", ".");
+    } else {
+      numberText = numberText.replace(",", ".");
+    }
+    const numeric = Number.parseFloat(numberText);
+    if (!Number.isFinite(numeric)) return null;
+    const multiplier = unit === "eft" ? 1000 : unit === "mft" ? 1000000 : 1;
+    return Math.round(numeric * multiplier);
+  }
+
+  function formatAmountWithFt(amount) {
+    if (!Number.isFinite(amount)) return "";
+    return `${amount.toLocaleString("hu-HU")} Ft`;
+  }
+
+  function formatRevenueText(value) {
+    if (!value) return "";
+    const normalized = normalizeSpace(value);
+    if (/\b(eFt|mFt)\b/i.test(normalized)) {
+      const parsed = parseHungarianAmount(normalized);
+      if (Number.isFinite(parsed)) return formatAmountWithFt(parsed);
+    }
+    return normalized;
+  }
+
   function extractDigits(value) {
     return (value || "").replace(/[^\d]/g, "");
   }
@@ -231,18 +264,18 @@
 
     const years = Array.from(map.keys()).sort((a, b) => b - a);
     if (!years.length) {
-      return readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
+      const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
+      return formatRevenueText(fallback);
     }
     const latest = years[0];
-    const prev = years.find((y) => y === latest - 1);
-    const parts = [`${latest}: ${map.get(latest)}`];
-    if (prev) parts.push(`${prev}: ${map.get(prev)}`);
-    return parts.join("; ");
+    return formatRevenueText(map.get(latest));
   }
 
   function extractRevenueValue(revenueText) {
     if (!revenueText) return "";
     const normalized = normalizeSpace(revenueText);
+    const parsed = parseHungarianAmount(normalized);
+    if (Number.isFinite(parsed)) return String(parsed);
     const withYear = normalized.match(/\b\d{4}\s*:\s*([0-9\s.-]+)/);
     if (withYear) return extractDigits(withYear[1]);
     const firstNumber = normalized.match(/([0-9][0-9\s.-]*)/);
@@ -503,7 +536,19 @@
   // -------------------------
   function getCacheKey() {
     const doc = document;
-    return getEidFromUrl() || getEidFromDoc(doc) || normalizeRegistryNumber(readRegistryNumberFromDoc(doc));
+    return getEidFromUrl()
+      || getEidFromDoc(doc)
+      || getIdentifierFromLinks(doc)
+      || normalizeRegistryNumber(readRegistryNumberFromDoc(doc))
+      || window.location.href;
+  }
+
+  function getIdentifierFromLinks(root) {
+    const link = root.querySelector("a[href*='/cegtar/cegadatlap/'], a[href*='/cegtar/cegriport/'], a[href*='/cegtar/kapcsolati-halo/']");
+    if (!link) return "";
+    const href = link.getAttribute("href") || "";
+    const match = href.match(/\/cegtar\/(?:cegadatlap|cegriport|kapcsolati-halo)\/([^/?#]+)/i);
+    return match ? match[1] : "";
   }
 
   function getEidFromDataAttributes(root) {
@@ -540,7 +585,7 @@
       normalizeRegistryNumber(base.registryNumber) ||
       normalizeRegistryNumber(readRegistryNumberFromDoc(currentDoc));
     const eid = getEidFromUrl() || getEidFromDoc(currentDoc);
-    const identifier = eid || registryNumberDigits;
+    const identifier = eid || registryNumberDigits || getIdentifierFromLinks(currentDoc);
 
     const cegadatlapUrl = buildOptenUrl("cegadatlap", identifier);
     const cegriportUrl = buildOptenUrl("cegriport", identifier);
