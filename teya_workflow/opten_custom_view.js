@@ -1131,12 +1131,14 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
         resolve("");
         return;
       }
-      const url = "https://www.iban.hu/calculate-iban";
+      const url = new URL("https://www.iban.hu/calculate-iban");
+      url.searchParams.set("requestId", buildRequestId());
       const data = new URLSearchParams({ country: countryCode, account }).toString();
       GM_xmlhttpRequest({
         method: "POST",
-        url,
+        url: url.toString(),
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        anonymous: true,
         data,
         onload: (response) => resolve(parseIbanFromHtml(response.responseText || "")),
         onerror: () => resolve("")
@@ -1150,18 +1152,27 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
         reject(new Error("GM_xmlhttpRequest not available"));
         return;
       }
-      const url = "https://www.iban.hu/iban-checker";
+      const url = new URL("https://www.iban.hu/iban-checker");
+      url.searchParams.set("requestId", buildRequestId());
       const normalized = normalizeAccount(iban).toUpperCase();
       const data = new URLSearchParams({ iban: normalized }).toString();
       GM_xmlhttpRequest({
         method: "POST",
-        url,
+        url: url.toString(),
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        anonymous: true,
         data,
         onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
         onerror: () => reject(new Error("IBAN checker failed"))
       });
     });
+  }
+
+  function buildRequestId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return `req-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
   function normalizeAccount(account) {
@@ -1415,6 +1426,8 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
         padding: 8px 10px; font-size: 13px; color:#111; background:#fff;
       }
       .teya-value[readonly]{ background:#fafafa; }
+      .teya-value-wrap{ display:flex; flex-direction:column; gap: 4px; }
+      .teya-value-note{ font-size: 11px; color:#777; }
       .teya-copy{
         border: 1px solid #ddd; background: #fff; border-radius: 10px;
         width: 36px; height: 36px; cursor:pointer; display:flex;
@@ -1559,6 +1572,18 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     else input.type = "text";
     if (id) input.id = id;
 
+    const valueWrap = document.createElement("div");
+    valueWrap.className = "teya-value-wrap";
+    valueWrap.appendChild(input);
+
+    const forintText = formatForintText(label, input.value);
+    if (forintText) {
+      const note = document.createElement("div");
+      note.className = "teya-value-note";
+      note.textContent = forintText;
+      valueWrap.appendChild(note);
+    }
+
     const copyBtn = document.createElement("button");
     copyBtn.type = "button";
     copyBtn.className = "teya-copy";
@@ -1570,7 +1595,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     `.trim();
 
     row.appendChild(labelEl);
-    row.appendChild(input);
+    row.appendChild(valueWrap);
     row.appendChild(copyBtn);
     return row;
   }
@@ -1586,6 +1611,88 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return section;
   }
 
+  function formatForintText(label, value) {
+    if (!value) return "";
+    const normalizedLabel = normalizeSpace(label).toLowerCase();
+    const forintLabels = [
+      "árbevétel",
+      "kártyás nettó havi árbevétele"
+    ];
+    const isForintField = forintLabels.some((item) => normalizedLabel.includes(item));
+    if (!isForintField) return "";
+    const digits = extractDigits(value);
+    if (!digits) return "";
+    const amount = Number.parseInt(digits, 10);
+    if (!Number.isFinite(amount)) return "";
+    return `${numberToHungarianWords(amount)} forint`;
+  }
+
+  function numberToHungarianWords(value) {
+    if (value === 0) return "nulla";
+    const scales = ["", "ezer", "millió", "milliárd", "billió"];
+    const parts = [];
+    let remaining = value;
+    let scaleIndex = 0;
+
+    while (remaining > 0 && scaleIndex < scales.length) {
+      const chunk = remaining % 1000;
+      if (chunk) {
+        const chunkWords = chunkToHungarianWords(chunk);
+        const scaleWord = scales[scaleIndex];
+        parts.unshift([chunkWords, scaleWord].filter(Boolean).join(" "));
+      }
+      remaining = Math.floor(remaining / 1000);
+      scaleIndex += 1;
+    }
+
+    return parts.join(" ").replace(/\s+/g, " ").trim();
+  }
+
+  function chunkToHungarianWords(value) {
+    const ones = ["", "egy", "kettő", "három", "négy", "öt", "hat", "hét", "nyolc", "kilenc"];
+    const compoundOnes = ["", "egy", "két", "három", "négy", "öt", "hat", "hét", "nyolc", "kilenc"];
+    const tens = ["", "tíz", "húsz", "harminc", "negyven", "ötven", "hatvan", "hetven", "nyolcvan", "kilencven"];
+
+    const hundred = Math.floor(value / 100);
+    const rest = value % 100;
+    let result = "";
+
+    if (hundred) {
+      result += hundred === 1 ? "száz" : `${compoundOnes[hundred]}száz`;
+    }
+
+    if (rest) {
+      if (rest < 10) {
+        result += ones[rest];
+      } else if (rest < 20) {
+        result += rest === 10 ? "tíz" : `tizen${ones[rest - 10]}`;
+      } else if (rest < 30) {
+        result += rest === 20 ? "húsz" : `huszon${ones[rest - 20]}`;
+      } else {
+        const ten = Math.floor(rest / 10);
+        const unit = rest % 10;
+        result += tens[ten];
+        if (unit) result += ones[unit];
+      }
+    }
+
+    return result;
+  }
+
+  function listActivities(activities) {
+    return Array.isArray(activities) ? activities.filter(Boolean).join("\n") : (activities || "");
+  }
+
+  function formatGroupedActivities(grouped, activities) {
+    if (!grouped || grouped.size === 0) return listActivities(activities);
+    return Array.from(grouped.entries())
+      .map(([category, items]) => {
+        const rows = items.map((item) => `- ${item}`);
+        return [category, ...rows].join("\n");
+      })
+      .join("\n");
+  }
+
   async function collectPayload() {
     const data = currentData || await getAllData();
     const val = (v) => v || "";
@@ -1599,9 +1706,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .filter(Boolean)
       .join("\n");
     const grouped = groupActivities(activities, kyc.matches);
-    const groupedActivitiesText = Array.from(grouped.entries())
-      .map(([category, items]) => `${category}: ${items.join(", ")}`)
-      .join("\n");
+    const groupedActivitiesText = formatGroupedActivities(grouped, activities);
 
     const signatoryList = (v) => {
       if (!Array.isArray(v)) return val(v);
@@ -1620,7 +1725,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       "Cégforma": val(data.companyForm),
       "Alakulás dátuma": val(data.establishmentDate),
       "Bejegyzés dátuma": val(data.registrationDate),
-      "Tevékenységi köre(i)": groupedActivitiesText || list(data.activities),
+      "Tevékenységi köre(i)": groupedActivitiesText || listActivities(data.activities),
       "Cég székhelye": val(data.headquarters),
       "Cég telephelye(i)": list(data.telephelyek),
       "Cégjegyzékszám": numeric(data.registryNumber),
@@ -1633,7 +1738,6 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       "Teya KYC megjegyzés": kyc.note,
       "Teya KYC MCC találatok": mccLines,
       "Cégjegyzésre jogosultak": signatoryList(data.signatories),
-      "Hány darab cég a cégben van": numeric(data.corporateOwnersCount),
       "Hány kapcsolata van különböző cégekkel": numeric(data.kapcsolatok),
       "EID": val(data.eid),
       "Forrás URL": val(data.sourceUrl)
@@ -1644,7 +1748,6 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const headerSub = document.getElementById(DRAWER_IDS.sub);
     const cleanedRegistryNumber = normalizeNumberField(data.registryNumber);
     const cleanedTaxId = normalizeNumberField(data.taxId);
-    const cleanedCorporateOwnersCount = normalizeNumberField(data.corporateOwnersCount);
     const cleanedKapcsolatok = normalizeNumberField(data.kapcsolatok);
     const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
     if (headerSub) {
@@ -1670,9 +1773,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .filter(Boolean)
       .join("\n");
     const grouped = groupActivities(activities, kyc.matches);
-    const groupedActivitiesText = Array.from(grouped.entries())
-      .map(([category, items]) => `${category}: ${items.join(", ")}`)
-      .join("\n");
+    const groupedActivitiesText = formatGroupedActivities(grouped, activities);
 
     const coreRows = [
       buildRow("Cégnév", data.companyName),
@@ -1689,7 +1790,6 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
     const computedRows = [
       buildRow("Becsült kártyás nettó havi árbevétele", estimatedMonthlyRevenue),
-      buildRow("Hány darab cég a cégben van", cleanedCorporateOwnersCount),
       buildRow("Hány kapcsolata van különböző cégekkel", cleanedKapcsolatok)
     ];
 
@@ -1698,7 +1798,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
     if (activities.length) {
       body.appendChild(buildSection("Tevékenységi körök", [
-        buildRow("Összesítés", groupedActivitiesText || activities.join(", "), { multiline: true })
+        buildRow("Összesítés", groupedActivitiesText || listActivities(activities), { multiline: true })
       ]));
     }
 
