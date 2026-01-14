@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.2.2
+// @version      1.2.3
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -30,12 +30,14 @@
   const GREIP_REQUEST_TIMEOUT_MS = 12000;
   const GREIP_IFRAME_URL = "https://greip.io/tools/IBAN-Validation";
   const IS_GREIP_HOST = window.location.hostname.endsWith("greip.io");
+  const GREIP_PENDING_STORAGE_KEY = "teya-greip-iban-pending";
 
   let greipRecaptchaPromise = null;
   let greipIbanRequestPromise = null;
 
   if (IS_GREIP_HOST) {
     setupGreipIbanRelay();
+    handleGreipPendingRequest();
     return;
   }
 
@@ -1180,21 +1182,19 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       if (!GREIP_ALLOWED_PARENT_ORIGINS.has(event.origin)) return;
       const data = event.data || {};
       if (data.type !== "TEYA_GREIP_IBAN_REQUEST" || !data.requestId || !data.iban) return;
-      try {
-        const details = await requestIbanCheckerLocal(data.iban);
-        event.source?.postMessage({
-          type: "TEYA_GREIP_IBAN_RESPONSE",
-          requestId: data.requestId,
-          details: details || []
-        }, event.origin);
-      } catch (error) {
-        event.source?.postMessage({
-          type: "TEYA_GREIP_IBAN_RESPONSE",
-          requestId: data.requestId,
-          details: [],
-          error: error instanceof Error ? error.message : "IBAN checker failed"
-        }, event.origin);
+      const pending = {
+        requestId: data.requestId,
+        iban: normalizeAccount(data.iban).toUpperCase(),
+        origin: event.origin
+      };
+      setGreipPendingRequest(pending);
+      if (isGreipResultPage() && isGreipResultForIban(pending.iban)) {
+        const details = parseIbanCheckerFromHtml(document.documentElement.outerHTML);
+        postGreipIbanResponse(pending, details);
+        clearGreipPendingRequest();
+        return;
       }
+      await triggerGreipLookup(pending.iban);
     });
   }
 
@@ -1225,21 +1225,102 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     });
   }
 
-  async function requestIbanCheckerLocal(iban) {
-    const normalized = normalizeAccount(iban).toUpperCase();
-    const token = await requestGreipTokenLocal();
-    const params = new URLSearchParams({
-      iban: normalized,
-      GreCapToken: token || "",
-      submit: ""
-    });
-    const url = `${GREIP_IFRAME_URL}?${params.toString()}`;
-    const response = await fetch(url, { credentials: "include" });
-    if (!response.ok) {
-      throw new Error("IBAN checker failed");
+  function getGreipPendingRequest() {
+    const raw = sessionStorage.getItem(GREIP_PENDING_STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      return null;
     }
-    const html = await response.text();
-    return parseIbanCheckerFromHtml(html);
+  }
+
+  function setGreipPendingRequest(pending) {
+    sessionStorage.setItem(GREIP_PENDING_STORAGE_KEY, JSON.stringify(pending));
+  }
+
+  function clearGreipPendingRequest() {
+    sessionStorage.removeItem(GREIP_PENDING_STORAGE_KEY);
+  }
+
+  function isGreipResultPage() {
+    return new URLSearchParams(window.location.search).has("iban");
+  }
+
+  function isGreipResultForIban(iban) {
+    const params = new URLSearchParams(window.location.search);
+    const current = normalizeAccount(params.get("iban") || "").toUpperCase();
+    return current && current === normalizeAccount(iban).toUpperCase();
+  }
+
+  function postGreipIbanResponse(pending, details, error = "") {
+    if (!pending || !pending.origin) return;
+    window.parent?.postMessage({
+      type: "TEYA_GREIP_IBAN_RESPONSE",
+      requestId: pending.requestId,
+      details: details || [],
+      error
+    }, pending.origin);
+  }
+
+  async function waitForGreipTokenValue(timeoutMs = 3000) {
+    const tokenInput = document.querySelector("#GreCapToken");
+    if (!tokenInput) return "";
+    if (tokenInput.value) return tokenInput.value;
+    const deadline = Date.now() + timeoutMs;
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (tokenInput.value) {
+          clearInterval(interval);
+          resolve(tokenInput.value);
+          return;
+        }
+        if (Date.now() >= deadline) {
+          clearInterval(interval);
+          resolve("");
+        }
+      }, 100);
+    });
+  }
+
+  async function triggerGreipLookup(iban) {
+    const form = document.querySelector("#lookupForm");
+    const ibanInput = form?.querySelector("input[name='iban']");
+    if (ibanInput) {
+      ibanInput.value = iban;
+    }
+    let token = await waitForGreipTokenValue();
+    if (!token) {
+      token = await requestGreipTokenLocal();
+      const tokenInput = document.querySelector("#GreCapToken");
+      if (tokenInput && token) {
+        tokenInput.value = token;
+      }
+    }
+    if (form) {
+      form.submit();
+      return;
+    }
+    if (token) {
+      const params = new URLSearchParams({
+        iban,
+        GreCapToken: token,
+        submit: ""
+      });
+      window.location.href = `${GREIP_IFRAME_URL}?${params.toString()}`;
+    }
+  }
+
+  function handleGreipPendingRequest() {
+    const pending = getGreipPendingRequest();
+    if (!pending) return;
+    if (isGreipResultPage() && isGreipResultForIban(pending.iban)) {
+      const details = parseIbanCheckerFromHtml(document.documentElement.outerHTML);
+      postGreipIbanResponse(pending, details);
+      clearGreipPendingRequest();
+      return;
+    }
+    triggerGreipLookup(pending.iban);
   }
 
   function requestIbanCheckerViaIframe(iban) {
