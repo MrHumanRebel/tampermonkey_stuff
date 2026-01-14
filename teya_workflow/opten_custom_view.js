@@ -54,6 +54,14 @@
     return (value || "").replace(/\s+/g, " ").trim();
   }
 
+  function normalizeNumberField(value) {
+    return (value || "").replace(/[\s-]+/g, "");
+  }
+
+  function extractDigits(value) {
+    return (value || "").replace(/[^\d]/g, "");
+  }
+
   function textFrom(root, selector) {
     const el = root.querySelector(selector);
     if (!el) return "";
@@ -232,6 +240,23 @@
     return parts.join("; ");
   }
 
+  function extractRevenueValue(revenueText) {
+    if (!revenueText) return "";
+    const normalized = normalizeSpace(revenueText);
+    const withYear = normalized.match(/\b\d{4}\s*:\s*([0-9\s.-]+)/);
+    if (withYear) return extractDigits(withYear[1]);
+    const firstNumber = normalized.match(/([0-9][0-9\s.-]*)/);
+    return firstNumber ? extractDigits(firstNumber[1]) : "";
+  }
+
+  function calculateEstimatedCardMonthlyRevenue(revenueText) {
+    const digits = extractRevenueValue(revenueText);
+    if (!digits) return "";
+    const revenue = Number.parseFloat(digits);
+    if (!Number.isFinite(revenue)) return "";
+    return String(Math.round((revenue * 0.7) / 12));
+  }
+
   function readAuthorizedSignatories(root) {
     const items = Array.from(root.querySelectorAll("#subhead-13 .oi-list-item"));
     if (!items.length) return [];
@@ -303,8 +328,7 @@
       "registryNumber",
       "address",
       "companyForm",
-      "headquarters",
-      "statisticalNumber"
+      "headquarters"
     ];
     return keys.some((key) => normalizeSpace(data[key] || "") !== "");
   }
@@ -857,6 +881,8 @@
     const data = currentData || await getAllData();
     const val = (v) => v || "";
     const list = (v) => Array.isArray(v) ? v.filter(Boolean).join("; ") : val(v);
+    const numeric = (v) => normalizeNumberField(val(v));
+    const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
 
     const signatoryList = (v) => {
       if (!Array.isArray(v)) return val(v);
@@ -879,15 +905,15 @@
       "Tevékenységi köre(i)": list(data.activities),
       "Cég székhelye": val(data.headquarters),
       "Cég telephelye(i)": list(data.telephelyek),
-      "Cégjegyzékszám": val(data.registryNumber),
-      "Adószám": val(data.taxId),
-      "Statisztikai számjele": val(data.statisticalNumber),
+      "Cégjegyzékszám": numeric(data.registryNumber),
+      "Adószám": numeric(data.taxId),
       "Email": val(data.emails),
       "Értékesítés nettó árbevétele": val(data.revenue),
+      "Becsült kártyás nettó havi árbevétele": estimatedMonthlyRevenue,
       "Opten gyorsjelentés": val(data.quickReport),
       "Cégjegyzésre jogosultak": signatoryList(data.signatories),
-      "Hány darab cég a cégben van": val(data.corporateOwnersCount),
-      "Hány kapcsolata van különböző cégekkel": val(data.kapcsolatok),
+      "Hány darab cég a cégben van": numeric(data.corporateOwnersCount),
+      "Hány kapcsolata van különböző cégekkel": numeric(data.kapcsolatok),
       "EID": val(data.eid),
       "Forrás URL": val(data.sourceUrl)
     };
@@ -895,10 +921,15 @@
 
   function renderDrawer(data) {
     const headerSub = document.getElementById(DRAWER_IDS.sub);
+    const cleanedRegistryNumber = normalizeNumberField(data.registryNumber);
+    const cleanedTaxId = normalizeNumberField(data.taxId);
+    const cleanedCorporateOwnersCount = normalizeNumberField(data.corporateOwnersCount);
+    const cleanedKapcsolatok = normalizeNumberField(data.kapcsolatok);
+    const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
     if (headerSub) {
       headerSub.innerHTML = [
-        data.registryNumber ? `<span>Cégjegyzékszám: ${data.registryNumber}</span>` : "",
-        data.taxId ? `<span>Adószám: ${data.taxId}</span>` : "",
+        cleanedRegistryNumber ? `<span>Cégjegyzékszám: ${cleanedRegistryNumber}</span>` : "",
+        cleanedTaxId ? `<span>Adószám: ${cleanedTaxId}</span>` : "",
         data.address ? `<span>${data.address}</span>` : ""
       ].filter(Boolean).join("");
     }
@@ -919,17 +950,17 @@
       buildRow("Alakulás dátuma", data.establishmentDate),
       buildRow("Bejegyzés dátuma", data.registrationDate),
       buildRow("Cég székhelye", data.headquarters, { multiline: true }),
-      buildRow("Cégjegyzékszám", data.registryNumber),
-      buildRow("Adószám", data.taxId),
-      buildRow("Statisztikai számjele", data.statisticalNumber),
+      buildRow("Cégjegyzékszám", cleanedRegistryNumber),
+      buildRow("Adószám", cleanedTaxId),
       buildRow("Email", data.emails, { multiline: true }),
       buildRow("Értékesítés nettó árbevétele", data.revenue),
       buildRow("Opten gyorsjelentés", data.quickReport)
     ];
 
     const computedRows = [
-      buildRow("Hány darab cég a cégben van", data.corporateOwnersCount),
-      buildRow("Hány kapcsolata van különböző cégekkel", data.kapcsolatok)
+      buildRow("Becsült kártyás nettó havi árbevétele", estimatedMonthlyRevenue),
+      buildRow("Hány darab cég a cégben van", cleanedCorporateOwnersCount),
+      buildRow("Hány kapcsolata van különböző cégekkel", cleanedKapcsolatok)
     ];
 
     body.appendChild(buildSection("Cég adatok", coreRows));
