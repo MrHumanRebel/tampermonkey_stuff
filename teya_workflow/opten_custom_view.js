@@ -314,14 +314,28 @@
   function parseKapcsolatiHalo(root) {
     const hoverNodes = Array.from(root.querySelectorAll("#khra .kh-item-hover"));
     const companyNames = new Set();
+    const addName = (name) => {
+      const clean = normalizeSpace(name);
+      if (clean) companyNames.add(clean);
+    };
+
     hoverNodes.forEach((node) => {
       const label = normalizeSpace(node.textContent);
-      if (label.includes("A cég neve")) {
+      if (label.includes("A cég neve") || label.includes("A magánszemély neve")) {
         const strong = node.querySelector("b");
-        const name = normalizeSpace(strong?.textContent || "");
-        if (name) companyNames.add(name);
+        addName(strong?.textContent || "");
       }
     });
+
+    if (!companyNames.size) {
+      const items = Array.from(root.querySelectorAll("#khra-listing .kh-item-wrapper"));
+      items.forEach((item) => {
+        if ((item.id || "").includes("InspectedCompany")) return;
+        const name = item.querySelector(".kh-item-center .textTruncate");
+        addName(name?.textContent || "");
+      });
+    }
+
     return {
       corporateOwnersCount: companyNames.size ? String(companyNames.size) : "",
       kapcsolatok: companyNames.size ? String(companyNames.size) : ""
@@ -468,7 +482,9 @@
       );
     }
 
-    if (cegriportUrl) {
+    if (window.location.pathname.includes("/cegtar/cegriport/")) {
+      results.report = parseCegriport(currentDoc) || {};
+    } else if (cegriportUrl) {
       requests.push(
         requestHtml(cegriportUrl)
           .then((html) => parseCegriport(htmlToDocument(html)))
@@ -477,7 +493,9 @@
       );
     }
 
-    if (kapcsolatiHaloUrl) {
+    if (window.location.pathname.includes("/cegtar/kapcsolati-halo/")) {
+      results.halo = parseKapcsolatiHalo(currentDoc) || {};
+    } else if (kapcsolatiHaloUrl) {
       requests.push(
         requestHtml(kapcsolatiHaloUrl)
           .then((html) => parseKapcsolatiHalo(htmlToDocument(html)))
