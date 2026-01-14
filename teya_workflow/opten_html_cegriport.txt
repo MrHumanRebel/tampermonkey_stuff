@@ -1,280 +1,3 @@
-<html lang="hu"><head>
-<meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta http-equiv="Content-Language" content="hu">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta http-equiv="imagetoolbar" content="no">
-    <meta name="author" content="opten">
-
-    <title>Opten</title>
-    <link rel="canonical" href="https://www.opten.hu/cegtar/cegriport/eid10136434">
-    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon">
-
-    <script async="" src="https://connect.facebook.net/en_US/fbevents.js"></script><script src="/assets/node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="/assets/inside/js/search.js?bc2c530a"></script>
-    <script src="/system/cms/themes/opten_in_2018/js/chartjs/Chart.js?bc2c530a"></script><style type="text/css">/* Chart.js */
-@-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
-    <link rel="stylesheet" href="/assets/inside/css/style.css?bc2c530a">
-
-    
-<!-- Hotjar Tracking Code for https://opten.hu/ -->
-<script>
-    (function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:1726800,hjsv:6};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);
-    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-</script><script async="" src="https://static.hotjar.com/c/hotjar-1726800.js?sv=6"></script>
-
-
-<!-- Facebook Pixel Code -->
-<script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', '122937978321676');
-  fbq('track', 'PageView');
-</script>
-<noscript>
-	<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=122937978321676&ev=PageView&noscript=1"/>
-</noscript>
-<!-- End Facebook Pixel Code -->
-
-<script type="text/javascript">
-
-    /*!
-    * jQuery keepAlive plugin
-    * https://github.com/Aldri/jQuery-keepAlive
-    *
-    * Copyright 2011, Olivier Combe
-    * Dual licensed under the MIT or GPL Version 2 licenses.
-    * http://jquery.org/license
-    *
-    * Version 1.0 2011-02-17
-    */
-    (function($) {
-        var methods = {
-            init: function(options) {
-                var defaults = {
-                    url: "/ousers/keepalive",
-                    timer: 600000, // 10min
-                    maxInterval: 3*60*60*1000,
-                    actualInterval: 0
-                };
-                this.options = $.extend(defaults, options);
-                methods._poke.apply(this);
-                return this;
-            },
-            stop: function() {
-                if (this.nextPoke)
-                    clearTimeout(this.nextPoke);
-            },
-            _poke: function() {
-                var self = this;
-                this.nextPoke = setTimeout(function() {
-                    $.ajax({
-                        url: self.options.url,
-                        cache: false
-                    }).done(kaHandler);
-                    methods._poke.apply(self);
-                }, self.options.timer);
-                self.options.actualInterval += self.options.timer;
-                if(self.options.actualInterval >= self.options.maxInterval)
-                    methods.stop.apply(self);
-            }
-        };
-        $.fn.keepAlive = function(method) {
-            if (methods[method]) {
-                return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-            } else if (typeof method === 'object' || !method) {
-                return methods.init.apply(this, arguments);
-            } else {
-                $.error("The method " + method + " doesn't exist in $.fn.keepAlive");
-            }
-        };
-    })(jQuery);
-        function kaHandler(data, textStatus, jqXHR){
-            var is_error =(typeof data.error !== 'undefined');
-            if(is_error){
-                var errorhtml = '<br /><div class="notification_area_2018 lg-12" style="position:fixed;"><div class="panel notification notification--regular" style="position:relative;margin:0 auto; width:75%;"><svg class="notification__icon notification__icon--red"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#status-error"></use></svg><div class="col md-8 xs-8 lg-10 align-center"><p class="fs-xs-14 fs-sm-16"><b>Figyelmeztetés:</b> '+data.error+'</p></div><div class="col md-4 xs-4 lg-2"><a class="button button--primary" href="/ousers/login">Belépés</a></div></div></div>';
-                $('#ka_kickout_error').remove();
-                $('.head01-header__spacer').after( errorhtml );
-
-                kaObj.keepAlive('stop');
-            }
-        }
-    var kaObj =null;
-    $(document).ready(function()
-    {
-            kaObj = $.fn.keepAlive({ timer: 3480 * 1000 });
-    }); //documentready
-</script>
-
-<!-- Google tag (gtag.js) -->
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-467CDZKPX1"></script>
-
-<script>
- window.dataLayer = window.dataLayer || [];
- function gtag(){dataLayer.push(arguments);}
- gtag('js', new Date());
-
- gtag('config', 'G-467CDZKPX1');
-</script>
-<style id="mked8a0u.g7">
-    :root { --teya-z: 999999; }
-
-    .teya-onb-backdrop{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.35);
-      z-index: var(--teya-z);
-      display:none;
-    }
-    .teya-onb-backdrop.show{ display:block; }
-
-    .teya-onb-drawer{
-      position: fixed; top: 0; right: 0; height: 100vh; width: min(720px, 95vw);
-      background: #fff;
-      box-shadow: -16px 0 40px rgba(0,0,0,.22);
-      z-index: calc(var(--teya-z) + 1);
-      transform: translateX(100%);
-      transition: transform .18s ease-out;
-      display:flex; flex-direction:column;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-    .teya-onb-drawer.show{ transform: translateX(0); }
-
-    .teya-onb-header{
-      display:flex; align-items:flex-start; justify-content:space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid #e7e7e7;
-    }
-    .teya-onb-title{
-      display:flex; flex-direction:column; gap: 6px;
-      min-width: 0;
-    }
-    .teya-onb-title h2{
-      margin: 0;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: .2px;
-      color:#111;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .teya-onb-sub{
-      font-size: 12px;
-      color:#555;
-      display:flex; flex-wrap:wrap; gap: 10px;
-    }
-
-    .teya-onb-close{
-      border: 1px solid #ddd;
-      background: #fff;
-      border-radius: 10px;
-      width: 36px; height: 36px;
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      flex: 0 0 auto;
-    }
-    .teya-onb-close:hover{ background:#f6f6f6; }
-
-    .teya-onb-body{
-      padding: 14px 16px 24px;
-      overflow:auto;
-    }
-
-    .teya-row{
-      display:grid;
-      grid-template-columns: 180px 1fr 44px;
-      gap: 10px;
-      align-items:start;
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .teya-label{
-      font-size: 12px;
-      color:#333;
-      font-weight: 650;
-      padding-top: 8px;
-    }
-    .teya-value{
-      width: 100%;
-      font-size: 13px;
-      padding: 10px 10px;
-      border: 1px solid #dcdcdc;
-      border-radius: 10px;
-      background:#fff;
-      color:#111;
-      outline:none;
-    }
-    .teya-value[readonly]{
-      background:#fbfbfb;
-    }
-    .teya-copy{
-      width: 44px; height: 40px;
-      border: 1px solid #dcdcdc;
-      border-radius: 10px;
-      background:#fff;
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .teya-copy:hover{ background:#f6f6f6; }
-
-    .teya-section{
-      margin-top: 14px;
-      border: 1px solid #e7e7e7;
-      border-radius: 14px;
-      overflow:hidden;
-    }
-    .teya-section-head{
-      padding: 10px 12px;
-      background:#fafafa;
-      border-bottom: 1px solid #eee;
-      font-size: 12px;
-      font-weight: 750;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .teya-pill{
-      font-size: 11px;
-      border: 1px solid #ddd;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background:#fff;
-      color:#444;
-    }
-
-    .teya-toast{
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%);
-      background: rgba(17,17,17,.92);
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      z-index: calc(var(--teya-z) + 2);
-      opacity: 0;
-      transition: opacity .18s ease-out;
-      pointer-events:none;
-    }
-    .teya-toast.show{ opacity: 1; }
-
-    @media (max-width: 520px){
-      .teya-row{ grid-template-columns: 1fr 44px; }
-      .teya-label{ grid-column: 1 / -1; padding-top:0; }
-    }
-  </style></head>
 <body>
     
 <div id="hover-content" style="display: none;"></div>
@@ -625,13 +348,13 @@
   </div>
   <div class="col-auto justify-content-between d-inline-flex" id="company_report_sticky__icons">
     <div class="col-auto align-items-center d-inline-flex" id="icons_container" style="position: relative;">
-                    <a title="Térképes megjelenítés" href="https://maps.google.com/?q=1114 Budapest, Kosztolányi Dezső tér 12. III. em. 2." target="_blank">
+                    <a title="Térképes megjelenítés" href="https://maps.google.com/?q=9082 Nyúl, Vasútsor utca 6." target="_blank">
           <i class="fa-regular fa-location-dot pb-2 pb-md-0"></i>
         </a>
-                                                            <a title="PDF Nyomtatás" id="anyomtatas_pdf" href="https://www.opten.hu/cegtar/cegriport-pdf/eid10136434" target="_blank">
+                                                            <a title="PDF Nyomtatás" id="anyomtatas_pdf" href="https://www.opten.hu/cegtar/cegriport-pdf/eid10761715" target="_blank">
               <i class="pb-2 pb-md-0 fa-regular fa-file-pdf"></i>
             </a>
-                                  <a title="HTML Nyomtatás" id="anyomtatas_nyomtatas" href="https://www.opten.hu/cegtar/cegriport-nyomtatas/eid10136434" target="_blank">
+                                  <a title="HTML Nyomtatás" id="anyomtatas_nyomtatas" href="https://www.opten.hu/cegtar/cegriport-nyomtatas/eid10761715" target="_blank">
               <i class="pb-2 pb-md-0 fa-regular fa-print"></i>
             </a>
                               </div>
@@ -639,7 +362,7 @@
   <div class="row d-inline-flex" id="company_report_sticky__report_title">
     <div class="col-auto align-items-center title-to-truncate">
         <span class="parsed-name" id="parsedNameTitle">
-            Produkta Tabak Bt.        </span>
+            BádogosCentrum Kft.        </span>
         <span class="icons-tooltip">
           <span data-bs-custom-class="copy-info-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-placement="top" data-bs-html="true" data-bs-title="Cégnév másolása" data-title-copied="Másolva!">
             <i class="fa-light fa-copy text-opten-blue-soft copy-number-icon" onclick="setCopied(event, 'parsedNameTitle');"></i>
@@ -654,7 +377,7 @@
         <div class="col-auto">
           <span class="title">Cím:</span>
           <span class="copy-block">
-            <b id="asz_txt_0">1114 Budapest, Kosztolányi Dezső tér 12. III. em. 2.</b>
+            <b id="asz_txt_0">9082 Nyúl, Vasútsor utca 6.</b>
             <span class="align-middle">
                 <span data-bs-custom-class="copy-info-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-placement="top" data-bs-html="true" data-bs-title="Cím másolása" data-title-copied="Másolva!">
                   <i class="fa-light fa-copy text-opten-blue-soft copy-number-icon" onclick="setCopied(event, 'asz_txt_0');"></i>
@@ -666,7 +389,7 @@
                   <div class="col-auto">
             <span class="title">Cégjegyzékszám:</span>
             <span class="copy-block">
-              <b id="cjsz_txt_2">01 06 786705</b>
+              <b id="cjsz_txt_2">08 09 019191</b>
               <span class="align-middle">
                 <span data-bs-custom-class="copy-info-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-placement="top" data-bs-html="true" data-bs-title="Cégjegyzékszám másolása" data-title-copied="Másolva!">
                   <i class="fa-light fa-copy text-opten-blue-soft copy-number-icon" onclick="setCopied(event, 'cjsz_txt_2')"></i>
@@ -678,7 +401,7 @@
                       <div class="col-auto">
               <span class="title">Adószám:</span>
               <span class="copy-block">
-                <b id="asz_l_txt_1">24346351-2-43</b>
+                <b id="asz_l_txt_1">11691826-2-08</b>
                 <span class="align-middle">
                 <span data-bs-custom-class="copy-info-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover focus click" data-bs-placement="top" data-bs-html="true" data-bs-title="Adószám másolása" data-title-copied="Másolva!">
                   <i class="fa-light fa-copy text-opten-blue-soft copy-number-icon" onclick="setCopied(event, 'asz_l_txt_1');"></i>
@@ -717,7 +440,7 @@
     <div class="row mx-0 sidebar-row g-0 g-md-3">
         <div class="col">
             
-<div class="sidebar-menu collapse" id="sidebar-menu" data-bs-scroll="true" style="height: 729px;">
+<div class="sidebar-menu collapse" id="sidebar-menu" data-bs-scroll="true" style="height: 800px;">
     <div class="sidebar-menu-blocks" id="sidebar-menu-blocks">
         <div class="sidebar-menu__header d-none d-md-flex d-very-brand-new-breakpoint-made-with-love-only-for-the-sidemenu-none">
             <a class="sidebar-menu__toggle" href="#sidebar-menu" id="sidebar-menu-toggle" data-bs-toggle="offcanvas">
@@ -730,15 +453,11 @@
         </div>
         <div class="sidebar-menu-container">
             <ul class="list-group sidebar-menu-group">
-                                        <li class="list-group-item" id="teyaOnboardingMenu">
-      <a class="w-100 d-flex align-items-center" href="#" title="Teya Onboarding" id="teyaOnboardingLink">
-        <svg class="sidebar-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="currentColor" d="M12 2l3 6 7 .9-5 4.6 1.3 6.5L12 16.9 5.7 20l1.3-6.5-5-4.6L9 8z"></path>
-        </svg>
-        <span class="sidebar-menu__label">Teya Onboarding</span>
-      </a>
-    </li><li class="list-group-item active  ">
-                            <a id="aujcegriport" class="w-100 d-flex align-items-center" href="/cegtar/cegriport/eid10136434" title="Riport">
+                                        <li id="teya-onboarding-li" class="list-group-item active  "><a id="teya-onboarding-link" class="w-100 d-flex align-items-center" href="#" title="Teya Onboarding">
+        <i class="fa-regular fa-square-check"></i>
+        <label class="ms-2">Teya Onboarding</label>
+      </a></li><li class="list-group-item active  ">
+                            <a id="aujcegriport" class="w-100 d-flex align-items-center" href="/cegtar/cegriport/eid10761715" title="Riport">
                                                                     <svg class="sidebar-menu__icon">
                                         <use xlink:href="#report"></use>
                                     </svg>
@@ -747,14 +466,14 @@
                             </a>
                         </li>
                                                             <li class="list-group-item   ">
-                            <a id="aujcegkivonat" class="w-100 d-flex align-items-center" href="/cegtar/cegadatlap/eid10136434" title="Cégadatlap">
+                            <a id="aujcegkivonat" class="w-100 d-flex align-items-center" href="/cegtar/cegadatlap/eid10761715" title="Cégadatlap">
                                                                     <i class="fa-regular fa-file-lines"></i>
                                 
                                 <label>Cégadatlap</label>
                             </a>
                         </li>
                                                             <li class="list-group-item   ">
-                            <a id="aujcegtortenet" class="w-100 d-flex align-items-center" href="/cegtar/cegtortenet/eid10136434" title="Cégtörténet">
+                            <a id="aujcegtortenet" class="w-100 d-flex align-items-center" href="/cegtar/cegtortenet/eid10761715" title="Cégtörténet">
                                                                     <svg class="sidebar-menu__icon">
                                         <use xlink:href="#story"></use>
                                     </svg>
@@ -763,21 +482,21 @@
                             </a>
                         </li>
                                                             <li class="list-group-item   ">
-                            <a id="aujsatu" class="w-100 d-flex align-items-center" href="/cegtar/kapcsolati-halo/eid10136434" title="Kapcsolati Háló">
+                            <a id="aujsatu" class="w-100 d-flex align-items-center" href="/cegtar/kapcsolati-halo/eid10761715" title="Kapcsolati Háló">
                                                                     <i class="fa-regular fa-spider-web"></i>
                                 
                                 <label>Kapcsolati Háló</label>
                             </a>
                         </li>
                                                             <li class="list-group-item   ">
-                            <a id="aujcegbiz" class="w-100 d-flex align-items-center" href="/cegtar/egyedi-cegadatlap/eid10136434" title="Egyedi cégadatlap">
+                            <a id="aujcegbiz" class="w-100 d-flex align-items-center" href="/cegtar/egyedi-cegadatlap/eid10761715" title="Egyedi cégadatlap">
                                                                     <i class="fa-regular fa-file-certificate"></i>
                                 
                                 <label>Egyedi cégadatlap</label>
                             </a>
                         </li>
                                                             <li class="list-group-item   ">
-                            <a id="aujnevjegy" class="w-100 d-flex align-items-center" href="/cegtar/nevjegy/eid10136434" title="Névjegy">
+                            <a id="aujnevjegy" class="w-100 d-flex align-items-center" href="/cegtar/nevjegy/eid10761715" title="Névjegy">
                                                                     <i class="fa-regular fa-address-card"></i>
                                 
                                 <label>Névjegy</label>
@@ -790,7 +509,7 @@
                 <h3 class="sidebar-menu-container__title">Megvásárolható termékek</h3>
                 <ul class="list-group sidebar-menu-group">
                                                 <li class="list-group-item no-hover">
-                                <a id="aujmerlegval" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/penzugyi-beszamolo/0106786705" title="Mérleg- és eredménykimutatás adatok - A szolgáltatás előfizetéshez kötött">
+                                <a id="aujmerlegval" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/penzugyi-beszamolo/0809019191" title="Mérleg- és eredménykimutatás adatok - A szolgáltatás előfizetéshez kötött">
                                                                             <svg class="sidebar-menu__icon">
                                             <use xlink:href="#balance-sheet"></use>
                                         </svg>
@@ -800,7 +519,7 @@
                                                                     </a>
                             </li>
                                                                         <li class="list-group-item no-hover">
-                                <a id="asatu_cim" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/cimkapcsolati-halo/0106786705" title="Címkapcsolati Háló - A szolgáltatás előfizetéshez kötött">
+                                <a id="asatu_cim" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/cimkapcsolati-halo/0809019191" title="Címkapcsolati Háló - A szolgáltatás előfizetéshez kötött">
                                                                             <svg class="sidebar-menu__icon">
                                             <use xlink:href="#satu_cim1"></use>
                                         </svg>
@@ -810,7 +529,7 @@
                                                                     </a>
                             </li>
                                                                         <li class="list-group-item no-hover">
-                                <a id="aujcegelemzes" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/cegelemzes-shop/0106786705" title="Cégelemzés - A szolgáltatás előfizetéshez kötött">
+                                <a id="aujcegelemzes" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/cegelemzes-shop/0809019191" title="Cégelemzés - A szolgáltatás előfizetéshez kötött">
                                                                             <i class="fa-regular fa-chart-pie-simple"></i>
                                                                         <span class="sidebar-menu__label sidebar-menu_text">Cégelemzés</span>
 
@@ -818,7 +537,7 @@
                                                                     </a>
                             </li>
                                                                         <li class="list-group-item no-hover">
-                                <a id="aprivat-ceginfo" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/privat-ceginfo/0106786705" title="Privát cégelemzés - A szolgáltatás előfizetéshez kötött">
+                                <a id="aprivat-ceginfo" class="w-100 d-flex align-items-center" href="/ceginformacios-szolgaltatasok/privat-ceginfo/0809019191" title="Privát cégelemzés - A szolgáltatás előfizetéshez kötött">
                                                                             <svg class="sidebar-menu__icon">
                                             <use xlink:href="#privat_cegelemzes"></use>
                                         </svg>
@@ -898,20 +617,20 @@
         <div class="col-md">
             <div id="main_content" class="rounded-start-xl-4 rounded-bottom-0 p-0 pt-4 p-md-4 p-sidemenu-second-breakpoint-6">
                 <div class="container-fluid px-0">
-                    <div id="root" data-id="10136434" data-pdf="cegriport-pdf" data-isev="0" data-lang="hu"><div class="p-0 container-fluid"><div class="mb-xl-4 g-4 row"><div class="col-xl-4 col-md-6"><div class="vstack gap-4"><div id="basicData" class="report-card card"><div class="card-body"><div class="hstack mb-5"><div class=""><h5 class="card-title">Alapadatok</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="#csoportosafa" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-contact text-opten-green"><i class="fa-solid pe-1 fa-check"></i><span>Érvényes az adószám</span></div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Cég neve:</div><div class="data-value fs-40">Produkta Tabak Bt</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Cégforma / Gazdálkodási forma:</div><div class="data-value">Betéti társaság</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">KKV besorolás:</div><div class="data-value">Kisvállalkozás</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Alapítás dátuma:</div><div class="data-value">2013.05.03.</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Létszám</div><div class="data-value">23 fő</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Főtevékenysége:</div><div class="data-value">4726 Dohányáru-kiskereskedelem</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Csoportos ÁFA alany:</div><div class="data-value">Nincs regisztrált információ.</div></div></div><div class="cdata-row row"><div class="col-11"><div class="data-contact text-opten-green"><i class="fa-sharp fa-solid me-2 fa-check"></i>Nincs eltiltott személy kapcsolat</div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="#csoportosafa" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div id="PositiveNegativeInfo" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row align-items-center mb-5"><div class="card-title h5">Pozitív / Negatív</div><div class="hstack mb-2 ms-auto"><div class="clear-button-wrapper"><a href="#kovetelesek_cegelemzo_msz" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Bővebben</a></div></div><div class="mb-2 ms-3 tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><div class="gap-4 vstack"><div class="row"><div class="d-inline-flex justify-content-center align-items-center pe-0 col-xxl-2 col-xl-3 col-2"><svg width="34" height="34" class="fill-svg-green"><use xlink:href="#opten_trophy"></use></svg></div><div class="col-xxl-10 col-xl-9 col-10"><div class="data-title">Pozitív információ:</div><div class="data-value fs-40">Van</div></div></div><div class="row"><div class="d-inline-flex justify-content-center align-items-center pe-0 col-xxl-2 col-xl-3 col-2"><svg width="6" height="24" class="fill-svg-opten-light-grey"><use xlink:href="#opten_exclamation"></use></svg></div><div class="col-xxl-10 col-xl-9 col-10"><div class="data-title">Negatív információ:</div><div class="data-value fs-40">Nincs</div></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#kovetelesek_cegelemzo_msz" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Bővebben</a></div></div></div></div><div id="exportdata" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row justify-content-between align-items-center mb-5"><div class="card-title h5">Exportképességi mutató</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="cdata-row row"><div class="col-12"><div class="text-center exportmutato-text exportmutato-bg"></div></div></div><div class="cdata-row pt-5 row"><div class="col-12"><div class="range-wrapper"><input min="1" max="100" class="custom-range export-range bg-report-range-color-blue" id="disabledRangeExport"></div><div class="panel-range__wrap d-flex align-items-center"><div class="panel-range__num">1</div><div class="panel-range__line"></div><div class="panel-range__num">100</div></div></div></div><div class="cdata-row pt-4 row"><div class="fs-14 text-opten-black pb-1 col-12"></div><div class="fs-14 text-opten-black col-12"></div></div></div></div><div id="contactnetworkinfo" class="report-card card"><div class="card-body"><div class="mb-5 hstack"><div class=""><h5 class="card-title">Kapcsolt vállalkozások száma</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="https://www.opten.hu/cegtar/kapcsolati-halo/0106786705" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="cdata-row pb-2 row"><div class="col-12"><div class="text-opten-blue inner-contact-text text-center">5</div></div></div><div class="cdata-row pb-4 row"><div class="text-center col-12"><div class="br-text-container fs-15 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-solid fa-sharp fa-check pe-1 fs-20"></i></span><span class="contacted-value">ebből NINCS kiemelten kockázatos</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="https://www.opten.hu/cegtar/kapcsolati-halo/0106786705" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div></div></div><div class="col-xl-4 col-md-6"><div class="vstack gap-4"><div id="RiskRatingEvents" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Kockázati besorolás / Index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="row"><div class="mb-6 col-12"><div class="row"><div class="mb-3 col-6"><div class="h-100 d-flex flex-column justify-content-between align-items-center text-center"><div class="mb-3"><div class="fs-12 text-center fw-semibold text-uppercase risk-rating-title">Kockázati besorolás</div><div class="fs-16 text-center fw-semibold text-opten-blue  risk-rating-value"></div></div><div class="risk__icon-wrap risk__icon-wrap--gray text-center align-content-center"><div>?</div></div></div></div><div class="mb-3 col-6"><div class="h-100 d-flex flex-column justify-content-between align-items-center text-center"><div><div class="fs-12 text-center fw-semibold text-uppercase risk-rating-title">Kockázati index</div></div><div class="risk__icon-wrap risk__icon-wrap--gray text-center align-content-center">?</div></div></div></div></div><div class="col-12"><div class="range-wrapper"><input type="range" min="1" max="100" class="custom-range risk-range" id="disabledRangeRisk"></div><div class="panel-range__wrap d-flex align-items-center"><div class="risk-range__num panel-range__num">1</div><div class="panel-range__line"></div><div class="risk-range__num panel-range__num">100</div></div></div></div></div></div><div id="stressindex" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Válságállósági index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="hstack gap-3 d-flex justify-content-center"><div class="img-container"><svg width="127" height="65"><use xlink:href="#valsagallosag_green"></use></svg></div><div><div class="text-center text-uppercase risk-rating-title">Válságállósági index</div><div class="text-center fw-semibold text-opten-blue risk-rating-value">vállalati likviditás alapú gazdasági stressztűrő képesség</div></div></div></div></div><div id="esgindex" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">ESG index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/esg-index" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="hstack gap-3 justify-content-center align-items-center esg-logo-wrapper pb-4"><div class=""><div class="img-container d-flex justify-content-center"><img width="77" height="89" src="/assets/inside/img/original_logo.png"></div></div><div class=""><svg class="esg-logo"><use xlink:href="#esg_index" data-id="esg_index"></use></svg></div><div class="no-data-num"><div class="esg-num-big esg-num-9">N.A.</div></div></div><div class="cdata-row pt-5 pb-4 row"><div class="col-12"><div class="range-wrapper"><input type="range" min="1" max="10" class="custom-range esg-range" id="disabledRangeEsg"></div><div class="panel-range__wrap d-flex align-items-center"><div class="esg-range__num panel-range__num">1</div><div class="panel-range__line"></div><div class="esg-range__num panel-range__num">10</div></div></div></div><div class="container justify-content-center align-items-center esg-num-wrapper pb-2 gap-0 gap-sm-3 gap-md-1 gap-lg-0 gap-xxl-0 gap-xxxl-4"><div class="esg-num-icon"><div class="esg-num-number e-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_eindex"></use></svg></div><div class="esg-num-icon"><div class="esg-num-number s-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_sindex"></use></svg></div><div class="esg-num-icon"><div class="esg-num-number g-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_gindex"></use></svg></div></div><div class="cdata-row pt-4 row"></div></div></div><div class="card report-card" id="timelineEvents"><div class="card-body"><div class="hstack mb-5"><div class=""><h5 class="card-title">Idővonal események</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/idovonal" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Bővebben</a></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan tulajdonosi háttér</span></div></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan főtevékenység</span></div></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan székhely</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/idovonal" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Bővebben</a></div></div></div></div></div></div></div><div class="col-xl-4 col-md-12"><div class="masonry-grid g-4 row" style=""><div class="masonry-grid_column" style="width: 50%;"><div class="masonry-item"><div id="shortfinancialdata" class="report-card card"><div class="card-body"><div class="mb-5 hstack"><div class=""><h5 class="card-title">Pénzügyi adatok</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="#penzugyi-adatok" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div><div class="mb-2 ms-3 tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><div class="vstack gap-4"><div class="row"><div class="d-inline-block text-start col-12"><div class="data-title">Nettó árbevétel (2024)</div></div><div class="text-start col-6"><div class="data-value d-inline-flex text-nowrap align-items-center">2 602 613 eFt</div></div><div class="text-end col-6"><span class="d-inline-flex text-nowrap align-items-center inner-text positive-text rounded-pill px-2 py-1"><i class="fa-regular fa-circle-plus pe-1"></i>10,72%</span></div></div><div class="row"><div class="d-inline-block text-start col-12"><div class="data-title">Adózott eredmény (2024)</div></div><div class="text-start col-6"><div class="data-value d-inline-flex text-nowrap align-items-center">92 749 eFt</div></div><div class="text-end col-6"><span class="d-inline-flex text-nowrap align-items-center inner-text negative-text rounded-pill px-2 py-1"><i class="fa-regular fa-circle-minus pe-1"></i>16,65%</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#penzugyi-adatok" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div class="masonry-item"><div id="trade_credit" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row justify-content-between align-items-center mb-5"><div class="card-title h5">Kereskedelmi hitelkeret</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="row cdata-row row"><div class="col-12"><div class="text-center fs-14 text-start"></div></div></div></div></div></div></div><div class="masonry-grid_column" style="width: 50%;"><div class="masonry-item"><div id="quickReport" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">OPTEN gyorsjelentés</div><div class="clear-button-wrapper ms-auto mb-2"><a href="#quickreport" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="container-fluid text-center my-3 container"><div class="text-center mb-2"><img height="101" width="160" class="img-fluid" src="/assets/inside/img/quickreport_new_-1.png"></div><div class="text-center fw-bold fs-15">Mérsékelt negatív változás</div><div class="text-center fw-bold fs-16 mb-2">2024/2023</div></div><div class="container-fluid mb-3 container"><div class="qreport-table px-0 row"><div class="px-0 positive-column col-lg-6 col-12"><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Értékesítés nettó árbevétele</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-green fs-14"><i class="fa-regular fa-circle-plus"></i> 11%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Személyi jellegű ráfordítások</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-green fs-14"><i class="fa-regular fa-circle-plus"></i> 20%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Létszám</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-green fs-14"><i class="fa-regular fa-circle-plus"></i> 20%</div></div></div></div></div><div class="px-0 negative-column col-lg-6 col-12"><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Adózott eredmény</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 17%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Saját tőke</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 17%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Forgóeszközök</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 26%</div></div></div></div></div></div></div><div class="container-fluid mb-3 text-center container"><div class="text-small">Az OPTEN gyorsjelentés az előző évhez viszonyított jelentős mértékű pénzügyi adatváltozást mutatja meg.</div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#quickreport" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div class="masonry-item"><div id="employmentStability" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Stabil munkaadó index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="cdata-row row"><div class="d-flex justify-content-center align-items-center flex-column col-12"><img class="stability-img img-fluid" src="/assets/inside/img/stability_3_star_hu.png"></div></div></div></div></div></div></div></div></div><div class="mb-4 g-4 row"><div class="col-md-6"><input type="hidden" name="tokegraph_kicsi_b64" id="arbevkChartinput"><div id="GrapghNetRevenue" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Árbevétel és adózott eredmény</div><div class="mb-2 ms-auto tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><canvas role="img" height="600" width="633" id="arbevkChart" style="display: block; box-sizing: border-box; height: 300px; width: 316px;"></canvas></div></div></div><div class="col-md-6"><input type="hidden" name="tokegraph_kicsi_b64" id="tokekChartinput"><div id="GrapghEquityIssuedCapital" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Saját tőke és jegyzett tőke</div><div class="mb-2 ms-auto tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><canvas role="img" height="600" width="633" id="tokekChart" style="display: block; box-sizing: border-box; height: 300px; width: 316px;"></canvas></div></div></div></div></div></div>
+                    <div id="root" data-id="10761715" data-pdf="cegriport-pdf" data-isev="0" data-lang="hu"><div class="p-0 container-fluid"><div class="mb-xl-4 g-4 row"><div class="col-xl-4 col-md-6"><div class="vstack gap-4"><div id="basicData" class="report-card card"><div class="card-body"><div class="hstack mb-5"><div class=""><h5 class="card-title">Alapadatok</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="#csoportosafa" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-contact text-opten-green"><i class="fa-solid pe-1 fa-check"></i><span>Érvényes az adószám</span></div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Cég neve:</div><div class="data-value fs-40">BádogosCentrum Kft.</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Cégforma / Gazdálkodási forma:</div><div class="data-value">Korlátolt felelősségű társaság</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">KKV besorolás:</div><div class="data-value">Mikrovállalkozás</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Alapítás dátuma:</div><div class="data-value">2009.12.09.</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Létszám</div><div class="data-value">3 fő</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Főtevékenysége:</div><div class="data-value">4752 Vasáru-, építőanyag-, festék-, üveg-kiskereskedelem</div></div></div><div class="cdata-row pb-4 row"><div class="col-11"><div class="data-title">Csoportos ÁFA alany:</div><div class="data-value">Nincs regisztrált információ.</div></div></div><div class="cdata-row row"><div class="col-11"><div class="data-contact text-opten-green"><i class="fa-sharp fa-solid me-2 fa-check"></i>Nincs eltiltott személy kapcsolat</div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="#csoportosafa" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div id="PositiveNegativeInfo" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row align-items-center mb-5"><div class="card-title h5">Pozitív / Negatív</div><div class="hstack mb-2 ms-auto"><div class="clear-button-wrapper"><a href="#kovetelesek_cegelemzo_msz" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Bővebben</a></div></div><div class="mb-2 ms-3 tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><div class="gap-4 vstack"><div class="row"><div class="d-inline-flex justify-content-center align-items-center pe-0 col-xxl-2 col-xl-3 col-2"><svg width="34" height="34" class="fill-svg-green"><use xlink:href="#opten_trophy"></use></svg></div><div class="col-xxl-10 col-xl-9 col-10"><div class="data-title">Pozitív információ:</div><div class="data-value fs-40">Van</div></div></div><div class="row"><div class="d-inline-flex justify-content-center align-items-center pe-0 col-xxl-2 col-xl-3 col-2"><svg width="6" height="24" class="fill-svg-opten-light-grey"><use xlink:href="#opten_exclamation"></use></svg></div><div class="col-xxl-10 col-xl-9 col-10"><div class="data-title">Negatív információ:</div><div class="data-value fs-40">Nincs</div></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#kovetelesek_cegelemzo_msz" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Bővebben</a></div></div></div></div><div id="exportdata" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row justify-content-between align-items-center mb-5"><div class="card-title h5">Exportképességi mutató</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="cdata-row row"><div class="col-12"><div class="text-center exportmutato-text exportmutato-bg"></div></div></div><div class="cdata-row pt-5 row"><div class="col-12"><div class="range-wrapper"><input min="1" max="100" class="custom-range export-range bg-report-range-color-blue" id="disabledRangeExport"></div><div class="panel-range__wrap d-flex align-items-center"><div class="panel-range__num">1</div><div class="panel-range__line"></div><div class="panel-range__num">100</div></div></div></div><div class="cdata-row pt-4 row"><div class="fs-14 text-opten-black pb-1 col-12"></div><div class="fs-14 text-opten-black col-12"></div></div></div></div><div id="contactnetworkinfo" class="report-card card"><div class="card-body"><div class="mb-5 hstack"><div class=""><h5 class="card-title">Kapcsolt vállalkozások száma</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="https://www.opten.hu/cegtar/kapcsolati-halo/0809019191" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="cdata-row pb-2 row"><div class="col-12"><div class="text-opten-blue inner-contact-text text-center">2</div></div></div><div class="cdata-row pb-4 row"><div class="text-center col-12"><div class="br-text-container fs-15 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-solid fa-sharp fa-check pe-1 fs-20"></i></span><span class="contacted-value">ebből NINCS kiemelten kockázatos</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="https://www.opten.hu/cegtar/kapcsolati-halo/0809019191" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div></div></div><div class="col-xl-4 col-md-6"><div class="vstack gap-4"><div id="RiskRatingEvents" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Kockázati besorolás / Index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="row"><div class="mb-6 col-12"><div class="row"><div class="mb-3 col-6"><div class="h-100 d-flex flex-column justify-content-between align-items-center text-center"><div class="mb-3"><div class="fs-12 text-center fw-semibold text-uppercase risk-rating-title">Kockázati besorolás</div><div class="fs-16 text-center fw-semibold text-opten-blue  risk-rating-value"></div></div><div class="risk__icon-wrap risk__icon-wrap--gray text-center align-content-center"><div>?</div></div></div></div><div class="mb-3 col-6"><div class="h-100 d-flex flex-column justify-content-between align-items-center text-center"><div><div class="fs-12 text-center fw-semibold text-uppercase risk-rating-title">Kockázati index</div></div><div class="risk__icon-wrap risk__icon-wrap--gray text-center align-content-center">?</div></div></div></div></div><div class="col-12"><div class="range-wrapper"><input type="range" min="1" max="100" class="custom-range risk-range" id="disabledRangeRisk"></div><div class="panel-range__wrap d-flex align-items-center"><div class="risk-range__num panel-range__num">1</div><div class="panel-range__line"></div><div class="risk-range__num panel-range__num">100</div></div></div></div></div></div><div id="stressindex" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Válságállósági index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="hstack gap-3 d-flex justify-content-center"><div class="img-container"><svg width="127" height="65"><use xlink:href="#valsagallosag_green"></use></svg></div><div><div class="text-center text-uppercase risk-rating-title">Válságállósági index</div><div class="text-center fw-semibold text-opten-blue risk-rating-value">vállalati likviditás alapú gazdasági stressztűrő képesség</div></div></div></div></div><div id="esgindex" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">ESG index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/esg-index" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="hstack gap-3 justify-content-center align-items-center esg-logo-wrapper pb-4"><div class=""><div class="img-container d-flex justify-content-center"><img width="77" height="89" src="/assets/inside/img/original_logo.png"></div></div><div class=""><svg class="esg-logo"><use xlink:href="#esg_index" data-id="esg_index"></use></svg></div><div class="no-data-num"><div class="esg-num-big esg-num-9">N.A.</div></div></div><div class="cdata-row pt-5 pb-4 row"><div class="col-12"><div class="range-wrapper"><input type="range" min="1" max="10" class="custom-range esg-range" id="disabledRangeEsg"></div><div class="panel-range__wrap d-flex align-items-center"><div class="esg-range__num panel-range__num">1</div><div class="panel-range__line"></div><div class="esg-range__num panel-range__num">10</div></div></div></div><div class="container justify-content-center align-items-center esg-num-wrapper pb-2 gap-0 gap-sm-3 gap-md-1 gap-lg-0 gap-xxl-0 gap-xxxl-4"><div class="esg-num-icon"><div class="esg-num-number e-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_eindex"></use></svg></div><div class="esg-num-icon"><div class="esg-num-number s-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_sindex"></use></svg></div><div class="esg-num-icon"><div class="esg-num-number g-index">-</div><svg class="esg-num-text-9" height="85" viewBox="0 0 75 75"><use xlink:href="#esg_index_gindex"></use></svg></div></div><div class="cdata-row pt-4 row"></div></div></div><div class="card report-card" id="timelineEvents"><div class="card-body"><div class="hstack mb-5"><div class=""><h5 class="card-title">Idővonal események</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/idovonal" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Bővebben</a></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan tulajdonosi háttér</span></div></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan főtevékenység</span></div></div></div><div class="row cdata-row pb-4"><div class="col-12"><div class="br-text-container fs-14 data-info brc-green py-2 px-3 d-inline-flex"><span class="align-content-center px-2"><i class="fa-sharp fa-solid fa-check pe-1 fs-20"></i></span><span>Változatlan székhely</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><div class=""><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/idovonal" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Bővebben</a></div></div></div></div></div></div></div><div class="col-xl-4 col-md-12"><div class="masonry-grid g-4 row"><div class="masonry-grid_column" style="width: 100%;"><div class="masonry-item"><div id="shortfinancialdata" class="report-card card"><div class="card-body"><div class="mb-5 hstack"><div class=""><h5 class="card-title">Pénzügyi adatok</h5></div><div class="clear-button-wrapper ms-auto mb-2"><a href="#penzugyi-adatok" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div><div class="mb-2 ms-3 tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><div class="vstack gap-4"><div class="row"><div class="d-inline-block text-start col-12"><div class="data-title">Nettó árbevétel (2024)</div></div><div class="text-start col-6"><div class="data-value d-inline-flex text-nowrap align-items-center">82 378 eFt</div></div><div class="text-end col-6"><span class="d-inline-flex text-nowrap align-items-center inner-text negative-text rounded-pill px-2 py-1"><i class="fa-regular fa-circle-minus pe-1"></i>35,42%</span></div></div><div class="row"><div class="d-inline-block text-start col-12"><div class="data-title">Adózott eredmény (2024)</div></div><div class="text-start col-6"><div class="data-value d-inline-flex text-nowrap align-items-center">1 454 eFt</div></div><div class="text-end col-6"><span class="d-inline-flex text-nowrap align-items-center inner-text negative-text rounded-pill px-2 py-1"><i class="fa-regular fa-circle-minus pe-1"></i>91,43%</span></div></div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#penzugyi-adatok" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div class="masonry-item"><div id="quickReport" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">OPTEN gyorsjelentés</div><div class="clear-button-wrapper ms-auto mb-2"><a href="#quickreport" class="clear-button rounded-pill text-opten-blue text-underline-hover nav-link">Részletek</a></div></div><div class="container-fluid text-center my-3 container"><div class="text-center mb-2"><img height="101" width="160" class="img-fluid" src="/assets/inside/img/quickreport_new_-2.png"></div><div class="text-center fw-bold fs-15">Negatív változás</div><div class="text-center fw-bold fs-16 mb-2">2024/2023</div></div><div class="container-fluid mb-3 container"><div class="qreport-table px-0 row"><div class="px-0 positive-column col-lg-6 col-12"><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Követelések</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-green fs-14"><i class="fa-regular fa-circle-minus"></i> 47%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Egyéb bevételek</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-green fs-14"><i class="fa-regular fa-circle-plus"></i> 500%</div></div></div></div></div><div class="px-0 negative-column col-lg-6 col-12"><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Értékesítés nettó árbevétele</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 35%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Adózott eredmény</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 91%</div></div></div></div><div class="qreport-td d-flex justify-content-start col-12"><div class="NOPROBLEM w-100 d-flex flex-row flex-xl-column flex-menue-de-row justify-content-space-between"><div class="qreport-table-title">Anyagjellegű ráfordítások</div><div class="NOPROBLEM col-auto ms-auto ms-xl-0 ms-menue-de-auto mt-0 mt-xl-auto mt-menue-de-0"><div class="br-text-container py-1 px-2 brc-red fs-14"><i class="fa-regular fa-circle-minus"></i> 34%</div></div></div></div></div></div></div><div class="container-fluid mb-3 text-center container"><div class="text-small">Az OPTEN gyorsjelentés az előző évhez viszonyított jelentős mértékű pénzügyi adatváltozást mutatja meg.</div></div><div class="cdata-row pt-4 clear-button-big-wrapper row"><div class="col-12"><a href="#quickreport" class="clear-button rounded-pill text-opten-blue text-underline-hover clear-button-big text-center py-2 nav-link">Részletek</a></div></div></div></div></div><div class="masonry-item"><div id="trade_credit" class="report-card card"><div class="d-flex flex-column card-body"><div class="d-flex flex-row justify-content-between align-items-center mb-5"><div class="card-title h5">Kereskedelmi hitelkeret</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="row cdata-row row"><div class="col-12"><div class="text-center fs-14 text-start"></div></div></div></div></div></div><div class="masonry-item"><div id="employmentStability" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Stabil munkaadó index</div></div><div class="subscribe-layer position-absolute w-100"><div class="d-flex flex-column align-items-center align-content-center justify-content-center h-100"><div class="fs-14 text-opten-red text-center fw-semibold mb-3">A szolgáltalás előfizetéshez kötött</div><div class="text-center"><a href="https://www.opten.hu/ceginformacios-szolgaltatasok/opten-riport" class="dark-button text-opten-white rounded-pill bg-opten-blue text-underline-hover">Bővebben</a></div></div></div><div class="cdata-row row"><div class="d-flex justify-content-center align-items-center flex-column col-12"><img class="stability-img img-fluid" src="/assets/inside/img/stability_3_star_hu.png"></div></div></div></div></div></div></div></div></div><div class="mb-4 g-4 row"><div class="col-md-6"><input type="hidden" name="tokegraph_kicsi_b64" id="arbevkChartinput"><div id="GrapghNetRevenue" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Árbevétel és adózott eredmény</div><div class="mb-2 ms-auto tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><canvas role="img" height="600" width="991" id="arbevkChart" style="display: block; box-sizing: border-box; height: 300px; width: 495px;"></canvas></div></div></div><div class="col-md-6"><input type="hidden" name="tokegraph_kicsi_b64" id="tokekChartinput"><div id="GrapghEquityIssuedCapital" class="report-card card"><div class="card-body card-body"><div class="hstack mb-5"><div class="card-title h5">Saját tőke és jegyzett tőke</div><div class="mb-2 ms-auto tooltip-wrapper"><span class="px-2 align-middle"><i class="fa-regular fa-circle-info tooltip-info text-gray-circle fs-20"></i></span></div></div><canvas role="img" height="600" width="991" id="tokekChart" style="display: block; box-sizing: border-box; height: 300px; width: 495px;"></canvas></div></div></div></div></div></div>
                     <script src="/assets/inside/riport-react/index.js?bc2c530a"></script>
                     <script>
                         let isEV = false;
                         let js_arbevk_labels1 = JSON.parse('["2021","2022","2023","2024"]');
-                        let js_arbevk_dataset1 = JSON.parse('[1.88425799999999998846078597125597298145294189453125,1.95184200000000007690914571867324411869049072265625,2.35054400000000018877699403674341738224029541015625,2.6026129999999998432258507818914949893951416015625]');
-                        let js_arbevk_dataset2 = JSON.parse('[0.08699700000000000488231677309158840216696262359619140625,0.10175299999999999622790625153356813825666904449462890625,0.11128000000000000391242593877905164845287799835205078125,0.0927489999999999981117326797175337560474872589111328125]');
+                        let js_arbevk_dataset1 = JSON.parse('[105.548000000000001818989403545856475830078125,128.917000000000001591615728102624416351318359375,127.5619999999999976125764078460633754730224609375,82.3780000000000001136868377216160297393798828125]');
+                        let js_arbevk_dataset2 = JSON.parse('[4.599000000000000198951966012828052043914794921875,13.0150000000000005684341886080801486968994140625,16.974000000000000198951966012828052043914794921875,1.4539999999999999591437926937942393124103546142578125]');
                         if(isEV) {
                             let js_adokotelezett_labels1 = JSON.parse('["2021","2022","2023","2024"]');
-                            let js_adokotelezett_dataset1 = JSON.parse('[87.1970000000000027284841053187847137451171875,101.953000000000002955857780762016773223876953125,111.4800000000000039790393202565610408782958984375,92.9489999999999980673237587325274944305419921875]');
+                            let js_adokotelezett_dataset1 = JSON.parse('[35.77300000000000324007487506605684757232666015625,48.7879999999999967030817060731351375579833984375,50.76200000000000045474735088646411895751953125,52.21600000000000108002495835535228252410888671875]');
                         } else {
                             let js_tokek_labels1 = JSON.parse('["2021","2022","2023","2024"]');
-                            let js_tokek_dataset1 = JSON.parse('[87.1970000000000027284841053187847137451171875,101.953000000000002955857780762016773223876953125,111.4800000000000039790393202565610408782958984375,92.9489999999999980673237587325274944305419921875]');
-                            let js_tokek_dataset2 = JSON.parse('[0.200000000000000011102230246251565404236316680908203125,0.200000000000000011102230246251565404236316680908203125,0.200000000000000011102230246251565404236316680908203125,0.200000000000000011102230246251565404236316680908203125]');
+                            let js_tokek_dataset1 = JSON.parse('[35.77300000000000324007487506605684757232666015625,48.7879999999999967030817060731351375579833984375,50.76200000000000045474735088646411895751953125,52.21600000000000108002495835535228252410888671875]');
+                            let js_tokek_dataset2 = JSON.parse('[3,3,3,3]');
                         }
                     </script>
                     <!-- összes lenyitasa gomb -->
@@ -948,56 +667,28 @@
                             <div>
                                                                     <div class="row mx-0  c-tr">
                                         <div class="c-td col-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14478259">Illés László (an: Kovács Ilona)</a></div>
+                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14747458">Tamás Norbert (an: Nagy Erzsébet Anna)</a></div>
                                         </div>
                                         <div class="c-td col-6 col-xl-3 text-start p-3">
                                             <div class="table-sub h-100 align-content-center"></div>
                                         </div>
                                         <div class="c-td col-12 col-xl-4 p-0 p-md-3 d-flex justify-content-start justify-content-xl-end flex-xl-wrap flex-xxxl-nowrap align-content-center">
                                                                                         <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14478259">
+                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14747458">
                         <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
                         &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
                 </div>                                                                                    </div>
                                     </div>
                                                                     <div class="row mx-0  c-tr">
                                         <div class="c-td col-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14522429">Körmendi Krisztina (an: Ugorzinszki Mária)</a></div>
+                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid15504166">Tamásné Csete Henrietta (an: Mészáros Ida)</a></div>
                                         </div>
                                         <div class="c-td col-6 col-xl-3 text-start p-3">
                                             <div class="table-sub h-100 align-content-center"></div>
                                         </div>
                                         <div class="c-td col-12 col-xl-4 p-0 p-md-3 d-flex justify-content-start justify-content-xl-end flex-xl-wrap flex-xxxl-nowrap align-content-center">
                                                                                         <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14522429">
-                        <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
-                        &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
-                </div>                                                                                    </div>
-                                    </div>
-                                                                    <div class="row mx-0  c-tr">
-                                        <div class="c-td col-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid17817098">Mandl-Illés Mercédesz (an: Döngölő Erika)</a></div>
-                                        </div>
-                                        <div class="c-td col-6 col-xl-3 text-start p-3">
-                                            <div class="table-sub h-100 align-content-center"></div>
-                                        </div>
-                                        <div class="c-td col-12 col-xl-4 p-0 p-md-3 d-flex justify-content-start justify-content-xl-end flex-xl-wrap flex-xxxl-nowrap align-content-center">
-                                                                                        <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid17817098">
-                        <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
-                        &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
-                </div>                                                                                    </div>
-                                    </div>
-                                                                    <div class="row mx-0  c-tr">
-                                        <div class="c-td col-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname h-100 align-content-center"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid16000303">Varró-Illés Bettina (an: Döngölő Erika)</a></div>
-                                        </div>
-                                        <div class="c-td col-6 col-xl-3 text-start p-3">
-                                            <div class="table-sub h-100 align-content-center"></div>
-                                        </div>
-                                        <div class="c-td col-12 col-xl-4 p-0 p-md-3 d-flex justify-content-start justify-content-xl-end flex-xl-wrap flex-xxxl-nowrap align-content-center">
-                                                                                        <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid16000303">
+                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid15504166">
                         <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
                         &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
                 </div>                                                                                    </div>
@@ -1015,24 +706,24 @@
                             <div>
                                                                     <div class="row mx-0  c-tr">
                                         <div class="c-td col-12 col-md-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14478259">Illés László (an: Kovács Ilona)</a></div>
+                                            <div class="table-cname"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14747458">Tamás Norbert (an: Nagy Erzsébet Anna)</a></div>
                                             <div class="table-sub">ügyvezető (vezető tisztségviselő)</div>                                        </div>
                                         <div class="c-td col-0 col-lg-3 col-xl-4 text-center p-3 d-none d-lg-flex"></div>
                                         <div class="c-td col-12 col-md-6 col-lg-3 px-0 px-md-3 py-0 p-xl-3 d-flex justify-content-start justify-content-md-end flex-xl-wrap align-content-center">
                                             <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14478259">
+                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14747458">
                         <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
                         &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
                 </div>                                        </div>
                                     </div>
                                                                     <div class="row mx-0  c-tr">
                                         <div class="c-td col-12 col-md-6 col-xl-5 text-start ps-0 p-md-3">
-                                            <div class="table-cname"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid14522429">Körmendi Krisztina (an: Ugorzinszki Mária)</a></div>
+                                            <div class="table-cname"><a class="table-cname text-underline-hover" href="/cegtar/szemelyes-kapcsolati-halo/eid15504166">Tamásné Csete Henrietta (an: Mészáros Ida)</a></div>
                                             <div class="table-sub">ügyvezető (vezető tisztségviselő)</div>                                        </div>
                                         <div class="c-td col-0 col-lg-3 col-xl-4 text-center p-3 d-none d-lg-flex"></div>
                                         <div class="c-td col-12 col-md-6 col-lg-3 px-0 px-md-3 py-0 p-xl-3 d-flex justify-content-start justify-content-md-end flex-xl-wrap align-content-center">
                                             <div class="me-1 align-content-center">
-                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid14522429">
+                    <a class="btn btn-outline-opten-text-blue my-1 px-2 text-nowrap" href="/cegtar/szemelyes-kapcsolati-halo/eid15504166">
                         <svg width="18" height="20"><use xlink:href="#contact_network"></use></svg>
                         &nbsp;Kapcsolati&nbsp;háló&nbsp;»</a>
                 </div>                                        </div>
@@ -1053,9 +744,9 @@
                         <div class="container container-fluid text-center my-6">
                 <div class="text-center fw-bold fs-20 mb-3"><h3 class="fs-xs-18 fs-sm-20 c-blue-grey" style="font-weight:600px">2024/2023</h3></div>
                 <div class="text-center mb-4">
-                    <img width="192" src="/assets/inside/img/quickreport_new_-1-v1767017653.png">
+                    <img width="192" src="/assets/inside/img/quickreport_new_-2-v1767017653.png">
                 </div>
-                <div class="text-center text-opten-blue fw-bold">Mérsékelt negatív változás</div>
+                <div class="text-center text-opten-blue fw-bold">Negatív változás</div>
             </div>
 
             <div class="container container-fluid mb-6">
@@ -1064,13 +755,41 @@
                         <div class="col-12 col-lg-6 p-3 qreport-td ">
                             <div class="row">
                                 <div class="col">
-                                    <div class="qreport-table-title">Értékesítés nettó árbevétele</div>
-                                    <div class="qreport-table-text">Az árbevétel az előző évhez képest jelentősen nőtt.</div>
+                                    <div class="qreport-table-title">Követelések</div>
+                                    <div class="qreport-table-text">A Követelések az Eszközök 15%-át legalább az egyik vizsgált évben meghaladták, ezért annak csökkenése, mint a kinnlévőségek behajtásának kockázata, pozitívan hat a cég pénzügyi állapotára.</div>
                                 </div>
 
                                                                     <div class="col-auto align-content-center align-content-lg-start">
                                         <div class="br-text-container p-2 brc-green">
-                                            <i class="fa-regular fa-circle-plus"></i> 11%                                        </div>
+                                            <i class="fa-regular fa-circle-minus"></i> 47%                                        </div>
+                                    </div>
+                                                            </div>
+                        </div>
+                    
+                        <div class="col-12 col-lg-6 p-3 qreport-td last">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="qreport-table-title">Értékesítés nettó árbevétele</div>
+                                    <div class="qreport-table-text">Az árbevétel az előző évhez képest jelentősen csökkent.</div>
+                                </div>
+
+                                                                    <div class="col-auto align-content-center align-content-lg-start">
+                                        <div class="br-text-container p-2 brc-red">
+                                            <i class="fa-regular fa-circle-minus"></i> 35%                                        </div>
+                                    </div>
+                                                            </div>
+                        </div>
+                    
+                        <div class="col-12 col-lg-6 p-3 qreport-td ">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="qreport-table-title">Egyéb bevételek</div>
+                                    <div class="qreport-table-text">Az egyéb bevételek az árbevétel 10%-át a vizsgált évek egyikében sem haladták meg, ezért a növekedés nem érinti jelentősen a cég pénzügyi állapotát.</div>
+                                </div>
+
+                                                                    <div class="col-auto align-content-center align-content-lg-start">
+                                        <div class="br-text-container p-2 brc-green">
+                                            <i class="fa-regular fa-circle-plus"></i> 500%                                        </div>
                                     </div>
                                                             </div>
                         </div>
@@ -1084,7 +803,7 @@
 
                                                                     <div class="col-auto align-content-center align-content-lg-start">
                                         <div class="br-text-container p-2 brc-red">
-                                            <i class="fa-regular fa-circle-minus"></i> 17%                                        </div>
+                                            <i class="fa-regular fa-circle-minus"></i> 91%                                        </div>
                                     </div>
                                                             </div>
                         </div>
@@ -1092,55 +811,23 @@
                         <div class="col-12 col-lg-6 p-3 qreport-td ">
                             <div class="row">
                                 <div class="col">
-                                    <div class="qreport-table-title">Személyi jellegű ráfordítások</div>
-                                    <div class="qreport-table-text">A Személyi jellegű ráfordítások az árbevétel 25%-át a vizsgált évek egyikében sem haladták meg, ezért a növekedés nem érinti jelentősen a cég pénzügyi állapotát.</div>
+                                    <div class="qreport-table-title"></div>
+                                    <div class="qreport-table-text"></div>
                                 </div>
 
-                                                                    <div class="col-auto align-content-center align-content-lg-start">
-                                        <div class="br-text-container p-2 brc-green">
-                                            <i class="fa-regular fa-circle-plus"></i> 20%                                        </div>
-                                    </div>
                                                             </div>
                         </div>
                     
                         <div class="col-12 col-lg-6 p-3 qreport-td last">
                             <div class="row">
                                 <div class="col">
-                                    <div class="qreport-table-title">Saját tőke</div>
-                                    <div class="qreport-table-text">A Saját tőke az előző évhez képest jelentősen csökkent.</div>
+                                    <div class="qreport-table-title">Anyagjellegű ráfordítások</div>
+                                    <div class="qreport-table-text">Az anyagjellegű ráfordítások és az adózott eredmény összege is csökkent az előző évhez képest.</div>
                                 </div>
 
                                                                     <div class="col-auto align-content-center align-content-lg-start">
                                         <div class="br-text-container p-2 brc-red">
-                                            <i class="fa-regular fa-circle-minus"></i> 17%                                        </div>
-                                    </div>
-                                                            </div>
-                        </div>
-                    
-                        <div class="col-12 col-lg-6 p-3 qreport-td ">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="qreport-table-title">Létszám</div>
-                                    <div class="qreport-table-text">A Létszám az előző évhez képest jelentősen nőtt.</div>
-                                </div>
-
-                                                                    <div class="col-auto align-content-center align-content-lg-start">
-                                        <div class="br-text-container p-2 brc-green">
-                                            <i class="fa-regular fa-circle-plus"></i> 20%                                        </div>
-                                    </div>
-                                                            </div>
-                        </div>
-                    
-                        <div class="col-12 col-lg-6 p-3 qreport-td last">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="qreport-table-title">Forgóeszközök</div>
-                                    <div class="qreport-table-text">A Forgóeszközök az Eszközök 25%-át legalább az egyik vizsgált évben meghaladták, ezért annak csökkenése, mint a likviditást segítő, elem negatívan hat a cég pénzügyi állapotára.</div>
-                                </div>
-
-                                                                    <div class="col-auto align-content-center align-content-lg-start">
-                                        <div class="br-text-container p-2 brc-red">
-                                            <i class="fa-regular fa-circle-minus"></i> 26%                                        </div>
+                                            <i class="fa-regular fa-circle-minus"></i> 34%                                        </div>
                                     </div>
                                                             </div>
                         </div>
@@ -1245,54 +932,54 @@
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;i&gt;Nettó árbevétel hiánya esetén a tevékenységre jellemző bevétel(ek).&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">2 602 613</td>                                                                                    <td class="table__cell text-end align-middle">2 350 544</td>                                                                                    <td class="table__cell text-end align-middle">1 951 842</td>                                                                                    <td class="table__cell text-end align-middle">1 884 258</td>                                                                                    <td class="table__cell text-end align-middle">1 655 822</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Üzemi eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">102 056</td>                                                                                    <td class="table__cell text-end align-middle">122 568</td>                                                                                    <td class="table__cell text-end align-middle">112 994</td>                                                                                    <td class="table__cell text-end align-middle">95 647</td>                                                                                    <td class="table__cell text-end align-middle">70 611</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adózás előtti eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">101 710</td>                                                                                    <td class="table__cell text-end align-middle">122 274</td>                                                                                    <td class="table__cell text-end align-middle">111 747</td>                                                                                    <td class="table__cell text-end align-middle">95 099</td>                                                                                    <td class="table__cell text-end align-middle">69 514</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">82 378</td>                                                                                    <td class="table__cell text-end align-middle">127 562</td>                                                                                    <td class="table__cell text-end align-middle">128 917</td>                                                                                    <td class="table__cell text-end align-middle">105 548</td>                                                                                    <td class="table__cell text-end align-middle">84 699</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Üzemi eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">2 785</td>                                                                                    <td class="table__cell text-end align-middle">18 304</td>                                                                                    <td class="table__cell text-end align-middle">14 342</td>                                                                                    <td class="table__cell text-end align-middle">5 471</td>                                                                                    <td class="table__cell text-end align-middle">5 758</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adózás előtti eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">2 298</td>                                                                                    <td class="table__cell text-end align-middle">17 762</td>                                                                                    <td class="table__cell text-end align-middle">13 710</td>                                                                                    <td class="table__cell text-end align-middle">5 259</td>                                                                                    <td class="table__cell text-end align-middle">5 657</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Mérleg szerinti eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">-</td>                                                                                    <td class="table__cell text-end align-middle">-</td>                                                                                    <td class="table__cell text-end align-middle">-</td>                                                                                    <td class="table__cell text-end align-middle">-</td>                                                                                    <td class="table__cell text-end align-middle">-</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adózott eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">92 749</td>                                                                                    <td class="table__cell text-end align-middle">111 280</td>                                                                                    <td class="table__cell text-end align-middle">101 753</td>                                                                                    <td class="table__cell text-end align-middle">86 997</td>                                                                                    <td class="table__cell text-end align-middle">64 015</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Eszközök összesen</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">200 174</td>                                                                                    <td class="table__cell text-end align-middle">224 448</td>                                                                                    <td class="table__cell text-end align-middle">212 569</td>                                                                                    <td class="table__cell text-end align-middle">195 464</td>                                                                                    <td class="table__cell text-end align-middle">148 254</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Befektetett eszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">44 365</td>                                                                                    <td class="table__cell text-end align-middle">16 602</td>                                                                                    <td class="table__cell text-end align-middle">24 644</td>                                                                                    <td class="table__cell text-end align-middle">33 915</td>                                                                                    <td class="table__cell text-end align-middle">35 645</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Forgóeszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">153 253</td>                                                                                    <td class="table__cell text-end align-middle">205 573</td>                                                                                    <td class="table__cell text-end align-middle">185 038</td>                                                                                    <td class="table__cell text-end align-middle">159 846</td>                                                                                    <td class="table__cell text-end align-middle">110 122</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Pénzeszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">10 882</td>                                                                                    <td class="table__cell text-end align-middle">59 331</td>                                                                                    <td class="table__cell text-end align-middle">13 636</td>                                                                                    <td class="table__cell text-end align-middle">8 491</td>                                                                                    <td class="table__cell text-end align-middle">3 668</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Aktív időbeli elhatárolások</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">2 556</td>                                                                                    <td class="table__cell text-end align-middle">2 273</td>                                                                                    <td class="table__cell text-end align-middle">2 887</td>                                                                                    <td class="table__cell text-end align-middle">1 703</td>                                                                                    <td class="table__cell text-end align-middle">2 487</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Saját tőke</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">92 949</td>                                                                                    <td class="table__cell text-end align-middle">111 480</td>                                                                                    <td class="table__cell text-end align-middle">101 953</td>                                                                                    <td class="table__cell text-end align-middle">87 197</td>                                                                                    <td class="table__cell text-end align-middle">64 215</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adózott eredmény</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">1 454</td>                                                                                    <td class="table__cell text-end align-middle">16 974</td>                                                                                    <td class="table__cell text-end align-middle">13 015</td>                                                                                    <td class="table__cell text-end align-middle">4 599</td>                                                                                    <td class="table__cell text-end align-middle">4 958</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Eszközök összesen</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">73 667</td>                                                                                    <td class="table__cell text-end align-middle">68 374</td>                                                                                    <td class="table__cell text-end align-middle">54 384</td>                                                                                    <td class="table__cell text-end align-middle">39 671</td>                                                                                    <td class="table__cell text-end align-middle">32 848</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Befektetett eszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">34 119</td>                                                                                    <td class="table__cell text-end align-middle">26 749</td>                                                                                    <td class="table__cell text-end align-middle">20 956</td>                                                                                    <td class="table__cell text-end align-middle">20 559</td>                                                                                    <td class="table__cell text-end align-middle">10 639</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Forgóeszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">39 125</td>                                                                                    <td class="table__cell text-end align-middle">41 625</td>                                                                                    <td class="table__cell text-end align-middle">33 428</td>                                                                                    <td class="table__cell text-end align-middle">19 112</td>                                                                                    <td class="table__cell text-end align-middle">22 209</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Pénzeszközök</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">6 957</td>                                                                                    <td class="table__cell text-end align-middle">8 085</td>                                                                                    <td class="table__cell text-end align-middle">10 218</td>                                                                                    <td class="table__cell text-end align-middle">9 060</td>                                                                                    <td class="table__cell text-end align-middle">11 021</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Aktív időbeli elhatárolások</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">423</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Saját tőke</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">52 216</td>                                                                                    <td class="table__cell text-end align-middle">50 762</td>                                                                                    <td class="table__cell text-end align-middle">48 788</td>                                                                                    <td class="table__cell text-end align-middle">35 773</td>                                                                                    <td class="table__cell text-end align-middle">31 174</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Céltartalékok</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">92 465</td>                                                                                    <td class="table__cell text-end align-middle">98 494</td>                                                                                    <td class="table__cell text-end align-middle">104 263</td>                                                                                    <td class="table__cell text-end align-middle">102 383</td>                                                                                    <td class="table__cell text-end align-middle">80 189</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adófizetési kötelezettség</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">8 961</td>                                                                                    <td class="table__cell text-end align-middle">10 994</td>                                                                                    <td class="table__cell text-end align-middle">9 994</td>                                                                                    <td class="table__cell text-end align-middle">8 102</td>                                                                                    <td class="table__cell text-end align-middle">5 499</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Rövid lejáratú kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">92 465</td>                                                                                    <td class="table__cell text-end align-middle">98 494</td>                                                                                    <td class="table__cell text-end align-middle">104 263</td>                                                                                    <td class="table__cell text-end align-middle">102 383</td>                                                                                    <td class="table__cell text-end align-middle">77 866</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Hosszú lejáratú kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">2 323</td>                                                                                                            </tr>
-                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Passzív időbeli elhatárolások</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">14 760</td>                                                                                    <td class="table__cell text-end align-middle">14 474</td>                                                                                    <td class="table__cell text-end align-middle">6 353</td>                                                                                    <td class="table__cell text-end align-middle">5 884</td>                                                                                    <td class="table__cell text-end align-middle">3 850</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">21 447</td>                                                                                    <td class="table__cell text-end align-middle">17 602</td>                                                                                    <td class="table__cell text-end align-middle">5 591</td>                                                                                    <td class="table__cell text-end align-middle">3 898</td>                                                                                    <td class="table__cell text-end align-middle">1 674</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Adófizetési kötelezettség</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">844</td>                                                                                    <td class="table__cell text-end align-middle">788</td>                                                                                    <td class="table__cell text-end align-middle">695</td>                                                                                    <td class="table__cell text-end align-middle">660</td>                                                                                    <td class="table__cell text-end align-middle">699</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Rövid lejáratú kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">18 886</td>                                                                                    <td class="table__cell text-end align-middle">16 622</td>                                                                                    <td class="table__cell text-end align-middle">4 298</td>                                                                                    <td class="table__cell text-end align-middle">1 886</td>                                                                                    <td class="table__cell text-end align-middle">854</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Hosszú lejáratú kötelezettségek</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">2 561</td>                                                                                    <td class="table__cell text-end align-middle">980</td>                                                                                    <td class="table__cell text-end align-middle">1 293</td>                                                                                    <td class="table__cell text-end align-middle">2 012</td>                                                                                    <td class="table__cell text-end align-middle">820</td>                                                                                                            </tr>
+                                                                <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Passzív időbeli elhatárolások</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">4</td>                                                                                    <td class="table__cell text-end align-middle">10</td>                                                                                    <td class="table__cell text-end align-middle">5</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                    <td class="table__cell text-end align-middle">0</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-blue align-middle row-title">Pénzügyi mutatók</div></td>                                                                                                                                                            <td class="table__cell text-end align-middle"></td>                                                                                    <td class="table__cell text-end align-middle"></td>                                                                                    <td class="table__cell text-end align-middle"></td>                                                                                    <td class="table__cell text-end align-middle"></td>                                                                                    <td class="table__cell text-end align-middle"></td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Eladósodottság foka<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;(Kötelezettségek/Eszközök összesen)&lt;/b&gt;&lt;br&gt;&lt;i&gt;Megmutatja, hogy az eszköz állomány milyen mértékben van megterhelve kötelezettségvállalással. Minél kisebb a mutató értéke, annál jobb a cég megítélése.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.46</td>                                                                                    <td class="table__cell text-end align-middle">0.44</td>                                                                                    <td class="table__cell text-end align-middle">0.49</td>                                                                                    <td class="table__cell text-end align-middle">0.52</td>                                                                                    <td class="table__cell text-end align-middle">0.54</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.29</td>                                                                                    <td class="table__cell text-end align-middle">0.26</td>                                                                                    <td class="table__cell text-end align-middle">0.10</td>                                                                                    <td class="table__cell text-end align-middle">0.10</td>                                                                                    <td class="table__cell text-end align-middle">0.05</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Eladósodottság mértéke - Bonitás<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;(Kötelezettségek/Saját tőke)&lt;/b&gt;&lt;br&gt;&lt;i&gt;Azt mutatja, hogy a saját források a kötelezettségek hány százalékát fedezik. Pozitív a cég megítélése, ha a mutató értéke tartósan (jóval) 1 alatt van.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.99</td>                                                                                    <td class="table__cell text-end align-middle">0.88</td>                                                                                    <td class="table__cell text-end align-middle">1.02</td>                                                                                    <td class="table__cell text-end align-middle">1.17</td>                                                                                    <td class="table__cell text-end align-middle">1.25</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.41</td>                                                                                    <td class="table__cell text-end align-middle">0.35</td>                                                                                    <td class="table__cell text-end align-middle">0.11</td>                                                                                    <td class="table__cell text-end align-middle">0.11</td>                                                                                    <td class="table__cell text-end align-middle">0.05</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Árbevétel arányos eredmény %<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;(Adózott eredmény/ Nettó árbevétel)&lt;/b&gt;&lt;br&gt;&lt;i&gt;A mutató az árbevétel hatékonyságát fejezi ki úgy, hogy az árbevétel nyereségtartalmát százalékban szemlélteti. A cég megítélése annál pozitívabb, minél magasabb a százalék.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">3.56</td>                                                                                    <td class="table__cell text-end align-middle">4.73</td>                                                                                    <td class="table__cell text-end align-middle">5.21</td>                                                                                    <td class="table__cell text-end align-middle">4.62</td>                                                                                    <td class="table__cell text-end align-middle">3.87</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">1.77</td>                                                                                    <td class="table__cell text-end align-middle">13.31</td>                                                                                    <td class="table__cell text-end align-middle">10.10</td>                                                                                    <td class="table__cell text-end align-middle">4.36</td>                                                                                    <td class="table__cell text-end align-middle">5.85</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">Likviditási gyorsráta<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;((Forgóeszközök-Készletek)/Rövid lej.kötelezettségek)&lt;/b&gt;&lt;br&gt;&lt;i&gt;Azt fejezi ki, hogy az egy év alatt pénzzé tehető készletek nélküli forgóeszközök milyen arányban képesek az egy éven belül esedékes kötelezettségek fedezésére, azaz milyen a cég rövid távú fizetőképessége. A cég megítélése akkor pozitív, ha ez az arány egyre növekvő, ami az azonnali fizetőképesség javulását jelzi.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.26</td>                                                                                    <td class="table__cell text-end align-middle">0.72</td>                                                                                    <td class="table__cell text-end align-middle">0.21</td>                                                                                    <td class="table__cell text-end align-middle">0.14</td>                                                                                    <td class="table__cell text-end align-middle">0.10</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.94</td>                                                                                    <td class="table__cell text-end align-middle">1.70</td>                                                                                    <td class="table__cell text-end align-middle">4.67</td>                                                                                    <td class="table__cell text-end align-middle">7.09</td>                                                                                    <td class="table__cell text-end align-middle">20.78</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">EBITDA<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;(Üzemi eredmény + Értékcsökkenés)&lt;/b&gt;&lt;br&gt;&lt;i&gt;A mutató a vállalat aktuális üzleti eredményességét tükrözi, hogy veszteséges vagy nyereséges-e az adott vagy a megelőző években. Annál jobb a cég megítélése, minél nagyobb a mutató értéke.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">109 187</td>                                                                                    <td class="table__cell text-end align-middle">133 018</td>                                                                                    <td class="table__cell text-end align-middle">123 449</td>                                                                                    <td class="table__cell text-end align-middle">106 205</td>                                                                                    <td class="table__cell text-end align-middle">82 205</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">9 173</td>                                                                                    <td class="table__cell text-end align-middle">23 593</td>                                                                                    <td class="table__cell text-end align-middle">19 003</td>                                                                                    <td class="table__cell text-end align-middle">9 186</td>                                                                                    <td class="table__cell text-end align-middle">9 554</td>                                                                                                            </tr>
                                                                 <tr class="table__row"><td class="table__cell"><div class="text-opten-text-blue align-middle row-title">ROE<span class="px-2 align-middle">
                             <span data-bs-custom-class="table-info-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true" data-bs-title="&lt;b&gt;(Adózott eredmény/Saját tőke)&lt;/b&gt;&lt;br&gt;&lt;i&gt;A mutató egy vállalat profittermelési hatékonyságáról nyújt információt, vagyis arról, hogy egységnyi saját tőkére vetítve mekkora jövedelemtermelésre képes az adott vállalat. Annál jobb a cég megítélése, minél nagyobb a mutató értéke.&lt;/i&gt;">
                             <i class="fa-regular fa-circle-info tooltip-info"></i>
                         </span>
-                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">1.00</td>                                                                                    <td class="table__cell text-end align-middle">1.00</td>                                                                                    <td class="table__cell text-end align-middle">1.00</td>                                                                                    <td class="table__cell text-end align-middle">1.00</td>                                                                                    <td class="table__cell text-end align-middle">1.00</td>                                                                                                            </tr>
+                        </span></div></td>                                                                                                                                                            <td class="table__cell text-end align-middle">0.03</td>                                                                                    <td class="table__cell text-end align-middle">0.33</td>                                                                                    <td class="table__cell text-end align-middle">0.27</td>                                                                                    <td class="table__cell text-end align-middle">0.13</td>                                                                                    <td class="table__cell text-end align-middle">0.16</td>                                                                                                            </tr>
                                                     </tbody>
                     </table>
                 </div>
@@ -1333,7 +1020,7 @@
 <script language="javascript" type="text/javascript">
     //labels, datasets vars -section 1
     const js_letszam_labels = JSON.parse(JSON.stringify(["2020. Nov.","2020. Dec.","2021. Jan.","2021. Feb.","2021. M\u00e1r.","2021. \u00c1pr.","2021. M\u00e1j.","2021. J\u00fan.","2021. J\u00fal.","2021. Aug.","2021. Szep.","2021. Okt.","2021. Nov.","2021. Dec.","2022. Jan.","2022. Feb.","2022. M\u00e1r.","2022. \u00c1pr.","2022. M\u00e1j.","2022. J\u00fan.","2022. J\u00fal.","2022. Aug.","2022. Szep.","2022. Okt.","2022. Nov.","2022. Dec.","2023. Jan.","2023. Feb.","2023. M\u00e1r.","2023. \u00c1pr.","2023. M\u00e1j.","2023. J\u00fan.","2023. J\u00fal.","2023. Aug.","2023. Szep.","2023. Okt.","2023. Nov.","2023. Dec.","2024. Jan.","2024. Feb.","2024. M\u00e1r.","2024. \u00c1pr.","2024. M\u00e1j.","2024. J\u00fan.","2024. J\u00fal.","2024. Aug.","2024. Szep.","2024. Okt.","2024. Nov.","2024. Dec.","2025. Jan.","2025. Feb.","2025. M\u00e1r.","2025. \u00c1pr.","2025. M\u00e1j.","2025. J\u00fan.","2025. J\u00fal.","2025. Aug.","2025. Szep.","2025. Okt.","2025. Nov."]));
-    const js_letszam_dataset = JSON.parse('[21,20,20,19,20,21,19,17,20,19,19,20,20,19,19,19,18,19,19,19,18,20,19,21,22,20,20,22,22,23,22,22,23,22,21,24,25,25,25,25,25,25,25,24,24,24,23,22,22,22,22,20,21,22,22,22,22,23,23,23,23]');
+    const js_letszam_dataset = JSON.parse('[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]');
 
     if(js_letszam_dataset.length > 0) {
         //chart vars declarations -section 2
@@ -1577,7 +1264,7 @@
                         <div class="text-opten-blue pb-3" style="font-weight: 600;">Technikai információ</div>
                         <div class="fs-14 text-opten-blue"><sup>v1</sup>: A táblázat a tulajdonosi hierarchia legfelső szintjén lévő magánszemélyeket tartalmazza, illetve minden olyan egyéb szervezet is megtalálható a listában, amelynek nincs közzétett magánszemély tulajdonosa. A tulajdonosi struktúrának ebben a nézetében jellemzően hazai és külföldi magánszemélyek, egyéb - nem cégbíróság által nyilvántartott - hazai intézmények és külföldi gazdasági társaságok szerepelnek.</div>
                         <div class="fs-14 text-opten-blue"><sup>v2</sup>: A táblázat a tulajdonosi hierarchia legfelső szintjén lévő cégeket tartalmazza, illetve minden olyan egyéb szervezet is megtalálható a listában, amelynek nincs közzétett magánszemély tulajdonosa. A tulajdonosi struktúrának ebben a nézetében jellemzően hazai cégek, egyéb hazai intézmények, valamint külföldi gazdasági társaságok szerepelnek. Mivel a táblázat nem tartalmazza a közvetlen tulajdonos magánszemélyeket, így a nézet lehet üres, illetve a befolyás mértékének összege nem feltétlen 100%.</div>
-                        <div class="mt-4 fs-14 text-opten-blue">A cégriport lekérésének ideje: 2026.01.14 15:17:34</div>
+                        <div class="mt-4 fs-14 text-opten-blue">A cégriport lekérésének ideje: 2026.01.14 19:13:02</div>
                     </div>
 
                 </div>
@@ -1590,7 +1277,7 @@
 <script defer="" src="/assets/inside/js/subheader.js?bc2c530a"></script>
 <script defer="" src="/assets/inside/js/list-handler.js?bc2c530a"></script>    </main>
     
-    <button id="scrollTopBtn" class="btn btn-secondary shadow">
+    <button id="scrollTopBtn" class="btn btn-secondary shadow" style="display: none;">
         <i class="fa-solid fa-chevron-up"></i>
     </button>
     <script defer="" src="/assets/inside/js/back-to-top.js?bc2c530a"></script>
@@ -3741,4 +3428,4 @@
 
     
 
-</body></html>
+</body>
