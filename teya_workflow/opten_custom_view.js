@@ -44,13 +44,18 @@
     toast: "teya-onb-toast"
   };
 
+  let cachedDataKey = "";
+  let cachedDataPromise = null;
+  let cachedData = null;
+  let currentData = null;
+
   // -------------------------
   // Helpers
   // -------------------------
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-  function textFrom(selector) {
-    const el = document.querySelector(selector);
+  function textFrom(root, selector) {
+    const el = root.querySelector(selector);
     if (!el) return "";
     return (el.textContent || "").trim();
   }
@@ -59,8 +64,8 @@
     return (value || "").replace(/\s+/g, " ").trim();
   }
 
-  function textFromLabel(labelText) {
-    const labels = Array.from(document.querySelectorAll(".data-line--label"));
+  function textFromLabel(root, labelText) {
+    const labels = Array.from(root.querySelectorAll(".data-line--label"));
     const match = labels.find((label) =>
       normalizeSpace(label.textContent || "").toLowerCase().includes(labelText.toLowerCase())
     );
@@ -68,8 +73,8 @@
     return normalizeSpace(value?.textContent || "");
   }
 
-  function textFromTitle(titleText) {
-    const titles = Array.from(document.querySelectorAll(".data-title"));
+  function textFromTitle(root, titleText) {
+    const titles = Array.from(root.querySelectorAll(".data-title"));
     const match = titles.find((title) =>
       normalizeSpace(title.textContent || "").toLowerCase().includes(titleText.toLowerCase())
     );
@@ -84,23 +89,29 @@
     return m ? `eid${m[1]}` : "";
   }
 
-  function buildPayload() {
+  function getEidFromDoc(root) {
+    const canonical = root.querySelector("link[rel='canonical']")?.href || "";
+    const match = canonical.match(/eid\d+/i);
+    return match ? match[0] : "";
+  }
+
+  function buildPayload(root = document) {
     const name =
-      textFrom(SELECTORS.companyName) ||
-      normalizeSpace(document.querySelector("#subhead-2 .head-title h3")?.textContent) ||
-      normalizeSpace(document.querySelector("h1")?.textContent) ||
-      normalizeSpace(document.title);
+      textFrom(root, SELECTORS.companyName) ||
+      normalizeSpace(root.querySelector("#subhead-2 .head-title h3")?.textContent) ||
+      normalizeSpace(root.querySelector("h1")?.textContent) ||
+      normalizeSpace(root.title || document.title);
 
     const taxId =
-      textFrom(SELECTORS.taxId) ||
-      normalizeSpace(document.querySelector("#subhead-21 h3")?.textContent) ||
-      textFromLabel("Adószám");
+      textFrom(root, SELECTORS.taxId) ||
+      normalizeSpace(root.querySelector("#subhead-21 h3")?.textContent) ||
+      textFromLabel(root, "Adószám");
 
     return {
       companyName: name || "",
       taxId,
-      registryNumber: textFrom(SELECTORS.registryNumber) || textFromLabel("Cégjegyzékszám"),
-      address: textFrom(SELECTORS.address) || normalizeSpace(document.querySelector("#subhead-5 .head-title a")?.textContent),
+      registryNumber: textFrom(root, SELECTORS.registryNumber) || textFromLabel(root, "Cégjegyzékszám"),
+      address: textFrom(root, SELECTORS.address) || normalizeSpace(root.querySelector("#subhead-5 .head-title a")?.textContent),
       eid: getEidFromUrl(),
       sourceUrl: window.location.href
     };
@@ -270,14 +281,14 @@
       showToast(ok ? "Másolva." : "Másolás sikertelen (clipboard tiltás?).");
     });
 
-    document.getElementById("teya_copy_json").addEventListener("click", () => {
-      const payload = collectPayload();
+    document.getElementById("teya_copy_json").addEventListener("click", async () => {
+      const payload = await collectPayload();
       const ok = safeCopy(JSON.stringify(payload, null, 2));
       showToast(ok ? "JSON másolva." : "Másolás sikertelen (clipboard tiltás?).");
     });
 
-    document.getElementById("teya_copy_block").addEventListener("click", () => {
-      const payload = collectPayload();
+    document.getElementById("teya_copy_block").addEventListener("click", async () => {
+      const payload = await collectPayload();
       const lines = Object.entries(payload)
         .filter(([, value]) => value !== "")
         .map(([key, value]) => `${key}: ${value}`);
@@ -285,9 +296,9 @@
       showToast(ok ? "Onboarding blokk másolva." : "Másolás sikertelen (clipboard tiltás?).");
     });
 
-    document.getElementById("teya_open_teya").addEventListener("click", () => {
+    document.getElementById("teya_open_teya").addEventListener("click", async () => {
       if (!TEYA_ONBOARDING_BASE_URL) return;
-      const payload = collectPayload();
+      const payload = await collectPayload();
       const url = new URL(TEYA_ONBOARDING_BASE_URL);
       Object.entries(payload).forEach(([key, value]) => {
         url.searchParams.set(key, value || "");
@@ -311,9 +322,48 @@
 
   function openDrawer() {
     ensureDrawer();
-    renderDrawer();
+    renderLoading();
     document.getElementById(DRAWER_IDS.drawer)?.classList.add("show");
     document.getElementById(DRAWER_IDS.backdrop)?.classList.add("show");
+    loadDataAndRender();
+  }
+
+  function renderLoading() {
+    const body = document.getElementById(DRAWER_IDS.body);
+    if (!body) return;
+    body.innerHTML = `
+      <div class="teya-section">
+        <div class="teya-section-head">Betöltés</div>
+        <div class="teya-row">
+          <div class="teya-label">Állapot</div>
+          <input class="teya-value" type="text" readonly value="Adatok betöltése folyamatban..." />
+          <button class="teya-copy" title="Másolás" disabled>…</button>
+        </div>
+      </div>
+    `.trim();
+  }
+
+  async function loadDataAndRender() {
+    const data = await getAllData();
+    currentData = data;
+    renderDrawer(data);
+  }
+
+  function getCacheKey() {
+    const doc = document;
+    return getEidFromUrl() || getEidFromDoc(doc) || normalizeRegistryNumber(readRegistryNumberFromDoc(doc));
+  }
+
+  async function getAllData() {
+    const key = getCacheKey();
+    if (cachedData && cachedDataKey === key) return cachedData;
+    if (cachedDataPromise && cachedDataKey === key) return cachedDataPromise;
+    cachedDataKey = key;
+    cachedDataPromise = loadAllData().then((data) => {
+      cachedData = data;
+      return data;
+    });
+    return cachedDataPromise;
   }
 
   function buildRow(label, value, { multiline = false, id } = {}) {
@@ -362,9 +412,9 @@
     return section;
   }
 
-  function readAuthorizedSignatories() {
-    const items = Array.from(document.querySelectorAll("#subhead-13 .oi-list-item"));
-    if (!items.length) return "";
+  function readAuthorizedSignatories(root) {
+    const items = Array.from(root.querySelectorAll("#subhead-13 .oi-list-item"));
+    if (!items.length) return [];
     const findLabelValue = (root, labelText) => {
       const labels = Array.from(root.querySelectorAll(".data-line--label"));
       const match = labels.find((label) =>
@@ -372,7 +422,7 @@
       );
       return normalizeSpace(match?.parentElement?.querySelector(".data-line--content")?.textContent || "");
     };
-    const lines = items.map((item, index) => {
+    return items.map((item) => {
       const head = item.querySelector(".head-title");
       const anchors = head ? Array.from(head.querySelectorAll("a")) : [];
       const name = normalizeSpace(anchors[0]?.textContent || "");
@@ -386,44 +436,43 @@
       const hatalyos = normalizeSpace(
         findLabelValue(item, "Hatályos")
       );
-
-      return [
-        `${index + 1}) Név: ${name || "ISMERETLEN"}`,
-        `Beosztás/jogkör: ${role || "ISMERETLEN"}`,
-        `Lakcím: ${address || "ISMERETLEN"}`,
-        `Születés ideje: ${birth || "ISMERETLEN"}`,
-        `Adóazonosító jel: ${taxId || "ISMERETLEN"}`,
-        `A képviselet módja: ${representation || "ISMERETLEN"}`,
-        `Hatályos: ${hatalyos || "ISMERETLEN"}`
-      ].join(" | ");
+      return {
+        name: name || "ISMERETLEN",
+        role: role || "ISMERETLEN",
+        address: address || "ISMERETLEN",
+        birth: birth || "ISMERETLEN",
+        taxId: taxId || "ISMERETLEN",
+        representation: representation || "ISMERETLEN",
+        hatalyos: hatalyos || "ISMERETLEN"
+      };
     });
-    return lines.join("\n");
   }
 
-  function readTelephelyek() {
-    const nodes = Array.from(document.querySelectorAll("#subhead-6 .head-title a"));
-    return nodes.map((node) => normalizeSpace(node.textContent)).filter(Boolean).join("; ");
+  function readTelephelyek(root) {
+    const nodes = Array.from(root.querySelectorAll("#subhead-6 .head-title a"));
+    return nodes.map((node) => normalizeSpace(node.textContent)).filter(Boolean);
   }
 
-  function readTevekenysegek() {
-    const list = Array.from(document.querySelectorAll("#subhead-9 .title-text"))
+  function readTevekenysegek(root) {
+    const list = Array.from(root.querySelectorAll("#subhead-9 .title-text"))
       .map((el) => normalizeSpace(el.textContent))
       .filter(Boolean);
-    if (list.length) return list.join("; ");
-    return textFromTitle("Főtevékenysége");
+    if (list.length) return list;
+    const fallback = textFromTitle(root, "Főtevékenysége");
+    return fallback ? [fallback] : [];
   }
 
-  function readEmails() {
-    const emails = Array.from(document.querySelectorAll("#subhead-90 a[href^='mailto:']"))
+  function readEmails(root) {
+    const emails = Array.from(root.querySelectorAll("#subhead-90 a[href^='mailto:']"))
       .map((el) => normalizeSpace(el.textContent))
       .filter(Boolean);
     if (emails.length) return Array.from(new Set(emails)).join("; ");
     return "";
   }
 
-  function readFinancialRevenue() {
+  function readFinancialRevenue(root) {
     const map = new Map();
-    const titleEls = Array.from(document.querySelectorAll(".data-title"));
+    const titleEls = Array.from(root.querySelectorAll(".data-title"));
     titleEls.forEach((el) => {
       const text = normalizeSpace(el.textContent);
       const match = text.match(/Nettó árbevétel\s*\((\d{4})\)/i);
@@ -442,27 +491,27 @@
     return parts.join("; ");
   }
 
-  function readQuickReport() {
-    const quickReport = document.querySelector("#quickReport");
+  function readQuickReport(root) {
+    const quickReport = root.querySelector("#quickReport");
     if (!quickReport) return "";
     const text = normalizeSpace(quickReport.querySelector(".fw-bold.fs-15")?.textContent || "");
     return text;
   }
 
-  function readKapcsoltVallalkozasok() {
-    const value = document.querySelector("#contactnetworkinfo .inner-contact-text");
+  function readKapcsoltVallalkozasok(root) {
+    const value = root.querySelector("#contactnetworkinfo .inner-contact-text");
     return normalizeSpace(value?.textContent || "");
   }
 
-  function readCorporateOwnersCount() {
-    const hoverTexts = Array.from(document.querySelectorAll("#khra .kh-item-hover"))
+  function readCorporateOwnersCount(root) {
+    const hoverTexts = Array.from(root.querySelectorAll("#khra .kh-item-hover"))
       .map((el) => normalizeSpace(el.textContent));
     const companies = hoverTexts.filter((text) => text.includes("A cég neve"));
     return companies.length ? String(companies.length) : "";
   }
 
-  function readBankAccounts() {
-    const accounts = Array.from(document.querySelectorAll("#subhead-32 .head-title h3"))
+  function readBankAccounts(root) {
+    const accounts = Array.from(root.querySelectorAll("#subhead-32 .head-title h3"))
       .map((el) => normalizeSpace(el.textContent))
       .filter(Boolean);
     return Array.from(new Set(accounts));
@@ -475,6 +524,279 @@
       if (normalizeSpace(rows[i].textContent) === "IBAN") {
         return normalizeSpace(rows[i + 1]?.childNodes?.[0]?.textContent || rows[i + 1]?.textContent || "");
       }
+    }
+    return "";
+  }
+
+  function parseIbanCheckerFromHtml(html) {
+    const doc = htmlToDocument(html);
+    const table = doc.querySelector("#results table") || doc.querySelector("table");
+    if (!table) return [];
+    const rows = Array.from(table.querySelectorAll("tr"));
+    const details = [];
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      if (cells.length < 2) return;
+      const key = normalizeSpace(cells[0].textContent).replace(/:$/, "");
+      const value = normalizeSpace(cells[1].textContent);
+      if (key && value) details.push([key, value]);
+    });
+    return details;
+  }
+
+  function htmlToDocument(html) {
+    return new DOMParser().parseFromString(html, "text/html");
+  }
+
+  function requestHtml(url) {
+    return new Promise((resolve, reject) => {
+      if (typeof GM_xmlhttpRequest !== "function") {
+        reject(new Error("GM_xmlhttpRequest not available"));
+        return;
+      }
+      GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: (response) => resolve(response.responseText || ""),
+        onerror: () => reject(new Error("Request failed"))
+      });
+    });
+  }
+
+  function normalizeRegistryNumber(value) {
+    return (value || "").replace(/\D/g, "");
+  }
+
+  function readRegistryNumberFromDoc(root) {
+    const fromLabel = textFromLabel(root, "Cégjegyzékszám");
+    if (fromLabel) return normalizeSpace(fromLabel.split("(")[0]);
+    const head = normalizeSpace(root.querySelector("#subhead-1 .data-line--content")?.textContent || "");
+    if (head) return normalizeSpace(head.split("(")[0]);
+    const title = normalizeSpace(root.querySelector(".kh-heading .fs-medium")?.textContent || "");
+    const match = title.match(/Cégjegyzékszám:\s*([0-9 ]+)/i);
+    return match ? normalizeSpace(match[1]) : "";
+  }
+
+  function parseCegadatlap(root) {
+    const base = buildPayload(root);
+    const registryNumber = base.registryNumber || readRegistryNumberFromDoc(root);
+    return {
+      companyName: base.companyName,
+      taxId: base.taxId,
+      registryNumber,
+      address: base.address,
+      companyForm: textFromLabel(root, "Cégforma") || textFromTitle(root, "Cégforma"),
+      establishmentDate: textFromLabel(root, "Alakulás dátuma"),
+      registrationDate: textFromLabel(root, "Bejegyzés dátuma"),
+      activities: readTevekenysegek(root),
+      headquarters: normalizeSpace(root.querySelector("#subhead-5 .head-title a")?.textContent || ""),
+      telephelyek: readTelephelyek(root),
+      statisticalNumber: normalizeSpace(root.querySelector("#subhead-20 h3")?.textContent || ""),
+      emails: readEmails(root),
+      signatories: readAuthorizedSignatories(root),
+      bankAccounts: readBankAccounts(root)
+    };
+  }
+
+  function parseCegriport(root) {
+    return {
+      kkv: textFromTitle(root, "KKV besorolás"),
+      revenue: readFinancialRevenue(root),
+      quickReport: readQuickReport(root),
+      kapcsolatok: readKapcsoltVallalkozasok(root)
+    };
+  }
+
+  function parseKapcsolatiHalo(root) {
+    const hoverNodes = Array.from(root.querySelectorAll("#khra .kh-item-hover"));
+    const companyNames = new Set();
+    hoverNodes.forEach((node) => {
+      const label = normalizeSpace(node.textContent);
+      if (label.includes("A cég neve")) {
+        const strong = node.querySelector("b");
+        const name = normalizeSpace(strong?.textContent || "");
+        if (name) companyNames.add(name);
+      }
+    });
+    return {
+      corporateOwnersCount: companyNames.size ? String(companyNames.size) : "",
+      kapcsolatok: companyNames.size ? String(companyNames.size) : ""
+    };
+  }
+
+  async function loadAllData() {
+    const currentDoc = document;
+    const base = parseCegadatlap(currentDoc);
+    const registryNumberDigits = normalizeRegistryNumber(base.registryNumber);
+    const eid = getEidFromUrl() || getEidFromDoc(currentDoc);
+    const cegadatlapUrl = eid ? `https://www.opten.hu/cegtar/cegadatlap/${eid}` : "";
+    const cegriportUrl = eid ? `https://www.opten.hu/cegtar/cegriport/${eid}` : "";
+    const kapcsolatiHaloUrl = registryNumberDigits ? `https://www.opten.hu/cegtar/kapcsolati-halo/${registryNumberDigits}` : "";
+
+    const results = {
+      base,
+      report: {},
+      halo: {}
+    };
+
+    const requests = [];
+
+    if (cegadatlapUrl) {
+      requests.push(
+        requestHtml(cegadatlapUrl)
+          .then((html) => parseCegadatlap(htmlToDocument(html)))
+          .then((data) => { results.base = { ...results.base, ...data }; })
+          .catch(() => {})
+      );
+    }
+
+    if (cegriportUrl) {
+      requests.push(
+        requestHtml(cegriportUrl)
+          .then((html) => parseCegriport(htmlToDocument(html)))
+          .then((data) => { results.report = data; })
+          .catch(() => {})
+      );
+    }
+
+    if (kapcsolatiHaloUrl) {
+      requests.push(
+        requestHtml(kapcsolatiHaloUrl)
+          .then((html) => parseKapcsolatiHalo(htmlToDocument(html)))
+          .then((data) => { results.halo = data; })
+          .catch(() => {})
+      );
+    }
+
+    await Promise.all(requests);
+
+    const merged = {
+      ...results.base,
+      ...results.report,
+      ...results.halo,
+      eid: eid || base.eid,
+      sourceUrl: window.location.href
+    };
+
+    if (!merged.kapcsolatok && results.halo?.kapcsolatok) {
+      merged.kapcsolatok = results.halo.kapcsolatok;
+    }
+
+    return merged;
+  }
+
+  function requestIbanFromCalculator(account, countryCode = "HU") {
+    return new Promise((resolve) => {
+      if (typeof GM_xmlhttpRequest !== "function") {
+        resolve("");
+        return;
+      }
+      const url = "https://www.iban.hu/calculate-iban";
+      const data = new URLSearchParams({
+        country: countryCode,
+        account
+      }).toString();
+      GM_xmlhttpRequest({
+        method: "POST",
+        url,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        data,
+        onload: (response) => resolve(parseIbanFromHtml(response.responseText || "")),
+        onerror: () => resolve("")
+      });
+    });
+  }
+
+  function requestIbanChecker(iban) {
+    return new Promise((resolve, reject) => {
+      if (typeof GM_xmlhttpRequest !== "function") {
+        reject(new Error("GM_xmlhttpRequest not available"));
+        return;
+      }
+      const url = "https://www.iban.hu/iban-checker";
+      const data = new URLSearchParams({ iban }).toString();
+      GM_xmlhttpRequest({
+        method: "POST",
+        url,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        data,
+        onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
+        onerror: () => reject(new Error("IBAN checker failed"))
+      });
+    });
+  }
+
+  function normalizeAccount(account) {
+    return normalizeSpace(account).replace(/\s+/g, "");
+  }
+
+  async function calculateIbans(accounts) {
+    const results = new Map();
+    for (const account of accounts) {
+      const normalized = normalizeAccount(account);
+      if (/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(normalized)) {
+        results.set(account, normalized);
+        continue;
+      }
+      const iban = await requestIbanFromCalculator(normalized, "HU");
+      results.set(account, iban || "IBAN számítás sikertelen");
+    }
+    return results;
+  }
+
+  async function collectPayload() {
+    const data = currentData || await getAllData();
+    const val = (value) => value || "";
+    const list = (value) => Array.isArray(value) ? value.filter(Boolean).join("; ") : val(value);
+    const signatoryList = (value) => {
+      if (!Array.isArray(value)) return val(value);
+      return value
+        .map((item, index) => [
+          `${index + 1}) Név: ${item.name}`,
+          `Beosztás/jogkör: ${item.role}`,
+          `Lakcím: ${item.address}`,
+          `Születés ideje: ${item.birth}`,
+          `Adóazonosító jel: ${item.taxId}`,
+          `A képviselet módja: ${item.representation}`,
+          `Hatályos: ${item.hatalyos}`
+        ].join(" | "))
+        .join("\n");
+    };
+    return {
+      "Cégnév": val(data.companyName),
+      "Cégforma": val(data.companyForm),
+      "KKV besorolás": val(data.kkv),
+      "Alakulás dátuma": val(data.establishmentDate),
+      "Bejegyzés dátuma": val(data.registrationDate),
+      "Tevékenységi köre(i)": list(data.activities),
+      "Cég székhelye": val(data.headquarters),
+      "Cég telephelye(i)": list(data.telephelyek),
+      "Cégjegyzékszám": val(data.registryNumber),
+      "Adószám": val(data.taxId),
+      "Statisztikai számjele": val(data.statisticalNumber),
+      "Email": val(data.emails),
+      "Értékesítés nettó árbevétele": val(data.revenue),
+      "Opten gyorsjelentés": val(data.quickReport),
+      "Cégjegyzésre jogosultak": signatoryList(data.signatories),
+      "Hány darab cég a cégben van": val(data.corporateOwnersCount),
+      "Hány kapcsolata van különböző cégekkel": val(data.kapcsolatok),
+      "EID": val(data.eid),
+      "Forrás URL": val(data.sourceUrl)
+    };
+  }
+
+  function renderDrawer(data) {
+    const headerSub = document.getElementById(DRAWER_IDS.sub);
+    if (headerSub) {
+      headerSub.innerHTML = [
+        data.registryNumber ? `<span>Cégjegyzékszám: ${data.registryNumber}</span>` : "",
+        data.taxId ? `<span>Adószám: ${data.taxId}</span>` : "",
+        data.address ? `<span>${data.address}</span>` : ""
+      ].filter(Boolean).join("");
     }
     return "";
   }
@@ -503,81 +825,30 @@
     });
   }
 
-  function normalizeAccount(account) {
-    return normalizeSpace(account).replace(/\s+/g, "");
-  }
-
-  async function calculateIbans(accounts) {
-    const results = new Map();
-    for (const account of accounts) {
-      const normalized = normalizeAccount(account);
-      if (/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(normalized)) {
-        results.set(account, normalized);
-        continue;
-      }
-      const iban = await requestIbanFromCalculator(normalized, "HU");
-      results.set(account, iban || "IBAN számítás sikertelen");
-    }
-    return results;
-  }
-
-  function collectPayload() {
-    const base = buildPayload();
-    const companyForm = textFromLabel("Cégforma") || textFromTitle("Cégforma");
-    const kkv = textFromTitle("KKV besorolás");
-    const establishmentDate = textFromLabel("Alakulás dátuma");
-    const registrationDate = textFromLabel("Bejegyzés dátuma");
-    const activities = readTevekenysegek();
-    const headquarters = normalizeSpace(document.querySelector("#subhead-5 .head-title a")?.textContent || "");
-    const telephelyek = readTelephelyek();
-    const statisticalNumber = normalizeSpace(document.querySelector("#subhead-20 h3")?.textContent || "");
-    const revenue = readFinancialRevenue();
-    const quickReport = readQuickReport();
-    const signatories = readAuthorizedSignatories();
-    const corporateOwners = readCorporateOwnersCount();
-    const kapcsolatok = readKapcsoltVallalkozasok();
-    const emails = readEmails();
-
-    return {
-      "Cégnév": base.companyName,
-      "Cégforma": companyForm,
-      "KKV besorolás": kkv,
-      "Alakulás dátuma": establishmentDate,
-      "Bejegyzés dátuma": registrationDate,
-      "Tevékenységi köre(i)": activities,
-      "Cég székhelye": headquarters,
-      "Cég telephelye(i)": telephelyek,
-      "Cégjegyzékszám": base.registryNumber,
-      "Adószám": base.taxId,
-      "Statisztikai számjele": statisticalNumber,
-      "Email": emails,
-      "Értékesítés nettó árbevétele": revenue,
-      "Opten gyorsjelentés": quickReport,
-      "Cégjegyzésre jogosultak": signatories,
-      "Hány darab cég a cégben van": corporateOwners,
-      "Hány kapcsolata van különböző cégekkel": kapcsolatok,
-      "EID": base.eid,
-      "Forrás URL": base.sourceUrl
-    };
-  }
-
-  function renderDrawer() {
-    const payload = buildPayload();
-    const headerSub = document.getElementById(DRAWER_IDS.sub);
-    if (headerSub) {
-      headerSub.innerHTML = [
-        payload.registryNumber ? `<span>Cégjegyzékszám: ${payload.registryNumber}</span>` : "",
-        payload.taxId ? `<span>Adószám: ${payload.taxId}</span>` : "",
-        payload.address ? `<span>${payload.address}</span>` : ""
-      ].filter(Boolean).join("");
-    }
-
     const body = document.getElementById(DRAWER_IDS.body);
     if (!body) return;
     body.innerHTML = "";
 
-    const baseInfo = collectPayload();
-    const bankAccounts = readBankAccounts();
+    const baseInfo = {
+      "Cégnév": data.companyName,
+      "Cégforma": data.companyForm,
+      "KKV besorolás": data.kkv,
+      "Alakulás dátuma": data.establishmentDate,
+      "Bejegyzés dátuma": data.registrationDate,
+      "Cég székhelye": data.headquarters,
+      "Cégjegyzékszám": data.registryNumber,
+      "Adószám": data.taxId,
+      "Statisztikai számjele": data.statisticalNumber,
+      "Email": data.emails,
+      "Értékesítés nettó árbevétele": data.revenue,
+      "Opten gyorsjelentés": data.quickReport,
+      "Hány darab cég a cégben van": data.corporateOwnersCount,
+      "Hány kapcsolata van különböző cégekkel": data.kapcsolatok
+    };
+    const bankAccounts = data.bankAccounts || [];
+    const activities = Array.isArray(data.activities) ? data.activities : [];
+    const telephelyek = Array.isArray(data.telephelyek) ? data.telephelyek : [];
+    const signatories = Array.isArray(data.signatories) ? data.signatories : [];
 
     const coreRows = [
       buildRow("Cégnév", baseInfo["Cégnév"]),
@@ -585,9 +856,7 @@
       buildRow("KKV besorolás", baseInfo["KKV besorolás"]),
       buildRow("Alakulás dátuma", baseInfo["Alakulás dátuma"]),
       buildRow("Bejegyzés dátuma", baseInfo["Bejegyzés dátuma"]),
-      buildRow("Tevékenységi köre(i)", baseInfo["Tevékenységi köre(i)"], { multiline: true }),
       buildRow("Cég székhelye", baseInfo["Cég székhelye"], { multiline: true }),
-      buildRow("Cég telephelye(i)", baseInfo["Cég telephelye(i)"], { multiline: true }),
       buildRow("Cégjegyzékszám", baseInfo["Cégjegyzékszám"]),
       buildRow("Adószám", baseInfo["Adószám"]),
       buildRow("Statisztikai számjele", baseInfo["Statisztikai számjele"]),
@@ -596,34 +865,72 @@
       buildRow("Opten gyorsjelentés", baseInfo["Opten gyorsjelentés"])
     ];
 
-    const signatoryRows = [
-      buildRow("Cégjegyzésre jogosult(ak) adatai", baseInfo["Cégjegyzésre jogosultak"], { multiline: true })
-    ];
-
     const computedRows = [
       buildRow("Hány darab cég a cégben van", baseInfo["Hány darab cég a cégben van"]),
       buildRow("Hány kapcsolata van különböző cégekkel", baseInfo["Hány kapcsolata van különböző cégekkel"])
     ];
 
-    const bankRows = [
-      buildRow("Bankszámlaszám(ok)", bankAccounts.join("; "), { multiline: true }),
-      buildRow("IBAN(ok)", bankAccounts.length ? "Számítás folyamatban..." : "")
-    ];
-
     body.appendChild(buildSection("Cég adatok", coreRows));
-    body.appendChild(buildSection("Cégjegyzésre jogosultak", signatoryRows));
     body.appendChild(buildSection("Számolt mezők", computedRows));
-    body.appendChild(buildSection("Bankszámlák", bankRows));
+
+    activities.forEach((activity, index) => {
+      body.appendChild(buildSection(`Tevékenységi kör ${index + 1}`, [
+        buildRow("Tevékenység", activity)
+      ]));
+    });
+
+    telephelyek.forEach((telephely, index) => {
+      body.appendChild(buildSection(`Telephely ${index + 1}`, [
+        buildRow("Cím", telephely, { multiline: true })
+      ]));
+    });
+
+    signatories.forEach((person, index) => {
+      body.appendChild(buildSection(`Cégjegyzésre jogosult ${index + 1}`, [
+        buildRow("Név", person.name),
+        buildRow("Beosztás/jogkör", person.role),
+        buildRow("Lakcím", person.address, { multiline: true }),
+        buildRow("Születés ideje", person.birth),
+        buildRow("Adóazonosító jel", person.taxId),
+        buildRow("A képviselet módja", person.representation),
+        buildRow("Hatályos", person.hatalyos)
+      ]));
+    });
+
+    const bankCardRefs = bankAccounts.map((account, index) => {
+      const combinedRow = buildRow("Bankszámlaszám → IBAN", `${account} → Számítás folyamatban...`, { multiline: true });
+      const checkerRow = buildRow("IBAN ellenőrzés", "Várakozás...", { multiline: true });
+      const section = buildSection(`Bankszámla ${index + 1}`, [combinedRow, checkerRow]);
+      body.appendChild(section);
+      return {
+        account,
+        combinedInput: combinedRow.querySelector(".teya-value"),
+        checkerInput: checkerRow.querySelector(".teya-value")
+      };
+    });
 
     if (bankAccounts.length) {
-      const ibanRow = bankRows[1].querySelector(".teya-value");
       calculateIbans(bankAccounts).then((map) => {
-        const values = bankAccounts.map((account) => {
-          const iban = map.get(account) || "";
-          return iban ? `${account} → ${iban}` : account;
+        bankCardRefs.forEach((ref) => {
+          const iban = map.get(ref.account) || "";
+          const combinedValue = iban ? `${ref.account} → ${iban}` : ref.account;
+          ref.combinedInput.value = combinedValue;
+          ref.combinedInput.rows = Math.min(8, Math.max(3, combinedValue.split("\n").length));
+          if (!iban || iban.toLowerCase().includes("sikertelen")) {
+            ref.checkerInput.value = "IBAN ellenőrzés nem elérhető.";
+            return;
+          }
+          requestIbanChecker(iban).then((details) => {
+            if (!details.length) {
+              ref.checkerInput.value = "Nincs elérhető IBAN részlet.";
+              return;
+            }
+            ref.checkerInput.value = details.map(([key, value]) => `${key}: ${value}`).join("\n");
+            ref.checkerInput.rows = Math.min(10, Math.max(3, details.length));
+          }).catch(() => {
+            ref.checkerInput.value = "IBAN ellenőrzés sikertelen.";
+          });
         });
-        ibanRow.value = values.join("\n");
-        ibanRow.rows = Math.min(8, Math.max(3, values.length));
       });
     }
   }
