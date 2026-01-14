@@ -1087,11 +1087,12 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   function parseIbanCheckerFromHtml(html) {
+    const emptyMessage = "IBAN ellenőrzés: 🏦 Want to validate an IBAN? Enter it above and let's take a peek 😄";
     const doc = htmlToDocument(html);
     const table = doc.querySelector(".result table") || doc.querySelector("table");
     if (!table) {
       const fallback = normalizeSpace(doc.querySelector(".result")?.textContent || "");
-      return fallback ? [["IBAN ellenőrzés", fallback]] : [];
+      return [["IBAN ellenőrzés", fallback || emptyMessage]];
     }
     const rows = Array.from(table.querySelectorAll("tr"));
     const details = [];
@@ -1102,7 +1103,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       const value = normalizeSpace(cells[1].textContent);
       if (key && value) details.push([key, value]);
     });
-    return details;
+    return details.length ? details : [["IBAN ellenőrzés", emptyMessage]];
   }
 
   function requestIbanFromCalculator(account, countryCode = "HU") {
