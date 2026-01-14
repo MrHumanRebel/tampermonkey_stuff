@@ -11,6 +11,7 @@
 // @grant        GM_xmlhttpRequest
 // @connect      iban.hu
 // @connect      www.iban.hu
+// @connect      greip.io
 // ==/UserScript==
 
 (() => {
@@ -1072,7 +1073,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   // -------------------------
-  // IBAN helpers (iban.hu)
+  // IBAN helpers (iban.hu + greip.io)
   // -------------------------
   function parseIbanFromHtml(html) {
     const doc = new DOMParser().parseFromString(html, "text/html");
@@ -1086,43 +1087,23 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   function parseIbanCheckerFromHtml(html) {
+    const emptyMessage = "IBAN ellenőrzés: 🏦 Want to validate an IBAN? Enter it above and let's take a peek 😄";
     const doc = htmlToDocument(html);
-    const alert = doc.querySelector(".alert");
-    if (alert) {
-      const alertText = normalizeSpace(alert.textContent || "");
-      if (alertText) return [["IBAN ellenőrzés", alertText]];
+    const table = doc.querySelector(".result table") || doc.querySelector("table");
+    if (!table) {
+      const fallback = normalizeSpace(doc.querySelector(".result")?.textContent || "");
+      return [["IBAN ellenőrzés", fallback || emptyMessage]];
     }
-    const table = doc.querySelector("#results table")
-      || doc.querySelector("table.table.table-bordered.downloads")
-      || doc.querySelector("table.downloads")
-      || doc.querySelector("table");
-    if (!table) return [];
     const rows = Array.from(table.querySelectorAll("tr"));
     const details = [];
     rows.forEach((row) => {
-      const header = row.querySelector("th");
-      if (header) {
-        const headerText = normalizeSpace(header.textContent || "");
-        if (headerText.toLowerCase().includes("iban")) {
-          const strong = header.querySelector("strong");
-          const iban = normalizeSpace(strong?.textContent || headerText.replace(/^IBAN/i, ""));
-          if (iban) details.push(["IBAN", iban]);
-        }
-        return;
-      }
       const cells = row.querySelectorAll("td");
       if (cells.length < 2) return;
       const key = normalizeSpace(cells[0].textContent).replace(/:$/, "");
       const value = normalizeSpace(cells[1].textContent);
       if (key && value) details.push([key, value]);
     });
-    const statusList = Array.from(table.querySelectorAll("tr td ul li"))
-      .map((item) => normalizeSpace(item.textContent))
-      .filter(Boolean);
-    if (statusList.length) {
-      details.push(["Ellenőrzés", statusList.join("; ")]);
-    }
-    return details;
+    return details.length ? details : [["IBAN ellenőrzés", emptyMessage]];
   }
 
   function requestIbanFromCalculator(account, countryCode = "HU") {
@@ -1152,16 +1133,13 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
         reject(new Error("GM_xmlhttpRequest not available"));
         return;
       }
-      const url = new URL("https://www.iban.hu/iban-checker");
-      url.searchParams.set("requestId", buildRequestId());
+      const url = new URL("https://greip.io/tools/IBAN-Validation");
       const normalized = normalizeAccount(iban).toUpperCase();
-      const data = new URLSearchParams({ iban: normalized }).toString();
+      url.searchParams.set("iban", normalized);
       GM_xmlhttpRequest({
-        method: "POST",
+        method: "GET",
         url: url.toString(),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         anonymous: true,
-        data,
         onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
         onerror: () => reject(new Error("IBAN checker failed"))
       });
