@@ -301,6 +301,20 @@
     };
   }
 
+  function hasCegadatlapData(data) {
+    if (!data) return false;
+    const keys = [
+      "companyName",
+      "taxId",
+      "registryNumber",
+      "address",
+      "companyForm",
+      "headquarters",
+      "statisticalNumber"
+    ];
+    return keys.some((key) => normalizeSpace(data[key] || "") !== "");
+  }
+
   function parseCegriport(root) {
     const kkvValue = readValueByDataTitle(root, "KKV besorolás", "#basicData") || textFromTitle(root, "KKV besorolás");
     return {
@@ -309,6 +323,21 @@
       quickReport: readQuickReport(root),
       kapcsolatok: readKapcsoltVallalkozasok(root)
     };
+  }
+
+  function hasReportData(report) {
+    if (!report) return false;
+    return Object.values(report).some((value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "string") return value.trim() !== "";
+      return Boolean(value);
+    });
+  }
+
+  function hasHaloData(data) {
+    if (!data) return false;
+    const keys = ["corporateOwnersCount", "kapcsolatok"];
+    return keys.some((key) => normalizeSpace(data[key] || "") !== "");
   }
 
   function parseKapcsolatiHalo(root) {
@@ -457,7 +486,8 @@
 
   async function loadAllData() {
     const currentDoc = document;
-    const base = parseCegadatlap(currentDoc);
+    const baseFromPage = parseCegadatlap(currentDoc);
+    const base = baseFromPage;
 
     const registryNumberDigits = normalizeRegistryNumber(base.registryNumber);
     const eid = getEidFromUrl() || getEidFromDoc(currentDoc);
@@ -473,7 +503,17 @@
     const results = { base, report: {}, halo: {} };
     const requests = [];
 
-    if (cegadatlapUrl) {
+    if (window.location.pathname.includes("/cegtar/cegadatlap/")) {
+      results.base = baseFromPage;
+      if (!hasCegadatlapData(baseFromPage) && cegadatlapUrl) {
+        requests.push(
+          requestHtml(cegadatlapUrl)
+            .then((html) => parseCegadatlap(htmlToDocument(html)))
+            .then((data) => { results.base = { ...results.base, ...data }; })
+            .catch(() => {})
+        );
+      }
+    } else if (cegadatlapUrl) {
       requests.push(
         requestHtml(cegadatlapUrl)
           .then((html) => parseCegadatlap(htmlToDocument(html)))
@@ -483,7 +523,16 @@
     }
 
     if (window.location.pathname.includes("/cegtar/cegriport/")) {
-      results.report = parseCegriport(currentDoc) || {};
+      const reportFromPage = parseCegriport(currentDoc) || {};
+      results.report = reportFromPage;
+      if (!hasReportData(reportFromPage) && cegriportUrl) {
+        requests.push(
+          requestHtml(cegriportUrl)
+            .then((html) => parseCegriport(htmlToDocument(html)))
+            .then((data) => { results.report = data || {}; })
+            .catch(() => {})
+        );
+      }
     } else if (cegriportUrl) {
       requests.push(
         requestHtml(cegriportUrl)
@@ -494,7 +543,16 @@
     }
 
     if (window.location.pathname.includes("/cegtar/kapcsolati-halo/")) {
-      results.halo = parseKapcsolatiHalo(currentDoc) || {};
+      const haloFromPage = parseKapcsolatiHalo(currentDoc) || {};
+      results.halo = haloFromPage;
+      if (!hasHaloData(haloFromPage) && kapcsolatiHaloUrl) {
+        requests.push(
+          requestHtml(kapcsolatiHaloUrl)
+            .then((html) => parseKapcsolatiHalo(htmlToDocument(html)))
+            .then((data) => { results.halo = data || {}; })
+            .catch(() => {})
+        );
+      }
     } else if (kapcsolatiHaloUrl) {
       requests.push(
         requestHtml(kapcsolatiHaloUrl)
