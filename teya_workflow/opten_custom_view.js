@@ -649,6 +649,8 @@
           .catch(() => {})
       );
     }
+    return "";
+  }
 
     if (cegriportUrl) {
       requests.push(
@@ -798,6 +800,8 @@
         data.address ? `<span>${data.address}</span>` : ""
       ].filter(Boolean).join("");
     }
+    return "";
+  }
 
     const body = document.getElementById(DRAWER_IDS.body);
     if (!body) return;
