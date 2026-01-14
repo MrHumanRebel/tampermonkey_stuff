@@ -913,10 +913,29 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   function readBankAccounts(root) {
-    const accounts = Array.from(root.querySelectorAll("#subhead-32 .head-title h3"))
-      .map((el) => normalizeSpace(el.textContent))
-      .filter(Boolean);
-    return Array.from(new Set(accounts));
+    const items = Array.from(root.querySelectorAll("#subhead-32 .oi-list-item"));
+    const accounts = items.map((item) => {
+      const account = normalizeSpace(item.querySelector(".head-title h3")?.textContent || "");
+      if (!account) return null;
+      const dataLines = Array.from(item.querySelectorAll(".text-content .data-line"));
+      const bankLine = dataLines.find((line) => {
+        const label = normalizeSpace(line.querySelector(".data-line--label")?.textContent || "");
+        return !label;
+      });
+      const bankName = normalizeSpace(bankLine?.querySelector(".data-line--content")?.textContent || "");
+      return {
+        account,
+        bankName
+      };
+    }).filter(Boolean);
+
+    const unique = new Map();
+    accounts.forEach((entry) => {
+      if (!unique.has(entry.account)) {
+        unique.set(entry.account, entry);
+      }
+    });
+    return Array.from(unique.values());
   }
 
   function parseCegadatlap(root) {
@@ -2650,7 +2669,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     };
   }
 
-  function buildIbanDetails(iban) {
+  function buildIbanDetails(iban, bankName = "") {
     const normalized = normalizeIbanInput(iban);
     if (!normalized) {
       return [["IBAN ellenőrzés", "Nincs megadott IBAN."]];
@@ -2661,17 +2680,27 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const bban = normalized.slice(4);
     const entry = getRegistryEntry(countryCode);
     const details = [
-      ["Bemenet", iban],
-      ["IBAN (normalizált)", normalized],
       ["IBAN (print formátum)", formatIbanPrint(normalized)],
       ["Országkód", countryCode],
+      ["Bank neve", bankName || "N/A"],
       ["Ellenőrző szám", checksum],
       ["BBAN", bban]
     ];
 
     if (!entry) {
-      details.push(["Ország támogatott", "Nem"]);
-      details.push(["Érvényes IBAN", "Nem"]);
+      details.push(
+        ["Ország", "Ismeretlen"],
+        ["IBAN hossz", `${normalized.length} / N/A`],
+        ["BBAN hossz", `${bban.length} / N/A`],
+        ["Bank azonosító pozíció", "N/A"],
+        ["Bank azonosító érték", "N/A"],
+        ["Fiók azonosító pozíció", "N/A"],
+        ["Fiók azonosító érték", "N/A"],
+        ["Ellenőrző szám (számolt)", "N/A"],
+        ["Mod97 eredmény", "N/A"],
+        ["Érvényes IBAN", "Nem"],
+        ["Hibák", "Ismeretlen országkód"]
+      );
       return details;
     }
 
@@ -2697,22 +2726,12 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       ["Ország", entry.country_name],
       ["IBAN hossz", `${normalized.length} / ${entry.iban_length}`],
       ["BBAN hossz", `${bban.length} / ${entry.bban_length}`],
-      ["IBAN szerkezet", entry.iban_structure],
-      ["BBAN szerkezet", entry.bban_structure],
-      ["IBAN regex", entry.iban_regex],
-      ["BBAN regex", entry.bban_regex],
       ["Bank azonosító pozíció", entry.bank_identifier_position || "N/A"],
-      ["Bank azonosító szerkezet", entry.bank_identifier_structure || "N/A"],
-      ["Bank azonosító regex", entry.bank_identifier_regex || "N/A"],
       ["Bank azonosító érték", bankId || "N/A"],
       ["Fiók azonosító pozíció", entry.branch_identifier_position || "N/A"],
-      ["Fiók azonosító szerkezet", entry.branch_identifier_structure || "N/A"],
-      ["Fiók azonosító regex", entry.branch_identifier_regex || "N/A"],
       ["Fiók azonosító érték", branchId || "N/A"],
       ["Ellenőrző szám (számolt)", checksumInfo.expectedChecksum],
       ["Mod97 eredmény", String(checksumInfo.remainder)],
-      ["IBAN elektronikus példa", entry.iban_electronic_format_example],
-      ["IBAN nyomtatási példa", entry.iban_print_format_example],
       ["Érvényes IBAN", isValid ? "Igen" : "Nem"],
       ["Hibák", issues.length ? issues.join("; ") : "Nincs"]
     );
@@ -2720,8 +2739,8 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return details;
   }
 
-  function requestIbanChecker(iban) {
-    return Promise.resolve(buildIbanDetails(iban));
+  function requestIbanChecker(iban, bankName) {
+    return Promise.resolve(buildIbanDetails(iban, bankName));
   }
 
   function normalizeAccount(account) {
@@ -2769,14 +2788,14 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
   async function calculateIbans(accounts) {
     const results = new Map();
-    for (const account of accounts) {
-      const normalized = normalizeAccount(account).toUpperCase();
+    for (const accountEntry of accounts) {
+      const normalized = normalizeAccount(accountEntry.account).toUpperCase();
       if (/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(normalized)) {
-        results.set(account, normalized);
+        results.set(accountEntry.account, normalized);
         continue;
       }
       const iban = await requestIbanFromCalculator(normalized, DEFAULT_IBAN_COUNTRY);
-      results.set(account, iban || "IBAN számítás sikertelen");
+      results.set(accountEntry.account, iban || "IBAN számítás sikertelen");
     }
     return results;
   }
@@ -3417,14 +3436,17 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       ]));
     });
 
-    const bankCardRefs = bankAccounts.map((account, index) => {
-      const accountRow = buildRow("Bankszámlaszám", account);
+    const bankCardRefs = bankAccounts.map((entry, index) => {
+      const bankLabelSuffix = entry.bankName ? ` - ${entry.bankName}` : "";
+      const sectionTitle = `Bankszámla ${index + 1}${bankLabelSuffix}`;
+      const accountRow = buildRow("Bankszámlaszám", entry.account);
       const ibanRow = buildRow("IBAN", "Számítás folyamatban...");
       const checkerRow = buildRow("IBAN ellenőrzés", "Várakozás...", { multiline: true });
-      const section = buildSection(`Bankszámla ${index + 1}`, [accountRow, ibanRow, checkerRow]);
+      const section = buildSection(sectionTitle, [accountRow, ibanRow, checkerRow]);
       body.appendChild(section);
       return {
-        account,
+        account: entry.account,
+        bankName: entry.bankName || "",
         ibanInput: ibanRow.querySelector(".teya-value"),
         checkerInput: checkerRow.querySelector(".teya-value")
       };
@@ -3441,7 +3463,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
             return;
           }
 
-          requestIbanChecker(iban).then((details) => {
+          requestIbanChecker(iban, ref.bankName).then((details) => {
             if (!details.length) {
               ref.checkerInput.value = "Nincs elérhető IBAN részlet.";
               return;
