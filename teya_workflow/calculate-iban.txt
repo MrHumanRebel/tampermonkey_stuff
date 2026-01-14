@@ -1,3 +1,49 @@
+https://www.iban.hu/calculate-iban
+GET
+200 OK
+
+
+
+
+	<!DOCTYPE html>
+<!--[if IE 8 ]><html class="ie" xmlns="http://www.w3.org/1999/xhtml" xml:lang="hu" lang="hu"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="hu" lang="hu"><!--<![endif]-->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
+<title>IBAN Kalkulátor: Számítsa ki az IBAN-t a Bank kódjából és a számlaszámból</title>
+<meta name="description" content="IBAN Kalkulátor - Konvertáljon bankszámlaszámot IBAN-ba. Tekintse meg a BIC kódot, a branch címét és a nemzetközi banki átutaláshoz szükséges információkat" />
+<meta name="keywords" content="számítás, hitelesítés, iban kalkulátor, számlaszám, banki kód" />
+<meta name="theme-color" content="#153570">
+<meta name="apple-mobile-web-app-status-bar-style" content="#153570">
+<meta name="MobileOptimized" content="width" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<link href="https://www.iban.hu/calculate-iban" rel="canonical">
+
+
+
+<link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.css" >
+<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/shortcodes.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/newcustom.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/responsive.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/animate.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/font-awesome.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/jquery.fancybox.css">
+
+
+<style>
+@media print {
+.fa-print,.fa-exclamation-circle{display:none}.flat-general.sidebar-right .flat-wrapper .general{border-right:none}.topheader{display:none}header{display:none}.general-sidebar{display:none}.flat-general .general{width:100%}#form{display:none}.serviceinfohelp{display:none}.pricing a{display:none}.reportproblem{display:none}#form1{display:none}.flat-title-button h3,.help{display:none}.footer-widgets,.content-bottom-widgets,.footer-content .copyright a{display:none;clear:both}}
+</style>
+
+</head>
+
+
 <body>
 <div class="boxed">
 <div class="topheader">
@@ -7,7 +53,7 @@
 <div class="top-navigator pull-left">
 <ul>
 
-<li><a href="https://www.iban.com/contact" title="Contact Us" class="no-border"><i class="fa fa-envelope"></i> KAPCSOLAT</a></li>
+<li ><a href="https://www.iban.com/contact" title="Contact Us" class="no-border"><i class="fa fa-envelope"></i> KAPCSOLAT</a></li>
 
 
 </ul>
@@ -55,7 +101,7 @@
 </ul>
 </li>
 
-<li></li>
+<li ></li>
 
 <li><a href="https://clients.iban.com/login/" title="Member Login" class="login"><i class="fa fa-lock no-border" aria-hidden="true"></i>BELÉPÉS</a></li>
 <li><a href="https://clients.iban.com/register/" title="Request a trial account" class="requesttrial hidden-xs">Demó kérése</a></li>
@@ -78,7 +124,7 @@
 
 <div id="logo" class="logo">
 <a href="/" title="IBAN Home">
-<img src="https://www.iban.com/images/logo@2x.png" alt="IBAN Logo" width="170" height="75">
+<img src="/images/logo.png" alt="IBAN Logo" width="170" height="75">
 </a>
 </div>
 <div class="btn-menu">
@@ -86,22 +132,22 @@
 </div>
 
 <div class="nav-wrap">                                
-
-</div>
-</div>
-</div>
-</div>
-</div>
-</header><nav id="mainnav-mobi" class="mainnav navbar-right" style="display: none;">
+<nav id="mainnav" class="mainnav navbar-right">
 <ul class="menu"> 
-<li><a href="/iban-checker" title="Check IBAN Number"><i class="fa fa-check"></i> <div class="atitle">IBAN Ellenőrzése</div></a></li>
+<li><a  href="/iban-checker" title="Check IBAN Number"><i class="fa fa-check"></i> <div class="atitle">IBAN Ellenőrzése</div></a></li>
 <li><a class="active" href="/calculate-iban" title="IBAN Calculator"><i class="fa fa-retweet"></i> <div class="atitle">IBAN Kalkulálása</div></a></li>
-<li><a href="/products" title="Products and services"><i class="fa fa-th-large"></i> <div class="atitle">Termékek</div></a></li>
-<li><a href="/why-iban" title="Why choose IBAN Services"><i class="fa fa-question-circle" aria-hidden="true"></i> <div class="atitle">Miért az IBAN?</div></a></li>
-<li><a href="/developers" title="Developers Documentation"><i class="fa fa-cogs"></i> <div class="atitle">Fejlesztők</div></a></li>
-<li><a href="/pricing" title="Order products and services"><i class="fa fa-tasks"></i> <div class="atitle">Árak</div></a></li>
+<li><a  href="/products" title="Products and services"><i class="fa fa-th-large" ></i> <div class="atitle">Termékek</div></a></li>
+<li><a  href="/why-iban" title="Why choose IBAN Services"><i class="fa fa-question-circle" aria-hidden="true"></i> <div class="atitle">Miért az IBAN?</div></a></li>
+<li><a  href="/developers" title="Developers Documentation"><i class="fa fa-cogs"></i> <div class="atitle">Fejlesztők</div></a></li>
+<li><a  href="/pricing" title="Order products and services"><i class="fa fa-tasks"></i> <div class="atitle">Árak</div></a></li>
 </ul>
-</nav><div class="flat-row flat-general sidebar-right pad-top0px">
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header><div class="flat-row flat-general sidebar-right pad-top0px">
 
 
 <div class="container">
@@ -129,7 +175,7 @@
 <form method="POST" id="form1">
 
 
-<select name="country" id="countrysel" class="countrysel" onchange="drawfields(this)" size="1" required="" style="width:80%;">
+<select name="country" id='countrysel' class="countrysel" onchange="drawfields(this)" size="1" required="" style="width:80%;">
 <option value="??">Ország Kiválasztása</option>
 <option value="GB">Egyesült Királyság  (GB)</option>
 <option value="FR">Franciaország (FR)</option>
@@ -201,76 +247,24 @@
 <br><br>
 
 
-<div id="inputs"><span><label>Számlaszám:</label><input type="text" id="huaccount" required="required" pattern="[0-9]{8}-[0-9]{8}(-[0-9]{8})?" maxlength="26" size="50" title="11111111-22222222 or 11111111-22222222-00000000" name="account" class="form-control" placeholder="11111111-22222222-00000000"></span><input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br></div>
+<div id="inputs"></div>
 
-<br><br></form>
-
-
-
-
-
-
-
-
-
-
-<div id="results">
-
-<table class="table table-bordered downloads">
-<tbody>
-<tr class="head"><td colspan="2"><strong>Details for  - 117210022112956600000000</strong> <a href="javascript:window.print()" style="margin-left:15px;"><i class="fa fa-print" aria-hidden="true" style="font-size:18px; color:#032af1;"></i></a> <div class="pull-right"><a href="#report" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-exclamation-circle orange" aria-hidden="true" style="font-size:18px;"></i></a></div></td></tr><tr>
-
-</tr><tr>
-<td><strong>IBAN</strong></td>
-<td>HU10117210022112956600000000
- 
-<form method="post" action="/iban-checker" style="display:inline;">
-<input type="hidden" name="iban" value="HU10117210022112956600000000">
-<a href="#" onclick="$(this).closest('form').submit()" style="display:inline;">IBAN Ellenőrzése</a>
 </form>
-</td>
-</tr>
-<tr>
-</tr><tr>
-<td><strong>BIC</strong></td>
-<td>OTPVHUHB
-</td>
-</tr>
-<tr>
-</tr><tr>
-<td><strong>BANK</strong></td>
-<td>OTP Budapesti r., XXI. Kossuth L. u.
-</td>
-</tr>
-<tr>
-</tr><tr>
-<td><strong>ADDRESS</strong></td>
-<td>Kossuth Lajos utca 86.
-</td>
-</tr>
-<tr>
-</tr><tr>
-<td><strong>CITY</strong></td>
-<td>Budapest
-</td>
-</tr>
-<tr>
-</tr><tr>
-<td><strong>ZIP</strong></td>
-<td>1211
-</td>
-</tr>
-<tr>
-
-</tr></tbody>
-</table>
-
-</div>
 
 
 
 
-<div class="serviceinfohelp"><br><br><div dir="ltr" style="box-shadow: 0 1px 3px rgba(0,0,0,0.6);width:95%;"><div style="padding:15px;border-left:3px solid #47A9EB;"><strong>Milyen hátrányai vannak, ha a bankoddal utalsz nemzetközileg</strong><br><br>Amikor a bankodon keresztül nemzetközileg pénzt küldesz vagy fogadsz, sok pénzt veszíthetsz a rossz átváltási árfolyam vagy a rejtett díjak miatt. Ez azért van, mert a bankok a pénzváltásnak még mindig egy régebbi rendszerét használják. Azt javasoljuk, hogy használd a Wise szolgáltatását, ami általában sokkal olcsóbb. Fejlett technológiájuknak köszönhetően:<br> A valódi átváltási árfolyamot kapod alacsony, átlátható díjszabással.<br> Legalább olyan gyorsan tudod mozgatni a pénzed, mint a bankoknál, de gyakran még gyorsabban – néhány pénznem esetében percek alatt.<br> A pénzed banki szintű biztonságban van.<br> <a href="https://transferwise.prf.hn/click/camref:1100l7rS7/" class="button sm hidden-xs">Utalás indítása</a> &nbsp;&nbsp; <a href="https://transferwise.prf.hn/click/camref:1100l7rS7//destination:https%3A%2F%2Ftransferwise.com%2Fborderless%2F" class="button sm hidden-xs">Pénz fogadása</a><br></div></div><br>
+
+
+
+
+
+
+
+
+
+
+<div class="serviceinfohelp">
 
 <hr>
 <p>Az IBAN kalkulátor része az <a href="/iban-suite"> IBAN SUITE </a> szolgáltatásunknak. </p>
@@ -310,12 +304,12 @@ Ez az oldal segít az alapvető bankszámlaszám (BBAN) pontos átkonvertálás�
 <div class="sidebar">
 <div class="widget widget_nav_menu">
 <ul class="nav_menu">
-<li class="menu-item"><a href="/iban-checker"><span>IBAN Checker</span></a></li>
+<li class="menu-item"><a href="/iban-checker" ><span>IBAN Checker</span></a></li>
 <li class="menu-item"><a href="/calculate-iban" class="active"><span>IBAN Kalkulátor</span></a></li>
-<li class="menu-item"><a href="/search-bic"><span>BIC Kereső</span></a></li>
-<li class="menu-item"><a href="/exchange-rates"> <span>Árfolyamok</span></a></li>
-<li class="menu-item"><a href="/currency-converter"><span>Valutaváltó</span></a></li>
-<li class="menu-item"><a href="/currency-codes"><span>Valutakódok listája</span></a></li>
+<li class="menu-item"><a href="/search-bic" ><span>BIC Kereső</span></a></li>
+<li class="menu-item"><a href="/exchange-rates" > <span>Árfolyamok</span></a></li>
+<li class="menu-item"><a href="/currency-converter" ><span>Valutaváltó</span></a></li>
+<li class="menu-item"><a href="/currency-codes" ><span>Valutakódok listája</span></a></li>
 </ul>
 </div>
 
@@ -333,7 +327,7 @@ Ez az oldal segít az alapvető bankszámlaszám (BBAN) pontos átkonvertálás�
 </div>
 </div>
 </div></div> 
-<footer class="footer">
+<footer class="footer" >
 
 
 
@@ -502,7 +496,7 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 <a href="https://www.iban.com/dpa">DPA</a> 
 <a href="https://www.iban.com/security" class="hidden-xs">Biztonság</a> 
 <a href="/contact">Contact</a>
-<a href="/sitemap" class="hidden-xs">Oldaltérkép</a>
+<a href="/sitemap" class="hidden-xs" >Oldaltérkép</a>
 
 
 
@@ -519,7 +513,7 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 <a class="go-top">
 <i class="fa fa-chevron-up"></i>
 </a>
-<script type="text/javascript" src="/javascript/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="/javascript/jquery-2.2.4.min.js" ></script>
 
 
 <script type="text/javascript">
@@ -1184,27 +1178,27 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 <div class="modal-header">
 <h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-exclamation-circle orange" aria-hidden="true" style="font-size:18px;"></i> Van valami probléma?</h5>
 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-<span aria-hidden="true">×</span>
+<span aria-hidden="true">&times;</span>
 </button>
 </div>
 <p>A részletesebb ismertetés segít a probléma megtalálásában. Sokat segít, ha akkor jelentik be a problémát, amikor megtörtént. Nagyra értékeljük, ha időt szánsz arra, hogy értesíts minket.</p>
 <div class="modal-body">
 
-<form action="#" method="POST" id="reportForm">
+<form action="#" method="POST" id="reportForm" >
 <div class="report">
-<input type="hidden" name="status" value="incorrect">
+<input type="hidden" name="status" value="incorrect" />
 
-<input type="hidden" name="iban" value=" HU__117210022112956600000000  ">
+<input type="hidden" name="iban" value=" __  " />
 
-<input type="hidden" name="username" value="">
+<input type="hidden" name="username" value="" />
 
-E-mail (opcionális): <input type="text" name="email" placeholder="Hogy értesítsünk, ha megoldottuk a problémát">
+E-mail (opcionális): <input type="text" name="email" placeholder="Hogy értesítsünk, ha megoldottuk a problémát"/>
 <br><br>
 A probléma leírása (hiányzó adatok, helytelen adatok, hiba stb.)<br>
-<textarea name="comment" class="form-control" rows="6" cols="60" required=""></textarea>
+<textarea name="comment" class="form-control" rows="6" cols="60" required></textarea>
 
 <div class="modal-footer">
-<input class="btn btn-success" id="send_report" style="width:110px;" value="Send">
+<input class="btn btn-success" id="send_report"  style="width:110px;" value="Send"/>
 </div></div>
 </form>
 
@@ -1312,12 +1306,12 @@ $( "#send_report" ).click(function( ) {
 		</script>
 <![endif]-->
 <script type="text/javascript" src="https://www.iban.com/javascript/tw-app.js"></script>
+</body>
+</html>
 
 
-
-
-
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-137898441-1"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src='https://www.googletagmanager.com/gtag/js?id=UA-137898441-1'></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -1327,4 +1321,3 @@ $( "#send_report" ).click(function( ) {
 </script>
 
 
-</body>
