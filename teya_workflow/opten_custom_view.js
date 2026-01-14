@@ -798,6 +798,32 @@
         data.address ? `<span>${data.address}</span>` : ""
       ].filter(Boolean).join("");
     }
+    return "";
+  }
+
+  function requestIbanFromCalculator(account, countryCode = "HU") {
+    return new Promise((resolve) => {
+      if (typeof GM_xmlhttpRequest !== "function") {
+        resolve("");
+        return;
+      }
+      const url = "https://www.iban.hu/calculate-iban";
+      const data = new URLSearchParams({
+        country: countryCode,
+        account
+      }).toString();
+      GM_xmlhttpRequest({
+        method: "POST",
+        url,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        data,
+        onload: (response) => resolve(parseIbanFromHtml(response.responseText || "")),
+        onerror: () => resolve("")
+      });
+    });
+  }
 
     const body = document.getElementById(DRAWER_IDS.body);
     if (!body) return;
