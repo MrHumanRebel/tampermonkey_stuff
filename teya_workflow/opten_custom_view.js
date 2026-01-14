@@ -201,7 +201,7 @@
   // Read blocks (Opten DOM)
   // -------------------------
   function readTelephelyek(root) {
-    const nodes = Array.from(root.querySelectorAll("#subhead-6 .head-title a"));
+    const nodes = Array.from(root.querySelectorAll("#subhead-7 .head-title a, #subhead-6 .head-title a"));
     return nodes.map((node) => normalizeSpace(node.textContent)).filter(Boolean);
   }
 
@@ -224,15 +224,31 @@
 
   function readQuickReport(root) {
     const quickReport = root.querySelector("#quickReport");
-    if (!quickReport) return "";
-    return normalizeSpace(
-      quickReport.querySelector(".fw-bold.fs-15, .text-center.fw-bold.fs-15, .card-body .fw-bold")?.textContent || ""
-    );
+    if (quickReport) {
+      return normalizeSpace(
+        quickReport.querySelector(".fw-bold.fs-15, .text-center.fw-bold.fs-15, .card-body .fw-bold")?.textContent || ""
+      );
+    }
+
+    const quickReportButton = Array.from(root.querySelectorAll("button, h2"))
+      .find((node) => normalizeSpace(node.textContent || "").toLowerCase().includes("gyorsjelentés"));
+    const collapseId = quickReportButton?.getAttribute("data-bs-target")
+      || quickReportButton?.getAttribute("aria-controls");
+    const collapse = collapseId
+      ? root.querySelector(collapseId.startsWith("#") ? collapseId : `#${collapseId}`)
+      : null;
+    const scope = collapse || quickReportButton?.closest(".accordion-item") || root;
+    const summary = scope.querySelector(".text-center.text-opten-blue.fw-bold")
+      || scope.querySelector(".text-opten-blue.fw-bold")
+      || scope.querySelector(".text-center.fw-bold");
+    return normalizeSpace(summary?.textContent || "");
   }
 
   function readKapcsoltVallalkozasok(root) {
     const value = root.querySelector("#contactnetworkinfo .inner-contact-text");
-    return normalizeSpace(value?.textContent || "");
+    if (value) return normalizeSpace(value.textContent || "");
+    const fallback = root.querySelector("[data-contact-count], .contact-count, .kh-stat, .kh-summary");
+    return normalizeSpace(fallback?.textContent || "");
   }
 
   function readValueByDataTitle(root, titleText, scopeSelector = "") {
@@ -263,12 +279,31 @@
     });
 
     const years = Array.from(map.keys()).sort((a, b) => b - a);
-    if (!years.length) {
-      const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
-      return formatRevenueText(fallback);
+    if (years.length) {
+      const latest = years[0];
+      return formatRevenueText(map.get(latest));
     }
-    const latest = years[0];
-    return formatRevenueText(map.get(latest));
+
+    const tableRow = Array.from(root.querySelectorAll("tr"))
+      .find((row) => normalizeSpace(row.querySelector(".row-title")?.textContent || "").toLowerCase()
+        .includes("értékesítés nettó árbevétele"));
+    if (tableRow) {
+      const table = tableRow.closest("table");
+      const isThousandHuf = normalizeSpace(table?.textContent || "").toLowerCase().includes("ezer huf");
+      const cells = Array.from(tableRow.querySelectorAll("td"));
+      const valueCell = cells.slice(1).find((cell) => {
+        const value = normalizeSpace(cell.textContent || "");
+        return value && value !== "-";
+      });
+      const value = normalizeSpace(valueCell?.textContent || "");
+      if (value) {
+        const withUnit = isThousandHuf ? `${value} eFt` : value;
+        return formatRevenueText(withUnit);
+      }
+    }
+
+    const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
+    return formatRevenueText(fallback);
   }
 
   function extractRevenueValue(revenueText) {
@@ -409,12 +444,12 @@
     });
 
     if (!companyNames.size) {
-      const items = Array.from(root.querySelectorAll("#khra-listing .kh-item-wrapper"));
+      const items = Array.from(root.querySelectorAll("#khra-listing .kh-item-wrapper, #khra .kh-item-wrapper, #khra .kh-item"));
       items.forEach((item) => {
         if ((item.id || "").includes("InspectedCompany")) return;
         fallbackCount += 1;
-        const name = item.querySelector(".kh-item-center .textTruncate");
-        addName(name?.textContent || "");
+        const name = item.querySelector(".kh-item-center .textTruncate, .kh-item-title, .kh-item-name");
+        addName(name?.textContent || item.textContent || "");
       });
     }
 
