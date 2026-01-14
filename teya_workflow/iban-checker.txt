@@ -1,13 +1,23 @@
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="hu" lang="hu" class=""><!--<![endif]--><head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+https://www.iban.hu/iban-checker
+GET
+200 OK
+
+
+
+
+	<!DOCTYPE html>
+<!--[if IE 8 ]><html class="ie" xmlns="http://www.w3.org/1999/xhtml" xml:lang="hu" lang="hu"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="hu" lang="hu"><!--<![endif]-->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
 <title>IBAN Checker: Érvényesítse és ellenőrizze az IBAN számokat</title>
-<meta name="description" content="Érvényesítse és ellenőrizze a bevitt IBAN (nemzetközi bankszámlaszám) online helyességét. Ellenőrizze az IBAN számát az IBAN.hu-on">
-<meta name="keywords" content="">
+<meta name="description" content="Érvényesítse és ellenőrizze a bevitt IBAN (nemzetközi bankszámlaszám) online helyességét. Ellenőrizze az IBAN számát az IBAN.hu-on" />
+<meta name="keywords" content="" />
 <meta name="theme-color" content="#153570">
 <meta name="apple-mobile-web-app-status-bar-style" content="#153570">
-<meta name="MobileOptimized" content="width">
-<meta name="HandheldFriendly" content="true">
+<meta name="MobileOptimized" content="width" />
+<meta name="HandheldFriendly" content="true" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
@@ -16,7 +26,7 @@
 
 
 
-<link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.css" >
 <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
 <link rel="stylesheet" type="text/css" href="/stylesheets/shortcodes.css">
 <link rel="stylesheet" type="text/css" href="/stylesheets/newcustom.css">
@@ -31,7 +41,7 @@
 .fa-print,.fa-exclamation-circle{display:none}.flat-general.sidebar-right .flat-wrapper .general{border-right:none}.topheader{display:none}header{display:none}.general-sidebar{display:none}.flat-general .general{width:100%}#form{display:none}.serviceinfohelp{display:none}.pricing a{display:none}.reportproblem{display:none}#form1{display:none}.flat-title-button h3,.help{display:none}.footer-widgets,.content-bottom-widgets,.footer-content .copyright a{display:none;clear:both}}
 </style>
 
-<script src="https://www.iban.com/javascript/tw-app/hu.js"></script><style type="text/css">.fancybox-margin{margin-right:0px;}</style></head>
+</head>
 
 
 <body>
@@ -43,7 +53,7 @@
 <div class="top-navigator pull-left">
 <ul>
 
-<li><a href="https://www.iban.com/contact" title="Contact Us" class="no-border"><i class="fa fa-envelope"></i> KAPCSOLAT</a></li>
+<li ><a href="https://www.iban.com/contact" title="Contact Us" class="no-border"><i class="fa fa-envelope"></i> KAPCSOLAT</a></li>
 
 
 </ul>
@@ -91,7 +101,7 @@
 </ul>
 </li>
 
-<li></li>
+<li ></li>
 
 <li><a href="https://clients.iban.com/login/" title="Member Login" class="login"><i class="fa fa-lock no-border" aria-hidden="true"></i>BELÉPÉS</a></li>
 <li><a href="https://clients.iban.com/register/" title="Request a trial account" class="requesttrial hidden-xs">Demó kérése</a></li>
@@ -114,7 +124,7 @@
 
 <div id="logo" class="logo">
 <a href="/" title="IBAN Home">
-<img src="https://www.iban.com/images/logo@2x.png" alt="IBAN Logo" width="170" height="75">
+<img src="/images/logo.png" alt="IBAN Logo" width="170" height="75">
 </a>
 </div>
 <div class="btn-menu">
@@ -122,22 +132,22 @@
 </div>
 
 <div class="nav-wrap">                                
-
-</div>
-</div>
-</div>
-</div>
-</div>
-</header><nav id="mainnav-mobi" class="mainnav navbar-right" style="display: none;">
+<nav id="mainnav" class="mainnav navbar-right">
 <ul class="menu"> 
 <li><a class="active" href="/iban-checker" title="Check IBAN Number"><i class="fa fa-check"></i> <div class="atitle">IBAN Ellenőrzése</div></a></li>
-<li><a href="/calculate-iban" title="IBAN Calculator"><i class="fa fa-retweet"></i> <div class="atitle">IBAN Kalkulálása</div></a></li>
-<li><a href="/products" title="Products and services"><i class="fa fa-th-large"></i> <div class="atitle">Termékek</div></a></li>
-<li><a href="/why-iban" title="Why choose IBAN Services"><i class="fa fa-question-circle" aria-hidden="true"></i> <div class="atitle">Miért az IBAN?</div></a></li>
-<li><a href="/developers" title="Developers Documentation"><i class="fa fa-cogs"></i> <div class="atitle">Fejlesztők</div></a></li>
-<li><a href="/pricing" title="Order products and services"><i class="fa fa-tasks"></i> <div class="atitle">Árak</div></a></li>
+<li><a  href="/calculate-iban" title="IBAN Calculator"><i class="fa fa-retweet"></i> <div class="atitle">IBAN Kalkulálása</div></a></li>
+<li><a  href="/products" title="Products and services"><i class="fa fa-th-large" ></i> <div class="atitle">Termékek</div></a></li>
+<li><a  href="/why-iban" title="Why choose IBAN Services"><i class="fa fa-question-circle" aria-hidden="true"></i> <div class="atitle">Miért az IBAN?</div></a></li>
+<li><a  href="/developers" title="Developers Documentation"><i class="fa fa-cogs"></i> <div class="atitle">Fejlesztők</div></a></li>
+<li><a  href="/pricing" title="Order products and services"><i class="fa fa-tasks"></i> <div class="atitle">Árak</div></a></li>
 </ul>
-</nav><div class="flat-row flat-general sidebar-right pad-top0px">
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header><div class="flat-row flat-general sidebar-right pad-top0px">
 
 
 <div class="container">
@@ -166,11 +176,11 @@
 <p style="margin-bottom:20px;">Példa: HU93116000060000000012345676 / DE75512108001245126199 / AT483200000012345864</p>
 <div class="row">
 <div class="col-md-8">
-<input class="form-control input-lg" type="text" placeholder="Type IBAN ..." name="iban" required="" aria-label="iban"> &nbsp;
+<input class="form-control input-lg" type="text" placeholder="Type IBAN ..." name="iban" required  aria-label="iban" /> &nbsp;
 </div>
 <div class="col-md-4">
 <div class="checkerbuttonchecker">
-<input value="IBAN Ellenőrzése" class="btn btn-success center-block" type="submit">
+<input value="IBAN Ellenőrzése" class="btn btn-success center-block"  type="submit" />
 </div>
 </div>
 </div>
@@ -183,98 +193,6 @@
 
 
 
-<script>
-
-$('html,body').animate({
-   scrollTop: $(".indexsearch").offset().top - 20
-});
-
-</script>
-
-
-<!-- <div class="col-md-6 col-md-offset-3 column"> -->
-
-<table class="table table-bordered downloads">
-
-<tbody><tr>
-<th colspan="2">IBAN  <strong>HU10117210022112956600000000</strong></th>
-</tr>
-<tr>
-<td colspan="2">
-<ul>
-<!-- <li><i class="fa fa-check green"></i> <strong>Érvényes IBAN</strong>  -->
-<li>
-<i class="fa"></i> <i class="fa fa-check green"></i> Helyes számlaszám ellenőrző számjegy 
-</li>
-<li>
-<i class="fa"></i> <i class="fa fa-check green"></i> Helyes IBAN ellenőrző számjegy 
-</li>
-<li>
-<i class="fa"></i> <i class="fa fa-check green"></i> Helyes IBAN struktúra 
-</li>
-<li>
-<i class="fa"></i> <i class="fa fa-check green"></i> Helyes IBAN hossz 
-</li>
-</ul></td>
-</tr>
-<tr>
-<td><strong>BANK</strong></td>
-<td>OTP Budapesti r., XXI. Kossuth L. u.</td>
-</tr>
-
-
-
-<tr>
-<td><strong>SWIFT BIC</strong></td>
-<td>OTPVHUHBXXX</td>
-</tr>
-
-
-
-<tr>
-<td><strong>CÍM</strong></td>
-<td>Kossuth Lajos utca 86., Budapest, 1211</td>
-</tr>
-
-
-
-<tr>
-<td><strong>ORSZÁG</strong></td>
-<td>Hungary( HU )</td>
-</tr>
-
-
-
-<tr>
-<td><strong>SEPA SCI</strong></td>
-<td>nem</td>
-</tr>
-<tr>
-<td><strong>SEPA TIPS</strong></td>
-<td>nem</td>
-</tr>
-<tr>
-<td><strong>SEPA SCT </strong></td>
-<td>Igen</td>
-</tr>
-<tr>
-<td><strong>SEPA SDD </strong></td>
-<td>nem</td>
-</tr>
-<tr>
-<td><strong>SEPA CORE </strong></td>
-<td>nem</td>
-</tr>
-<tr>
-<td><strong>SEPA B2B </strong></td>
-<td>nem</td>
-</tr>
-<tr>
-<td><strong>SEPA SCC </strong></td>
-<td>nem</td>
-</tr>
-</tbody></table>
-
 
 
 
@@ -282,7 +200,7 @@ $('html,body').animate({
 <div class="informa">
 IBAN Checker egy ingyenes kipróbálási lehetőség az IBAN SUITE szolgáltatáshoz.<br>
 Integrálja az <a href="/iban-suite"><strong> IBAN SUITE </strong></a> szolgáltatást a saját ERP,CMR,szoftverébe vagy szolgáltatásába. <br>Ha többet szeretne megtudni szolgáltatásaink integrálásáról, tekintse meg a <a href="/developers"><strong>Fejlesztői Központot</strong></a>.További információ a <a href="/pricing"><strong>Tervekről &amp; Árakról</strong></a><br>
-</div><br><br><div dir="ltr" style="box-shadow: 0 1px 3px rgba(0,0,0,0.6);width:95%;"><div style="padding:15px;border-left:3px solid #47A9EB;"><strong>Milyen hátrányai vannak, ha a bankoddal utalsz nemzetközileg</strong><br><br>Amikor a bankodon keresztül nemzetközileg pénzt küldesz vagy fogadsz, sok pénzt veszíthetsz a rossz átváltási árfolyam vagy a rejtett díjak miatt. Ez azért van, mert a bankok a pénzváltásnak még mindig egy régebbi rendszerét használják. Azt javasoljuk, hogy használd a Wise szolgáltatását, ami általában sokkal olcsóbb. Fejlett technológiájuknak köszönhetően:<br> A valódi átváltási árfolyamot kapod alacsony, átlátható díjszabással.<br> Legalább olyan gyorsan tudod mozgatni a pénzed, mint a bankoknál, de gyakran még gyorsabban – néhány pénznem esetében percek alatt.<br> A pénzed banki szintű biztonságban van.<br> <a href="https://transferwise.prf.hn/click/camref:1100l7rS7/" class="button sm hidden-xs">Utalás indítása</a> &nbsp;&nbsp; <a href="https://transferwise.prf.hn/click/camref:1100l7rS7//destination:https%3A%2F%2Ftransferwise.com%2Fborderless%2F" class="button sm hidden-xs">Pénz fogadása</a><br></div></div><br><br>
+</div><br>
 
 <p>A nemzetközi számla szám (IBAN) ellenőrző számjegyekkel történő érvényesítése rendkívül hatékony módszer a tranzakciók kudarcának minimalizálására, amikor a hazai és a nemzetközi fizetések feldolgozása történik. <br>
 Rendszerünk képes a BIC (Bank Identifier Code) azonosítására a kérdéses bank / fiók számára. A tényleges fizetési útvonalat a kedvezményezett bank felé biztosítják, ha érvényes IBAN-t kombinálnak egy hitelesített BIC-kóddal.<br>
@@ -352,7 +270,7 @@ A belső nyilvántartásban szereplő 116 ország mindegyikének saját hossza v
 A lehetséges visszatérések:<br><br>
 
 <i class="fa fa-check green"></i> Az IBAN hossza megfelel az Egyesült Királyságnak<br>
-<i class="fa fa-exclamation-triangle red"></i> ***Ország neve*** IBAN-nak **N** karakter hosszúnak kell lennie<br><br>
+<i class='fa fa-exclamation-triangle red'></i> ***Ország neve*** IBAN-nak **N** karakter hosszúnak kell lennie<br><br>
 
 Ha az IBAN hossza nem egyezik meg, akkor azt hibásnak kell tekinteni.<br>
 
@@ -383,8 +301,8 @@ Például:<br><br>
 Miután azonosítottuk és végrehajtottuk a helyes validálást, a következő eredmények egyikét kapjuk vissza:<br><br>
 
 <strong><i class="fa fa-check green"></i> A számlaszám ellenőrző összege érvényes</strong> - Érvényes számlaszám.<br><br>
-<strong><i class="fa fa-exclamation-triangle red"></i> A számlaszám ellenőrző összege nem megfelelő</strong> -  ez egy érvénytelen számlaszám és egy érvénytelen IBAN.<br><br>
-<strong><i class="fa fa-info-circle yellow"></i> A számlaszám nem támogatja az ellenőrző összeg érvényesítését</strong> - Számos ország és bank nem támogatja a számlaszámok érvényesítését. Ebben az esetben az integritás ellenőrzése az IBAN ellenőrző számjegyből történik. <br><br>
+<strong><i class='fa fa-exclamation-triangle red'></i> A számlaszám ellenőrző összege nem megfelelő</strong> -  ez egy érvénytelen számlaszám és egy érvénytelen IBAN.<br><br>
+<strong><i class='fa fa-info-circle yellow'></i> A számlaszám nem támogatja az ellenőrző összeg érvényesítését</strong> - Számos ország és bank nem támogatja a számlaszámok érvényesítését. Ebben az esetben az integritás ellenőrzése az IBAN ellenőrző számjegyből történik. <br><br>
 
 Jelenleg összesen 48 országban támogatják a BBAN és a belföldi számlaszám ellenőrző számjegyek érvényesítését.<br>
 
@@ -399,7 +317,7 @@ Ha egy ország nem támogatja a számlaszám ellenőrző számjegyét, ez haszno
 
 Ez az ellenőrzés a következő eredményeket adja vissza:<br><br>
 <strong><i class="fa fa-check green"></i></strong> Helyes IBAN Formázás és Struktúra!<br><br>
-<strong><i class="fa fa-exclamation-triangle red"></i></strong> Helytelen IBAN Formázás és Struktúra!<br><br>
+<strong><i class='fa fa-exclamation-triangle red'></i></strong> Helytelen IBAN Formázás és Struktúra!<br><br>
 
 
 <strong>Formázás</strong><br><br>
@@ -441,11 +359,11 @@ A szerkezet hitelesítése ellenőrzi, hogy:<br><br>
 <div class="widget widget_nav_menu">
 <ul class="nav_menu">
 <li class="menu-item"><a href="/iban-checker" class="active"><span>IBAN Checker</span></a></li>
-<li class="menu-item"><a href="/calculate-iban"><span>IBAN Kalkulátor</span></a></li>
-<li class="menu-item"><a href="/search-bic"><span>BIC Kereső</span></a></li>
-<li class="menu-item"><a href="/exchange-rates"> <span>Árfolyamok</span></a></li>
-<li class="menu-item"><a href="/currency-converter"><span>Valutaváltó</span></a></li>
-<li class="menu-item"><a href="/currency-codes"><span>Valutakódok listája</span></a></li>
+<li class="menu-item"><a href="/calculate-iban" ><span>IBAN Kalkulátor</span></a></li>
+<li class="menu-item"><a href="/search-bic" ><span>BIC Kereső</span></a></li>
+<li class="menu-item"><a href="/exchange-rates" > <span>Árfolyamok</span></a></li>
+<li class="menu-item"><a href="/currency-converter" ><span>Valutaváltó</span></a></li>
+<li class="menu-item"><a href="/currency-codes" ><span>Valutakódok listája</span></a></li>
 </ul>
 </div>
 
@@ -464,7 +382,7 @@ A szerkezet hitelesítése ellenőrzi, hogy:<br><br>
 </div>
 
 </div> 
-<footer class="footer">
+<footer class="footer" >
 
 
 
@@ -633,7 +551,7 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 <a href="https://www.iban.com/dpa">DPA</a> 
 <a href="https://www.iban.com/security" class="hidden-xs">Biztonság</a> 
 <a href="/contact">Contact</a>
-<a href="/sitemap" class="hidden-xs">Oldaltérkép</a>
+<a href="/sitemap" class="hidden-xs" >Oldaltérkép</a>
 
 
 
@@ -650,7 +568,7 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 <a class="go-top">
 <i class="fa fa-chevron-up"></i>
 </a>
-<script type="text/javascript" src="/javascript/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="/javascript/jquery-2.2.4.min.js" ></script>
 
 
 
@@ -724,12 +642,12 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 		</script>
 <![endif]-->
 <script type="text/javascript" src="https://www.iban.com/javascript/tw-app.js"></script>
+</body>
+</html>
 
 
-
-
-
-<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-137898441-1"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src='https://www.googletagmanager.com/gtag/js?id=UA-137898441-1'></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -739,4 +657,3 @@ Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
 </script>
 
 
-</body></html>
