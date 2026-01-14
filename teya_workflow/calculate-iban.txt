@@ -1,0 +1,1330 @@
+<body>
+<div class="boxed">
+<div class="topheader">
+<div class="container">
+<div class="row">
+<div class="col-md-6">
+<div class="top-navigator pull-left">
+<ul>
+
+<li><a href="https://www.iban.com/contact" title="Contact Us" class="no-border"><i class="fa fa-envelope"></i> KAPCSOLAT</a></li>
+
+
+</ul>
+</div>
+
+
+</div>
+
+<div class="col-md-6">
+<div class="top-navigator pull-right">
+<ul>
+<li class="hidden-xs"><a href="#" class="language"><img src="/images/icon/blank.png" class="flag flag-hu" width="16" height="11" alt="en"> HU</a>
+<ul>
+<li><a href="https://www.iban.com/" title="English" data-lang-id="en"><img src="/images/icon/blank.png" class="flag flag-gb" width="16" height="11" alt="en"> English</a></li>
+<li><a href="https://de.iban.com/" title="Deutsch" data-lang-id="de_DE"><img src="/images/icon/blank.png" class="flag flag-de" width="16" height="11" alt="de"> Deutsch</a></li>
+<li><a href="https://fr.iban.com/" title="Français" data-lang-id="fr_FR"><img src="/images/icon/blank.png" class="flag flag-fr" width="16" height="11" alt="fr"> Français</a></li>
+<li><a href="https://it.iban.com/" title="Italiano" data-lang-id="it_IT"><img src="/images/icon/blank.png" class="flag flag-it" width="16" height="11" alt="it"> Italiano</a></li>
+<li><a href="https://nl.iban.com/" title="Dutch" data-lang-id="nl_NL"><img src="/images/icon/blank.png" class="flag flag-nl" width="16" height="11" alt="nl"> Dutch</a></li>
+<li><a href="https://es.iban.com/" title="Español" data-lang-id="es_ES"><img src="/images/icon/blank.png" class="flag flag-es" width="16" height="11" alt="es"> Español</a></li>
+<li><a href="https://pt.iban.com/" title="Português" data-lang-id="pt_PT"><img src="/images/icon/blank.png" class="flag flag-pt" width="16" height="11" alt="pt"> Português</a></li>
+<li><a href="https://www.iban.pl/" title="Polski" data-lang-id="pl"><img src="/images/icon/blank.png" class="flag flag-pl" width="16" height="11" alt="pl"> Polski</a></li>
+<li><a href="https://www.iban.se/" title="Svenska" data-lang-id="sv"><img src="/images/icon/blank.png" class="flag flag-se" width="16" height="11" alt="sv"> Svenska</a></li>
+<li><a href="https://www.iban.fi/" title="Suomi" data-lang-id="fi"><img src="/images/icon/blank.png" class="flag flag-fi" width="16" height="11" alt="fi"> Suomi</a></li>
+<li><a href="https://www.iban.dk/" title="Dansk" data-lang-id="da"><img src="/images/icon/blank.png" class="flag flag-dk" width="16" height="11" alt="da"> Dansk</a></li>
+<li><a href="https://www.iban.co.no/" title="Norsk" data-lang-id="no"><img src="/images/icon/blank.png" class="flag flag-no" width="16" height="11" alt="no"> Norsk</a></li>
+<!-- <li><a href="https://www.iban.hu/" title="Magyar" data-lang-id="hu"><img src="/images/icon/blank.png" class="flag flag-hu" width="16" height="11" alt="hu"> Magyar</a></li> -->
+<li><a href="https://www.iban.gr/" title="Eλληνική" data-lang-id="el"><img src="/images/icon/blank.png" class="flag flag-gr" width="16" height="11" alt="el"> Eλληνική</a></li>
+<li><a href="https://www.iban.cz/" title="Čeština" data-lang-id="cs"><img src="/images/icon/blank.png" class="flag flag-cz" width="16" height="11" alt="cs"> Čeština</a></li>
+<li><a href="https://www.iban.si/" title="Slovenščina" data-lang-id="sv"><img src="/images/icon/blank.png" class="flag flag-si" width="16" height="11" alt="sl"> Slovenščina</a></li>
+<li><a href="https://www.iban.hr/" title="Hrvatski" data-lang-id="hr_HR"><img src="/images/icon/blank.png" class="flag flag-hr" width="16" height="11" alt="hr"> Hrvatski</a></li>
+<li><a href="https://www.iban.sk/" title="Slovenský" data-lang-id="sk"><img src="/images/icon/blank.png" class="flag flag-sk" width="16" height="11" alt="sk"> Slovenský</a></li>
+<li><a href="https://www.iban.lv/" title="Latviešu" data-lang-id="lv"><img src="/images/icon/blank.png" class="flag flag-lv" width="16" height="11" alt="lv"> Latviešu</a></li>
+<li><a href="https://www.iban.lt/" title="Lietuvių" data-lang-id="lt"><img src="/images/icon/blank.png" class="flag flag-lt" width="16" height="11" alt="lt"> Lietuvių</a></li>
+<li><a href="https://www.iban.ee/" title="Eesti" data-lang-id="et"><img src="/images/icon/blank.png" class="flag flag-ee" width="16" height="11" alt="et"> Eesti</a></li>
+<li><a href="https://www.iban.rs/" title="Srpski" data-lang-id="sr"><img src="/images/icon/blank.png" class="flag flag-rs" width="16" height="11" alt="sr"> Srpski</a></li>
+<li><a href="https://www.ibankodu.com.tr/" title="Türkçe" data-lang-id="tr"><img src="/images/icon/blank.png" class="flag flag-tr" width="16" height="11" alt="tr"> Türkçe</a></li>
+<li><a href="https://www.iban.ru/" title="Русский" data-lang-id="ru_RU"><img src="/images/icon/blank.png" class="flag flag-ru" width="16" height="11" alt="ru"> Русский</a></li>
+<li><a href="https://www.iban.bg/" title=" Български" data-lang-id="bg"><img src="/images/icon/blank.png" class="flag flag-bg" width="16" height="11" alt="bg"> Български</a></li>
+<li><a href="https://www.iban.com.ua/" title="Українська" data-lang-id="uk"><img src="/images/icon/blank.png" class="flag flag-ua" width="16" height="11" alt="uk"> Українська</a></li>
+<li><a href="https://www.iban.ma/" title="العربية" data-lang-id="ar"><img src="/images/icon/blank.png" class="flag flag-ma" width="16" height="11" alt="ar"> العربية</a></li>
+<li><a href="https://www.iban.co.il/" title="עברית" data-lang-id="he"><img src="/images/icon/blank.png" class="flag flag-il" width="16" height="11" alt="he"> עברית</a></li>
+<li><a href="https://www.iban.jp/" title="日本語" data-lang-id="ja"><img src="/images/icon/blank.png" class="flag flag-jp" width="16" height="11" alt="ja"> 日本語</a></li>
+<li><a href="https://www.iban.kr/" title="한국어" data-lang-id="ko"><img src="/images/icon/blank.png" class="flag flag-kr" width="16" height="11" alt="ko"> 한국어</a></li>
+<li><a href="https://www.iban.hk/" title="繁體中文" data-lang-id="zh-TW"><img src="/images/icon/blank.png" class="flag flag-hk" width="16" height="11" alt="zh-TW"> 繁體中文</a></li>
+</ul>
+</li>
+
+<li></li>
+
+<li><a href="https://clients.iban.com/login/" title="Member Login" class="login"><i class="fa fa-lock no-border" aria-hidden="true"></i>BELÉPÉS</a></li>
+<li><a href="https://clients.iban.com/register/" title="Request a trial account" class="requesttrial hidden-xs">Demó kérése</a></li>
+
+
+
+</ul>
+</div>
+</div>              
+</div>
+</div>
+</div>
+		
+		
+<header id="header" class="header clearfix"> 
+<div class="header-wrap clearfix">
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+
+<div id="logo" class="logo">
+<a href="/" title="IBAN Home">
+<img src="https://www.iban.com/images/logo@2x.png" alt="IBAN Logo" width="170" height="75">
+</a>
+</div>
+<div class="btn-menu">
+<span></span>
+</div>
+
+<div class="nav-wrap">                                
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</header><nav id="mainnav-mobi" class="mainnav navbar-right" style="display: none;">
+<ul class="menu"> 
+<li><a href="/iban-checker" title="Check IBAN Number"><i class="fa fa-check"></i> <div class="atitle">IBAN Ellenőrzése</div></a></li>
+<li><a class="active" href="/calculate-iban" title="IBAN Calculator"><i class="fa fa-retweet"></i> <div class="atitle">IBAN Kalkulálása</div></a></li>
+<li><a href="/products" title="Products and services"><i class="fa fa-th-large"></i> <div class="atitle">Termékek</div></a></li>
+<li><a href="/why-iban" title="Why choose IBAN Services"><i class="fa fa-question-circle" aria-hidden="true"></i> <div class="atitle">Miért az IBAN?</div></a></li>
+<li><a href="/developers" title="Developers Documentation"><i class="fa fa-cogs"></i> <div class="atitle">Fejlesztők</div></a></li>
+<li><a href="/pricing" title="Order products and services"><i class="fa fa-tasks"></i> <div class="atitle">Árak</div></a></li>
+</ul>
+</nav><div class="flat-row flat-general sidebar-right pad-top0px">
+
+
+<div class="container">
+<div class="row">
+
+<div class="services-title"><h1 class="title text-center">IBAN Kalkulátor</h1></div>
+
+<div class="flat-wrapper">
+<div class="general flat-clients">
+<div class="general-text">
+<!-- <div class="flat-title-button">
+<h2 class="title small"><i class="fa fa-refresh"></i> Számítsa ki az IBAN-t bankszámla és számlaszám alapján</h2>
+</div> -->
+
+
+
+<div class="title-section style2 pad-top0px">
+<h2 class="title" style="font-size:21px;"><span>Számítsa ki az IBAN-t bankszámla és számlaszám alapján</span></h2>
+</div>
+
+
+
+
+
+<form method="POST" id="form1">
+
+
+<select name="country" id="countrysel" class="countrysel" onchange="drawfields(this)" size="1" required="" style="width:80%;">
+<option value="??">Ország Kiválasztása</option>
+<option value="GB">Egyesült Királyság  (GB)</option>
+<option value="FR">Franciaország (FR)</option>
+<option value="DE">Németország (DE)</option>
+<option value="ES">Spanyolország (ES)</option>
+<option value="AT">Ausztria (AT)</option>
+<option value="IT">Olaszország (IT)</option>
+<option value="BE">Belgium (BE)</option>
+<option value="AL">Albánia (AL)</option>
+<option value="AD">Andorra (AD)</option>
+<option value="AZ">Azerbajdzsán (AZ)</option>
+<option value="BH">Bahrein (BH)</option>
+<option value="BA">Bosznia és Hercegovina (BA)</option>
+<option value="BG">Bulgária (BG)</option>
+<option value="CR">Costa Rica (CR)</option>
+<option value="HR">Horvátország (HR)</option>
+<option value="CY">Ciprus (CY)</option>
+<option value="CZ">Csehország (CZ)</option>
+<option value="DK">Dánia (DK)</option>
+<option value="DO">Dominikai Köztársaság (DO)</option>
+<option value="EE">Észtország (EE)</option>
+<option value="FO">Feröer-szigetek (FO)</option>
+<option value="FI">Finnország (FI)</option>
+<option value="GE">Georgia (GE)</option>
+<option value="GI">Gibraltár (GI)</option>
+<option value="GL">Grönland (GL)</option>
+<option value="GT">Guatemala (GT)</option>
+<option value="HU">Magyarország (HU)</option>
+<option value="IC">Izland (IS)</option>
+<option value="IE">Írország (IE)</option>
+<option value="IL">Izrael (IL)</option>
+<option value="JO">Jordan (JO)</option>
+<option value="KZ">Kazahsztán (KZ)</option>
+<option value="KW">Kuvait (KW)</option>
+<option value="LV">Lettország (LV)</option>
+<option value="LB">Libanon (LB)</option>
+<option value="LI">Liechtenstein (LI)</option>
+<option value="LT">Litvánia (LT)</option>
+<option value="LU">Luxemburg (LU)</option>
+<option value="MK">Macedónia (MK)</option>
+<option value="MT">Málta (MT)</option>
+<option value="MR">Mauritánia (MR)</option>
+<option value="MU">Mauritius (MU)</option>
+<option value="MD">Moldova (MD)</option>
+<option value="MC">Monaco (MC)</option>
+<option value="ME">Montenegro (ME)</option>
+<option value="MA">Morroco (MA)</option>
+<option value="NO">Norvégia (NO)</option>
+<option value="PK">Pakisztán (PK)</option>
+<option value="PS">Palesztina (PS)</option>
+<option value="PL">Lengyelország (PL)</option>
+<option value="PT">Portugália (PT)</option>
+<option value="QA">Katar (QA)</option>
+<option value="RO">Románia (RO)</option>
+<option value="SM">San Marino (SM)</option>
+<option value="SA">Szaúd-Arábia (SA)</option>
+<option value="RS">Szerbia (RS)</option>
+<option value="SK">Szlovákia (SK)</option>
+<option value="SI">Szlovénia (SI)</option>
+<option value="SE">Svédország (SE)</option>
+<option value="TN">Tunézia (TN)</option>
+<option value="UA">Ukrajna (UA)</option>
+<option value="AE">Egyesült Arab Emírségek (AE)</option>
+<option value="VG">Virgin-szigetek, brit (VG)</option>
+</select>
+
+
+
+<br><br>
+
+
+<div id="inputs"><span><label>Számlaszám:</label><input type="text" id="huaccount" required="required" pattern="[0-9]{8}-[0-9]{8}(-[0-9]{8})?" maxlength="26" size="50" title="11111111-22222222 or 11111111-22222222-00000000" name="account" class="form-control" placeholder="11111111-22222222-00000000"></span><input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br></div>
+
+<br><br></form>
+
+
+
+
+
+
+
+
+
+
+<div id="results">
+
+<table class="table table-bordered downloads">
+<tbody>
+<tr class="head"><td colspan="2"><strong>Details for  - 117210022112956600000000</strong> <a href="javascript:window.print()" style="margin-left:15px;"><i class="fa fa-print" aria-hidden="true" style="font-size:18px; color:#032af1;"></i></a> <div class="pull-right"><a href="#report" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-exclamation-circle orange" aria-hidden="true" style="font-size:18px;"></i></a></div></td></tr><tr>
+
+</tr><tr>
+<td><strong>IBAN</strong></td>
+<td>HU10117210022112956600000000
+ 
+<form method="post" action="/iban-checker" style="display:inline;">
+<input type="hidden" name="iban" value="HU10117210022112956600000000">
+<a href="#" onclick="$(this).closest('form').submit()" style="display:inline;">IBAN Ellenőrzése</a>
+</form>
+</td>
+</tr>
+<tr>
+</tr><tr>
+<td><strong>BIC</strong></td>
+<td>OTPVHUHB
+</td>
+</tr>
+<tr>
+</tr><tr>
+<td><strong>BANK</strong></td>
+<td>OTP Budapesti r., XXI. Kossuth L. u.
+</td>
+</tr>
+<tr>
+</tr><tr>
+<td><strong>ADDRESS</strong></td>
+<td>Kossuth Lajos utca 86.
+</td>
+</tr>
+<tr>
+</tr><tr>
+<td><strong>CITY</strong></td>
+<td>Budapest
+</td>
+</tr>
+<tr>
+</tr><tr>
+<td><strong>ZIP</strong></td>
+<td>1211
+</td>
+</tr>
+<tr>
+
+</tr></tbody>
+</table>
+
+</div>
+
+
+
+
+<div class="serviceinfohelp"><br><br><div dir="ltr" style="box-shadow: 0 1px 3px rgba(0,0,0,0.6);width:95%;"><div style="padding:15px;border-left:3px solid #47A9EB;"><strong>Milyen hátrányai vannak, ha a bankoddal utalsz nemzetközileg</strong><br><br>Amikor a bankodon keresztül nemzetközileg pénzt küldesz vagy fogadsz, sok pénzt veszíthetsz a rossz átváltási árfolyam vagy a rejtett díjak miatt. Ez azért van, mert a bankok a pénzváltásnak még mindig egy régebbi rendszerét használják. Azt javasoljuk, hogy használd a Wise szolgáltatását, ami általában sokkal olcsóbb. Fejlett technológiájuknak köszönhetően:<br> A valódi átváltási árfolyamot kapod alacsony, átlátható díjszabással.<br> Legalább olyan gyorsan tudod mozgatni a pénzed, mint a bankoknál, de gyakran még gyorsabban – néhány pénznem esetében percek alatt.<br> A pénzed banki szintű biztonságban van.<br> <a href="https://transferwise.prf.hn/click/camref:1100l7rS7/" class="button sm hidden-xs">Utalás indítása</a> &nbsp;&nbsp; <a href="https://transferwise.prf.hn/click/camref:1100l7rS7//destination:https%3A%2F%2Ftransferwise.com%2Fborderless%2F" class="button sm hidden-xs">Pénz fogadása</a><br></div></div><br>
+
+<hr>
+<p>Az IBAN kalkulátor része az <a href="/iban-suite"> IBAN SUITE </a> szolgáltatásunknak. </p>
+
+<h3 style="font-size:18px;">IBAN Konvertáló: Konvertálja BBAN-ját a megfelelő IBAN-számra</h3>
+
+<p>Példa a kalkulátor használatára az Egyesült Királyságra: válaszd ki az országot <strong>Egyesült Királyság (UK)</strong> add meg a Sort Kódot - <strong>200415</strong> és a számlaszámot - <strong>38290008</strong></p>
+<p>Példa a kalkulátor használatára Németországra: válaszd ki az országot <strong>Németország (DE)</strong> Branch Kód (BLZ) - <strong>37040044</strong> és számlaszám - <strong>0532013000</strong></p>
+<p>Konverziós példa Franciaországra: válaszd ki az országot <strong>Franciaország (FR)</strong> Bank Kód (Code Banque) - <strong>30002</strong>, Branch Kód (Code Guiche) - <strong>00550</strong> és számlaszám (Numéro de Compte) - <strong>0000157841Z</strong></p>
+
+Ha már tudod az IBAN-t, <a href="/iban-checker">ellenőrizheted</a> annak helyességét.<br><br>
+
+
+
+Az IBAN Kalkulátor egy speciális szoftver, amelyet a hazai bankszámla és számlaszám nemzetközi bankszámlaszámra (IBAN) történő átalakítására fejlesztettek ki.<br><br>
+
+Ez az oldal segít az alapvető bankszámlaszám (BBAN) pontos átkonvertálásában a megfelelő IBAN Számra.Szoftverünk helyi ellenőrző számjegy algoritmust is használ az ellenőrzőösszeg és így az IBAN kód érvényességének ellenőrzésére. Egy másik fontos funkció ügyfeleink számára a megfelelő bank és fióktelep BIC kódjának (a SWIFT hálózat által kezelt bank azonosítója) megtalálása. <br><br> Az IBAN konverter használatával növelheti a nemzetközi banki átutalások sikerességét és biztonságát. Weboldalunk dinamikusan módosítja a beviteli mezőket a kiválasztott ország szerint. Speciális számítási motorunk az IBAN-eket pontosan szinte bármely ország belföldi számlaszámából és banki kódjából generálja. Néhány országban támogatjuk a helyi számlaszám érvényesítését és a BBAN-IBAN konverziót.<br>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+</div>
+</div>
+
+<div class="general-sidebar">
+<div class="sidebar-wrap">
+<div class="sidebar">
+<div class="widget widget_nav_menu">
+<ul class="nav_menu">
+<li class="menu-item"><a href="/iban-checker"><span>IBAN Checker</span></a></li>
+<li class="menu-item"><a href="/calculate-iban" class="active"><span>IBAN Kalkulátor</span></a></li>
+<li class="menu-item"><a href="/search-bic"><span>BIC Kereső</span></a></li>
+<li class="menu-item"><a href="/exchange-rates"> <span>Árfolyamok</span></a></li>
+<li class="menu-item"><a href="/currency-converter"><span>Valutaváltó</span></a></li>
+<li class="menu-item"><a href="/currency-codes"><span>Valutakódok listája</span></a></li>
+</ul>
+</div>
+
+
+
+
+</div>
+</div>
+</div>
+   
+
+
+
+</div>
+</div>
+</div>
+</div></div> 
+<footer class="footer">
+
+
+
+<div class="footer-widgets">
+<div class="container">
+<div class="row">
+
+					
+					
+<div class="col-md-3 col-sm-6 col-xs-6">
+<div class="widget widget_nav_menu">
+<div class="menu-footer-menu-container">
+<div class="footermenutitle">Webeszközök</div>
+<ul class="ft-menu">
+<li><a href="/iban-checker">IBAN Checker</a></li>
+<li><a href="/calculate-iban">IBAN Kalkulátor</a></li>
+<li><a href="/search-bic">BIC Keresés</a></li>
+<!-- <li><a href="/currency-converter">Pénznem Váltás</a></li>
+<li><a href="/exchange-rates">Valutaárfolyamok</a></li> -->
+</ul>
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 col-sm-6 col-xs-6">
+<div class="widget widget_nav_menu">
+<div class="menu-footer-menu-container">
+<div class="footermenutitle"><a href="/developers">Termékek</a></div>
+<ul class="ft-menu">
+<li><a href="/iban-suite">IBAN Suite: Kalkuláció és Hitelesítés</a></li>
+<li><a href="/bic-validation-service">BIC Hitelesítési Szolgáltatás</a></li>
+<li><a href="/register">Próbaverzió Igénylése</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 col-sm-6 col-xs-6">
+<div class="widget widget_nav_menu">
+<div class="menu-footer-menu-container">
+<div class="footermenutitle"><a href="/developers">Fejlesztők</a></div>
+<ul class="ft-menu">
+
+<li><a href="/validation-api">IBAN Hitelesítési API</a></li>
+<li><a href="/calculation-api">IBAN Kalkulátor API</a></li>
+<li><a href="/bic-validation-api">BIC Hitelesítési API</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div class="col-md-3 col-sm-6 col-xs-6">
+<div class="widget widget_nav_menu">
+<div class="menu-footer-menu-container">
+<div class="footermenutitle"><a href="/about">Rólunk</a></div>
+<ul class="ft-menu">
+<li><a href="/why-iban">Miért az IBAN?</a></li>
+<li><a href="/customers">Ügyfelek</a></li>
+<li><a href="/our-data">Adataink</a></li>
+</ul>
+
+<!-- <div class="footermenutitle">Nyelv</div> -->
+
+
+<!-- <select id="foo">
+    <option value="">Nyelv Kiválasztása</option>
+    <option value="http://www.google.com">x</option>
+    <option value="http://www.yahoo.com">y</option>
+	<option value="http://www.google.com"><img src="/images/icon/blank.png" class="flag flag-de" width="16" height="11" alt="de"> Deutsch</option>
+</select>
+
+<script>
+    document.getElementById("foo").onchange = function() {
+        if (this.selectedIndex!==0) {
+            window.location.href = this.value;
+        }        
+    };
+</script> -->
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+</div>
+					
+
+					
+					
+					
+					
+					
+</div>
+</div>
+</div>
+	 
+	 
+	 
+<div class="content-bottom-widgets">        
+<div class="container">
+<div class="row"> 
+
+<div class="ft-wrapper">						
+<div class="col-md-12 text-center footermenutitle">Partnerek</div></div>
+
+</div>    
+</div>
+</div>
+
+	 
+	 
+	 
+<div class="content-bottom-widgets">        
+<div class="container">
+<div class="row"> 
+<div class="flat-wrapper">
+<div class="ft-wrapper">
+
+<div class="col-md-4 text-left">
+<span style="clear:both;">A BIC adatok a S.W.I.F.T. engedélyével használhatók. SCRL. Adatbázis jogai fenntartva, 2026. <br> Az IBAN.com egy hivatalos VocaLink™ forgalmazó</span>
+</div>
+
+<div class="col-md-2 col-sm-6 text-center">
+<span><img src="/images/logos/swiftref.png" alt="S.W.I.F.T. SCRL">&nbsp;&nbsp;</span>
+</div>
+<div class="col-md-2 col-sm-6 text-center">
+<span><img src="/images/logos/deutsche_bundesbank.png" alt="Deutsche Bundesbank">&nbsp;&nbsp;</span>
+</div>
+<div class="col-md-2 col-sm-6 text-center">
+<span><img src="/images/logos/banque_de_france.png" alt="La Banque de France Eurosisteme"></span>
+</div>
+<div class="col-md-2 col-sm-6 text-center">
+<span><img src="/images/logos/vocalink_mastercard.png" alt="Vocalink LTD (Mastercard)">&nbsp;&nbsp;</span>
+</div>
+
+
+</div>
+</div>
+</div>    
+</div>
+</div>
+
+<div class="footer-content">
+<div class="container">
+<div class="row">
+
+<div class="copyright">
+<div class="copyright-content">
+<div class="col-md-4 col-sm-12">
+Copyright © 2026<a href="https://www.iban.com/">IBAN</a>
+</div>
+
+
+
+<div class="col-md-8 col-sm-12">
+<a href="https://www.iban.com/privacy">Adatvédelem</a> 
+<a href="https://www.iban.com/terms">Feltételek</a>
+<a href="https://www.iban.com/dpa">DPA</a> 
+<a href="https://www.iban.com/security" class="hidden-xs">Biztonság</a> 
+<a href="/contact">Contact</a>
+<a href="/sitemap" class="hidden-xs">Oldaltérkép</a>
+
+
+
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</footer>
+
+
+<a class="go-top">
+<i class="fa fa-chevron-up"></i>
+</a>
+<script type="text/javascript" src="/javascript/jquery-2.2.4.min.js"></script>
+
+
+<script type="text/javascript">
+	
+	
+
+	
+	
+	
+	//$(function() {
+   // $("#countrysel").val('{$country}');
+	//$("#countrysel").change();
+	//});
+	
+	// Default form UK display
+	$( document ).ready(function() {
+		if($("#countrysel").val() == '??') 
+		{
+			$("#countrysel").val('HU');
+			var default_value_form = {value:"HU"};
+			drawfields(default_value_form);
+		}
+	});
+	
+
+	
+	
+		function drawfields(country) 
+	{
+	
+		$("#inputs").empty();
+		
+		$("#form1").append('<br><br>');
+
+		
+		//alert(sel.value);
+		if(country.value == 'FR')
+		{
+			frform();
+		}else if(country.value == 'DE')
+		{
+			deform();
+		}else if(country.value == 'BE')
+		{
+			beform();
+		}else if(country.value == 'GB')
+		{
+			ukform();
+		}else if(country.value == 'IE')
+		{
+			ieform();
+		}else if(country.value == 'AT')
+		{
+			atform();
+		}
+		else if(country.value == 'IT')
+		{
+			itform();
+		}else if(country.value == 'IT')
+		{
+			itform();
+		}else if(country.value == 'SM')
+		{
+			itform();
+		}else if(country.value == 'MC')
+		{
+			mcform();
+		}else if(country.value == 'MR')
+		{
+			mrform();
+		}else if(country.value == 'GR')
+		{
+			grform();
+		}else if(country.value == 'TR')
+		{
+			trform();
+			//disabledform();
+		}else if(country.value == 'NO')
+		{
+			noform();
+		}else if(country.value == 'EE')
+		{
+			eeform();
+		}else if(country.value == 'CH')
+		{
+			chform();
+		}else if(country.value == 'CZ')
+		{
+			czform();
+		}else if(country.value == 'SK')
+		{
+			skform();
+		}else if(country.value == 'ES')
+		{
+			esform();
+		}else if(country.value == 'HU')
+		{
+			huform();
+		}
+		else if(country.value == 'FI')
+		{
+			fiform();
+		}else if(country.value == 'BR')
+		{
+			brform();
+		}else if(country.value == 'PL')
+		{
+			plform();
+		}else if(country.value == 'SE')
+		{
+			seform();
+		}else if(country.value == 'PT')
+		{
+			ptform();
+		}else if(country.value == 'MT')
+		{
+			mtform();
+		}else if(country.value == 'AL')
+		{
+			alform();
+		}else if(country.value == 'SI')
+		{
+			siform();
+		}
+		else if(country.value == 'NL')
+		{
+			nlform();
+		}
+		else if(country.value == 'MA')
+		{
+			maform();
+		}
+		else if(country.value == 'BY')
+		{
+			byform();
+		}
+		else if(country.value == 'IC')
+		{
+			icform();
+		}
+		else{
+			defaultform(country.value);
+		}
+		
+		
+		
+	}
+
+
+	// draw default form
+	function defaultform(country)
+	{
+
+
+		$("#inputs").append(
+		
+		
+		'<label>Banki Kód:</label>',
+		'<input required="required" type="text" name="bankcode" id="bankcode" class="form-control" placeholder="Bank/Branch Kód">',
+		'<label>Számlaszám:</label> <input type="text" name="account" required="required" id="accountnumber" class="form-control" placeholder="Számlaszám"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br>'
+		
+		);
+		
+		
+		// check if country is in swift nid array
+		var ar = ["AZ", "BH", "DO", "GI","GT","JO","KW","LV","MD","MU","NL","PK","PS","QA","RO","VG"];
+		if(jQuery.inArray(country, ar) != -1) {
+			//console.log("is in array");
+			$("#bankcode").attr("placeholder", "SWIFT/BIC kód");
+		}
+		
+		
+	}
+	
+	
+	// draw Iceland form
+	function icform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód ( max 4 számjegy ):</label>',
+		'<input type="text" required="required" name="bankcode" maxlength="4" class="form-control" placeholder="0301">',
+		'<label>Fiók típus( max 2 számjegy ):</label>',
+		'<input type="text" required="required" name="acc_type" maxlength="2" class="form-control" placeholder="21">',
+		'<label>Számlaszám ( max 6 számjegy ):</label>',
+		'<input type="text" required="required" name="account" maxlength="6" class="form-control" placeholder="123456">',
+		'<label>Kennitala/Társadalombiztosítási szám ( 10 számjegy ):</label>',
+		'<input type="text" required="required" name="kennitala" maxlength="11" class="form-control" placeholder="654321-4629"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br>'
+		
+		);
+	}
+	
+	
+	
+	// draw Franche form
+	function frform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Banki Kód:</label><input type="text" required="required" name="bankcode" maxlength="5" size="12" class="form-control" placeholder="(Code Banque)"></span>',
+		
+		'<span><label>Branch Kód:</label><input type="text" required="required" name="branchcode" maxlength="5" size="12" class="form-control" placeholder="(Code Guiche)"></span>',
+		
+		'<span><label>Számlaszám:</label><input type="text" required="required" name="account" maxlength="11" size="15" class="form-control" placeholder="(Numéro de Compte)"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br></div>'
+		
+		);
+	}
+
+
+	
+	// draw Germany form DE
+	function deform()
+	{
+
+
+		$("#inputs").append(
+		
+		// Create <form> Tag and Appending in HTML Div form1.
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" class="form-control" placeholder="BLZ">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" name="account" class="form-control" placeholder="Kontonummer">',
+		'<br><input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br>'
+		
+		);
+	}
+	
+	
+		// draw Germany form
+	function ukform()
+	{
+
+
+		$("#inputs").append(
+		
+		// Create <form> Tag and Appending in HTML Div form1.
+		
+		'<label>Rendezési kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{6}" maxlength="6" title="6 számjegynek kell lennie " class="form-control" placeholder="Sort Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" required="required" pattern="[0-9]{8}" title="8 számjegynek kell lennie" maxlength="8" class="form-control" placeholder="Account Number">',
+		'<br><input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br>'
+		);
+	}
+	
+	// draw Ireland form
+	function ieform()
+	{
+
+
+		$("#inputs").append(
+		
+		// Create <form> Tag and Appending in HTML Div form1.
+		
+		'<label>Rendezési kód:</label>',
+		'<input type="text" required="required" pattern="[0-9]{6}" maxlength="6" title="6 számjegynek kell lennie" name="bankcode" class="form-control" placeholder="Sort Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" pattern="[0-9]{8}" maxlength="8" title="8 számjegynek kell lennie" name="account" class="form-control" placeholder="Account Number">',
+		'<br><input type="submit" class="btn btn-success btn-quirk" value="Kalkulálás"><br>'
+		
+		);
+	}
+	
+	
+	// draw Belgium form
+	function beform()
+	{
+
+		$("#inputs").append(
+		'<span><label>Banki kód:</label><input type="text" maxlength="3" size="3" required="required" name="bankcode" class="form-control" placeholder="3 számjegy"></span>',
+		
+		'<span><label>Számlaszám</label><input type="text" maxlength="7" size="7" required="required" name="account" class="form-control" placeholder="7 számjegy"></span>',
+		
+		'<span><label>Ellenőrző szám (nem kötelező):</label><input type="text" name="cd" maxlength="2" size="5" class="form-control" placeholder="2 ellenőrző szám (a bank adhatta meg)"></span><input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>',
+		
+		'<br>* Ha beírja az ellenőrző számjegyet, érvényesítjük. Ha üresen hagyja, kiszámítjuk a számla megfelelő számát.<br>'
+		);
+	}
+	
+	
+	// draw Austria form
+	function atform()
+	{
+
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" class="form-control" placeholder="BLZ">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" class="form-control" placeholder="Account Number"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+		// draw Italy form
+	function itform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Banki Kód:</label> <input type="text" name="bankcode" maxlength="5" size="5" class="form-control" placeholder="(A.B.I.)"></span>',
+		'<span><label>Branch Kód:</label> <input type="text" name="branchcode" maxlength="5" size="5" class="form-control" placeholder="(C.A.B.)"></span>',
+		'<span><label>Számlaszám:</label> <input type="text" name="account" maxlength="12" size="12" class="form-control" placeholder="(Numero di Conto)"></span>',
+		'<input type=submit class="btn btn-success btn-quirk" value="Calculate">'
+		
+		
+		);
+	
+	}
+	
+	
+	
+	// draw Monaco form
+	function mcform()
+	{
+
+		$("#inputs").append(
+		'<span><label>Banki Kód:</label><input type="text" name="bankcode" size="12" maxlength="5" class="form-control" placeholder="( Code Banque )"></span>',
+		'<span><label>Branch Kód:</label><input type="text" size="12" name="branch" maxlength="5" class="form-control" placeholder="(Code Guiche)"></span>',
+		'<span><label>Számlaszám:</label><input type="text" name="account" maxlength="11" size="15" class="form-control" placeholder="(Numéro de Compte)"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw Mauritania form
+	function mrform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" required="required" name="bankcode" maxlength="5" class="form-control" placeholder="(Code Banque)">',
+		'<label>Branch Kód:</label>',
+		'<input type="text" required="required" name="branch" maxlength="5" class="form-control" placeholder="(Code Guiche)">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" name="account" maxlength="11" class="form-control" placeholder="(Numéro de Compte)"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw Greece form
+	function grform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" maxlength="16" class="form-control" placeholder="(αριθμός του λογαριασμού του πελάτη)"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw Norway form
+	function noform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" maxlength="11" class="form-control" placeholder="Adja meg a számlaszámot"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	// draw Estonia form
+	function eeform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" maxlength="11" class="form-control" placeholder="Adja meg a számlaszámot"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" maxlength="14" class="form-control" placeholder="Adja meg a számlaszámot"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw turkey form 
+	function trform()
+	{
+		$("#inputs").append(
+		
+		'<input type="hidden" name="tr_init" value="1">'
+		);
+		
+		$("#form1").submit();
+	}
+	
+	
+	
+	// draw Czech Republic form
+	function czform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Fiók előtagja (opcionális):</label><input type="text" name="prefix" maxlength="6" pattern="[0-9]{0,6}" title="Ilyen formátumban kell lennie: 123456" class="form-control" placeholder="123456" size="6"></span> / ',
+		'<span><label>Számlaszám:</label><input type="text" name="account" maxlength="10" pattern="[0-9]{2,10}" title="Legfeljebb tíz számjegynek kell lennie" class="form-control" placeholder="1234567890" size="10"></span>',
+		'<span><label>Banki Kód:</label><input type="text" name="bankcode" maxlength="4" pattern="[0-9]{4}" size="4" title="Ilyen formátumban kell lennie: 11-1234567890/2222" class="form-control" placeholder="2222"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+		
+		
+	}
+	
+	// draw Finland form
+	function fiform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Számlaszám:</label><input type="text" name="account" class="form-control" placeholder="Pankkitilin numero ( 111111-22222222 )" size="50" ><span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw Hungary form
+	function huform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Számlaszám:</label><input type="text" id="huaccount" required="required" pattern="[0-9]{8}-[0-9]{8}(-[0-9]{8})?" maxlength="26" size="50" title="11111111-22222222 or 11111111-22222222-00000000" name="account" class="form-control" placeholder="11111111-22222222-00000000"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		);
+		
+	}
+	
+	// draw Switzerland form
+	function chform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{1,5}" maxlength="5" title="12345" class="form-control" placeholder="Bank Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" pattern="[0-9A-Za-z]{1,12}" maxlength="12" title="123456789012" name="account" class="form-control" placeholder="123456789012"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+	
+		);
+		
+	}
+	
+
+	// draw Brazil form
+	function brform()
+	{
+		$("#inputs").append(
+		'<input type="hidden" name="br_init" value="1">'
+		);
+		$("#form1").submit();
+	}
+	
+	
+	// draw Netherlands form
+	function nlform()
+	{
+		$("#inputs").append(
+		'<input type="hidden" name="nl_init" value="1">'
+		);
+		$("#form1").submit();
+	}
+	
+	
+	function seform()
+	{
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{1,5}" maxlength="5" title="12345" class="form-control" placeholder="Bank Code / Clearingnummer">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" pattern="[0-9]{1,10}" maxlength="10" title="1234567890" name="account" class="form-control" placeholder="1234567890"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+		
+	}
+	
+	
+	function esform()
+	{
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{1,4}" maxlength="4" title="1234" class="form-control" placeholder="Bank Code / Entidad">',
+		'<label>Branch Kód:</label>',
+		'<input type="text" name="branch" required="required" pattern="[0-9]{1,4}" maxlength="4" title="1234" class="form-control" placeholder="Bank Code / Oficina">',
+		'<label>Ellenőrző számok:</label>',
+		'<input type="text" name="cd" required="required" pattern="[0-9]{1,2}" maxlength="2" title="1234" class="form-control" placeholder="DIGITO DE CONTROL">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" required="required" pattern="[0-9]{1,10}" maxlength="10" title="1234567890" name="account" class="form-control" placeholder="NÚMERO DE CUENTA"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+		
+	}
+	
+	// draw Poland form
+	function plform()
+	{
+
+
+		$("#inputs").append(
+		
+		
+		'<label>Rendezési kód: </label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{8}" maxlength="8" title="8 számjegyűnek kell lennie" class="form-control" placeholder="Sort Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" required="required" pattern="[0-9]{3,16}" title="Legalább 16 számjegyűnek kell lennie" maxlength="16" class="form-control" placeholder="Account Number"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	// draw Portugal form
+	function ptform()
+	{
+
+		$("#inputs").append(
+		
+		'<span><label>Banki Kód:</label><input type="text" required="required" name="bankcode" pattern="[0-9]{4}" title="4 számjegyűnek kell lennie" maxlength="4" size="5" class="form-control" placeholder="0007"></span>',
+		'<span><label>Branch Kód:</label><input type="text" required="required" pattern="[0-9]{4}" title="4 számjegyűnek kell lennie" name="branch" maxlength="4" size="5" class="form-control" placeholder="1234"></span>',
+		'<span><label>Számlaszám:</label><input type="text" required="required" pattern="[0-9]{1,11}" title="Legalább 11 számjegyűnek kell lennie" name="account" maxlength="11" size="11" class="form-control" placeholder="12345678901"></span>',
+		'<span><label>Ellenőrző számok:</label><input type="text" required="required" name="cd" pattern="[0-9]{2}" title="2 számjegyűnek kell lennie" maxlength="2" class="form-control" placeholder="12" size="5"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	// draw Malta form
+	function mtform()
+	{
+
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{5}" maxlength="5" title="5 számjegyűnek kell lennie" class="form-control" placeholder="Sort Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" required="required" pattern="[0-9a-zA-Z]{1,18}" title="1 és 18 számjegy között kell lennie" maxlength="18" class="form-control" placeholder="Account Number"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+
+	// draw Albania form
+	function alform()
+	{
+
+
+		$("#inputs").append(
+		
+		'<label>Bank Code/KIB:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{8}" maxlength="8" title="8 számjegyűnek kell lennie" class="form-control" placeholder="Sort Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" required="required" title="Legalább 16 számjegyűnek kell lennie" maxlength="16" class="form-control" placeholder="Account Number"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	
+	
+	// draw Slovakia form
+	function skform()
+	{
+
+		$("#inputs").append(
+		
+		'<label>Account Prefix (optional):</label>',
+		'<input type="text" name="prefix" maxlength="6" pattern="[0-9]{0,6}" title="Ilyen formátumban kell lennie: 123456" class="form-control" placeholder="123456">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" maxlength="10" pattern="[0-9]{2,10}" title="Legalább 10 számjegyűnek kell lennie" class="form-control" placeholder="1234567890">',
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" maxlength="4" pattern="[0-9]{4}" title="Ilyen formátumban kell lennie: 11-1234567890/2222" class="form-control" placeholder="2222"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+		
+		
+	}
+	
+		// draw Slovenia form
+	function siform()
+	{
+
+
+		$("#inputs").append(
+		
+		'<label>Banki Kód:</label>',
+		'<input type="text" name="bankcode" required="required" pattern="[0-9]{0,5}" maxlength="5" title="6 számjegyűnek kell lennie" class="form-control" placeholder="Bank Code">',
+		'<label>Számlaszám:</label>',
+		'<input type="text" name="account" required="required" pattern="[0-9]{0,10}" title="10 számjegyűnek kell lennie" maxlength="10" class="form-control" placeholder="Account Number"><br>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	// draw Morroco form
+	function maform()
+	{
+ 
+		$("#inputs").append(
+		
+		'<span><label>Account  Number ( RIB ):</label><input type="text" required="required" name="account" maxlength="24" size="24" class="form-control" placeholder="11111111111111111111111"></span>',
+		'<input type="submit" class="btn btn-success btn-quirk" value="Calculate"><br>'
+		
+		);
+	}
+	
+	// draw Belarus form
+	function byform()
+	{
+		$("#inputs").append(
+		'<input type="hidden" name="by_init" value="1">'
+		);
+		$("#form1").submit();
+	}
+	
+	function disabledform()
+	{
+		$("#inputs").append(
+		'<div class="alert alert-danger"><strong>Ezen ország IBAN kalkulátora még fejlesztés alatt áll. <br>Kérjük, próbálja újra később.</strong></div>'
+		);
+		
+	}
+	
+	
+
+	
+	
+</script>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+<div class="modal-dialog" role="document">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="exampleModalLabel"><i class="fa fa-exclamation-circle orange" aria-hidden="true" style="font-size:18px;"></i> Van valami probléma?</h5>
+<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+<span aria-hidden="true">×</span>
+</button>
+</div>
+<p>A részletesebb ismertetés segít a probléma megtalálásában. Sokat segít, ha akkor jelentik be a problémát, amikor megtörtént. Nagyra értékeljük, ha időt szánsz arra, hogy értesíts minket.</p>
+<div class="modal-body">
+
+<form action="#" method="POST" id="reportForm">
+<div class="report">
+<input type="hidden" name="status" value="incorrect">
+
+<input type="hidden" name="iban" value=" HU__117210022112956600000000  ">
+
+<input type="hidden" name="username" value="">
+
+E-mail (opcionális): <input type="text" name="email" placeholder="Hogy értesítsünk, ha megoldottuk a problémát">
+<br><br>
+A probléma leírása (hiányzó adatok, helytelen adatok, hiba stb.)<br>
+<textarea name="comment" class="form-control" rows="6" cols="60" required=""></textarea>
+
+<div class="modal-footer">
+<input class="btn btn-success" id="send_report" style="width:110px;" value="Send">
+</div></div>
+</form>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+<script>
+// Attach a submit handler to the form
+$( "#send_report" ).click(function( ) {
+ 
+
+/* Get from elements values */
+ var values = $("#reportForm").serialize();
+
+ $.ajax({
+        url: "sendreport.php",
+        type: "post",
+        data: values ,
+        success: function (response) {
+           // you will get response from your php page (what you echo or print)    
+		$("#report_status").html('<div class="alert alert-success"><strong>Köszönjük a bejelentést!</strong></div>');		   
+		$("#exampleModal").hide();$(".modal-backdrop").hide();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          $("#report_status").html('<div class="alert alert-warning"><strong>Probléma volt a bejelentéssel kapcsolatban, próbálkozz újra!</strong></div>');
+         $("#exampleModal").hide();$(".modal-backdrop").hide();
+		}
+
+
+    });
+  
+});
+</script>
+
+
+
+
+
+
+<!-- NID BROWSER CODE SWITCHING JS INCLUDE -->
+
+
+
+
+
+
+<!-- END NID BROWSER SWITCHING JS INCLUDE -->
+
+
+<script type="text/javascript" src="/javascript/ibanlibs.js"></script> 
+<script type="text/javascript" src="/javascript/main.js"></script> 
+
+
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$.DivasCookies({
+					bannerText				: "Ez a weboldal Sütiket használ a webes élmény javítása érdekében.",		// text for the Divas Cookies banner
+					cookiePolicyLink		: "/privacy",		// link to the extended cookie policy
+					cookiePolicyLinkText	: "Adatvédelmi irányelvek",				// text for the link to the extended cookie policy
+					thirdPartyPolicyWidget	: "",						// if set to "iubenda" tries to use the Iubenda widget
+					acceptButtonText		: "Elfogadás",						// text for the close button
+					acceptButtonSrc			: "",						// source for the close button image
+					openEffect				: "",				// opening effect for Divas Cookies banner ["fade", "slideUp", "slideDown", "slideLeft", "slideRight"]
+					openEffectDuration		: 600,						// duration of the opening effect (msec)
+					openEffectEasing		: "",					// easing for the opening effect
+					closeEffect				: "",				// closing effect for Divas Cookies banner ["fade", "slideUp", "slideDown", "slideLeft", "slideRight"]
+					closeEffectDuration		: 600,						// duration of the closing effect (msec)
+					closeEffectEasing		: "",					// easing for the closing effect
+					debugMode				: false,					// if true, the options are checked and warnings are shown
+					saveUserPreferences		: true,						// if true, sets a cookie after the Divas Cookies is closed the first time and never shows it again
+					cookieDuration			: 30,						// number of days after which the Divas Cookie technical cookie will expire (default 365 days)
+					blockScripts			: false,					// set this to true if you blocked scripts by wrapping them with if($.DivasCookies.optedIn()){**script to be blocked**} (default false)
+					pageReload				: false,					// if true reloads the actual page after opt-in to show the previuosly blocked scripts (default false)
+					acceptOnScroll			: false,					// if true sets the Divas Cookie technical cookie on page scroll for cookies agreement (default false)
+					acceptOnClick			: true,					// if true sets the Divas Cookie technical cookie on click on any <a> in the page except that on Divas Cookies banner for cookies agreement (default false)
+					excludePolicyPage		: true						// if true excludes the cookie policy page from acceptOnScroll and acceptOnClick (default false)
+				});
+			});
+		</script> 
+
+<!--[if lt IE 10]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!--[if IE 9]>
+	<script src="javascript/matchMedia.js"></script>
+		 <script type="text/javascript" src="javascript/jquery.placeholder.js"></script>
+	 
+	 <script>
+			// To test the @id toggling on password inputs in browsers that don’t support changing an input’s @type dynamically (e.g. Firefox 3.6 or IE), uncomment this:
+			// $.fn.hide = function() { return this; }
+			// Then uncomment the last rule in the <style> element (in the <head>).
+			$(function() {
+				// Invoke the plugin
+				$('input, textarea').placeholder({customClass:'my-placeholder'});
+				// That’s it, really.
+				
+				var html;
+			});
+		</script>
+<![endif]-->
+<script type="text/javascript" src="https://www.iban.com/javascript/tw-app.js"></script>
+
+
+
+
+
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-137898441-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-137898441-1');
+</script>
+
+
+</body>
