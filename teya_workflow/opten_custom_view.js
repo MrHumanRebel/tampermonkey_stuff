@@ -2708,8 +2708,17 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Servicesâ
     const bbanRegex = parseRegistryRegex(entry.bban_regex);
     const lengthOk = normalized.length === entry.iban_length;
     const bbanLengthOk = bban.length === entry.bban_length;
-    const formatOk = ibanRegex ? ibanRegex.test(normalized) : false;
-    const bbanFormatOk = bbanRegex ? bbanRegex.test(bban) : false;
+    let formatOk = ibanRegex ? ibanRegex.test(normalized) : false;
+    let bbanFormatOk = bbanRegex ? bbanRegex.test(bban) : false;
+    const ibanNumericOnly = entry.iban_structure && !/![ac]/.test(entry.iban_structure);
+    const bbanNumericOnly = entry.bban_structure && !/![ac]/.test(entry.bban_structure);
+
+    if (!formatOk && ibanNumericOnly && lengthOk && /^[A-Z]{2}\d+$/.test(normalized)) {
+      formatOk = true;
+    }
+    if (!bbanFormatOk && bbanNumericOnly && bbanLengthOk && /^\d+$/.test(bban)) {
+      bbanFormatOk = true;
+    }
     const checksumInfo = validateIbanChecksum(normalized);
     const bankId = extractSegment(bban, entry.bank_identifier_position);
     const branchId = extractSegment(bban, entry.branch_identifier_position);
