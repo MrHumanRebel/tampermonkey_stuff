@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.1.1
+// @version      1.1.2
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -190,12 +190,28 @@
   function readQuickReport(root) {
     const quickReport = root.querySelector("#quickReport");
     if (!quickReport) return "";
-    return normalizeSpace(quickReport.querySelector(".fw-bold.fs-15")?.textContent || "");
+    return normalizeSpace(
+      quickReport.querySelector(".fw-bold.fs-15, .text-center.fw-bold.fs-15, .card-body .fw-bold")?.textContent || ""
+    );
   }
 
   function readKapcsoltVallalkozasok(root) {
     const value = root.querySelector("#contactnetworkinfo .inner-contact-text");
     return normalizeSpace(value?.textContent || "");
+  }
+
+  function readValueByDataTitle(root, titleText, scopeSelector = "") {
+    const scope = scopeSelector ? root.querySelector(scopeSelector) || root : root;
+    const titleNodes = Array.from(scope.querySelectorAll(".data-title"));
+    const match = titleNodes.find((node) =>
+      normalizeSpace(node.textContent).toLowerCase().includes(titleText.toLowerCase())
+    );
+    if (!match) return "";
+    const row = match.closest(".row") || match.parentElement;
+    const value = row?.querySelector(".data-value");
+    if (value) return normalizeSpace(value.textContent || "");
+    const sibling = match.nextElementSibling;
+    return normalizeSpace(sibling?.textContent || "");
   }
 
   function readFinancialRevenue(root) {
@@ -212,7 +228,9 @@
     });
 
     const years = Array.from(map.keys()).sort((a, b) => b - a);
-    if (!years.length) return "";
+    if (!years.length) {
+      return readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
+    }
     const latest = years[0];
     const prev = years.find((y) => y === latest - 1);
     const parts = [`${latest}: ${map.get(latest)}`];
@@ -241,15 +259,6 @@
       const birth = findLabelValue(item, "Születés ideje");
       const taxId = findLabelValue(item, "Adóazonosító");
 
-      // A "képviselet módja" az Opten DOM-ban sokszor nem label-value, ezért robust fallback:
-      const rep = Array.from(item.querySelectorAll(".data-line"))
-        .map((dl) => {
-          const k = normalizeSpace(dl.querySelector(".data-line--label")?.textContent || "");
-          const v = normalizeSpace(dl.querySelector(".data-line--content")?.textContent || "");
-          return [k, v];
-        })
-        .find(([k]) => k.toLowerCase().includes("képviselet módja"))?.[1] || "";
-
       const hatalyos = findLabelValue(item, "Hatályos");
 
       return {
@@ -258,7 +267,6 @@
         address: address || "ISMERETLEN",
         birth: birth || "ISMERETLEN",
         taxId: taxId || "ISMERETLEN",
-        representation: rep || "ISMERETLEN",
         hatalyos: hatalyos || "ISMERETLEN"
       };
     });
@@ -294,8 +302,9 @@
   }
 
   function parseCegriport(root) {
+    const kkvValue = readValueByDataTitle(root, "KKV besorolás", "#basicData") || textFromTitle(root, "KKV besorolás");
     return {
-      kkv: textFromTitle(root, "KKV besorolás"),
+      kkv: kkvValue,
       revenue: readFinancialRevenue(root),
       quickReport: readQuickReport(root),
       kapcsolatok: readKapcsoltVallalkozasok(root)
@@ -335,17 +344,36 @@
 
   function parseIbanCheckerFromHtml(html) {
     const doc = htmlToDocument(html);
-    const table = doc.querySelector("#results table") || doc.querySelector("table");
+    const table = doc.querySelector("#results table")
+      || doc.querySelector("table.table.table-bordered.downloads")
+      || doc.querySelector("table.downloads")
+      || doc.querySelector("table");
     if (!table) return [];
     const rows = Array.from(table.querySelectorAll("tr"));
     const details = [];
     rows.forEach((row) => {
+      const header = row.querySelector("th");
+      if (header) {
+        const headerText = normalizeSpace(header.textContent || "");
+        if (headerText.toLowerCase().includes("iban")) {
+          const strong = header.querySelector("strong");
+          const iban = normalizeSpace(strong?.textContent || headerText.replace(/^IBAN/i, ""));
+          if (iban) details.push(["IBAN", iban]);
+        }
+        return;
+      }
       const cells = row.querySelectorAll("td");
       if (cells.length < 2) return;
       const key = normalizeSpace(cells[0].textContent).replace(/:$/, "");
       const value = normalizeSpace(cells[1].textContent);
       if (key && value) details.push([key, value]);
     });
+    const statusList = Array.from(table.querySelectorAll("tr td ul li"))
+      .map((item) => normalizeSpace(item.textContent))
+      .filter(Boolean);
+    if (statusList.length) {
+      details.push(["Ellenőrzés", statusList.join("; ")]);
+    }
     return details;
   }
 
@@ -422,7 +450,11 @@
 
     const cegadatlapUrl = eid ? `https://www.opten.hu/cegtar/cegadatlap/${eid}` : "";
     const cegriportUrl = eid ? `https://www.opten.hu/cegtar/cegriport/${eid}` : "";
-    const kapcsolatiHaloUrl = registryNumberDigits ? `https://www.opten.hu/cegtar/kapcsolati-halo/${registryNumberDigits}` : "";
+    const kapcsolatiHaloUrl = eid
+      ? `https://www.opten.hu/cegtar/kapcsolati-halo/${eid}`
+      : registryNumberDigits
+        ? `https://www.opten.hu/cegtar/kapcsolati-halo/${registryNumberDigits}`
+        : "";
 
     const results = { base, report: {}, halo: {} };
     const requests = [];
@@ -736,7 +768,6 @@
         `Lakcím: ${item.address}`,
         `Születés ideje: ${item.birth}`,
         `Adóazonosító jel: ${item.taxId}`,
-        `A képviselet módja: ${item.representation}`,
         `Hatályos: ${item.hatalyos}`
       ].join(" | ")).join("\n");
     };
@@ -821,19 +852,19 @@
         buildRow("Lakcím", person.address, { multiline: true }),
         buildRow("Születés ideje", person.birth),
         buildRow("Adóazonosító jel", person.taxId),
-        buildRow("A képviselet módja", person.representation),
         buildRow("Hatályos", person.hatalyos)
       ]));
     });
 
     const bankCardRefs = bankAccounts.map((account, index) => {
-      const combinedRow = buildRow("Bankszámlaszám → IBAN", `${account} → Számítás folyamatban...`, { multiline: true });
+      const accountRow = buildRow("Bankszámlaszám", account);
+      const ibanRow = buildRow("IBAN", "Számítás folyamatban...");
       const checkerRow = buildRow("IBAN ellenőrzés", "Várakozás...", { multiline: true });
-      const section = buildSection(`Bankszámla ${index + 1}`, [combinedRow, checkerRow]);
+      const section = buildSection(`Bankszámla ${index + 1}`, [accountRow, ibanRow, checkerRow]);
       body.appendChild(section);
       return {
         account,
-        combinedInput: combinedRow.querySelector(".teya-value"),
+        ibanInput: ibanRow.querySelector(".teya-value"),
         checkerInput: checkerRow.querySelector(".teya-value")
       };
     });
@@ -842,9 +873,7 @@
       calculateIbans(bankAccounts).then((map) => {
         bankCardRefs.forEach((ref) => {
           const iban = map.get(ref.account) || "";
-          const combinedValue = iban ? `${ref.account} → ${iban}` : ref.account;
-          ref.combinedInput.value = combinedValue;
-          ref.combinedInput.rows = Math.min(8, Math.max(3, combinedValue.split("\n").length));
+          ref.ibanInput.value = iban || "IBAN számítás sikertelen";
 
           if (!iban || iban.toLowerCase().includes("sikertelen")) {
             ref.checkerInput.value = "IBAN ellenőrzés nem elérhető.";
