@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.1.2
+// @version      1.1.3
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -83,12 +83,6 @@
   function getEidFromUrl() {
     const m = window.location.pathname.match(/eid(\d+)/i);
     return m ? `eid${m[1]}` : "";
-  }
-
-  function getEidFromDoc(root) {
-    const canonical = root.querySelector("link[rel='canonical']")?.href || "";
-    const match = canonical.match(/eid\d+/i);
-    return match ? match[0] : "";
   }
 
   function normalizeRegistryNumber(value) {
@@ -343,6 +337,7 @@
   function parseKapcsolatiHalo(root) {
     const hoverNodes = Array.from(root.querySelectorAll("#khra .kh-item-hover"));
     const companyNames = new Set();
+    let fallbackCount = 0;
     const addName = (name) => {
       const clean = normalizeSpace(name);
       if (clean) companyNames.add(clean);
@@ -360,14 +355,16 @@
       const items = Array.from(root.querySelectorAll("#khra-listing .kh-item-wrapper"));
       items.forEach((item) => {
         if ((item.id || "").includes("InspectedCompany")) return;
+        fallbackCount += 1;
         const name = item.querySelector(".kh-item-center .textTruncate");
         addName(name?.textContent || "");
       });
     }
 
+    const count = companyNames.size || fallbackCount;
     return {
-      corporateOwnersCount: companyNames.size ? String(companyNames.size) : "",
-      kapcsolatok: companyNames.size ? String(companyNames.size) : ""
+      corporateOwnersCount: count ? String(count) : "",
+      kapcsolatok: count ? String(count) : ""
     };
   }
 
@@ -446,7 +443,8 @@
         return;
       }
       const url = "https://www.iban.hu/iban-checker";
-      const data = new URLSearchParams({ iban }).toString();
+      const normalized = normalizeAccount(iban).toUpperCase();
+      const data = new URLSearchParams({ iban: normalized }).toString();
       GM_xmlhttpRequest({
         method: "POST",
         url,
@@ -459,13 +457,13 @@
   }
 
   function normalizeAccount(account) {
-    return normalizeSpace(account).replace(/\s+/g, "");
+    return normalizeSpace(account).replace(/[^0-9a-z]/gi, "");
   }
 
   async function calculateIbans(accounts) {
     const results = new Map();
     for (const account of accounts) {
-      const normalized = normalizeAccount(account);
+      const normalized = normalizeAccount(account).toUpperCase();
       if (/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(normalized)) {
         results.set(account, normalized);
         continue;
@@ -484,21 +482,45 @@
     return getEidFromUrl() || getEidFromDoc(doc) || normalizeRegistryNumber(readRegistryNumberFromDoc(doc));
   }
 
+  function getEidFromDataAttributes(root) {
+    const byRoot = root.querySelector("#root[data-id]")?.getAttribute("data-id");
+    if (byRoot && /^\d+$/.test(byRoot)) return `eid${byRoot}`;
+    const byKhra = root.querySelector("#khra[data-eid]")?.getAttribute("data-eid");
+    if (byKhra && /^\d+$/.test(byKhra)) return `eid${byKhra}`;
+    const anyEid = root.querySelector("[data-eid]")?.getAttribute("data-eid");
+    if (anyEid && /^\d+$/.test(anyEid)) return `eid${anyEid}`;
+    return "";
+  }
+
+  function getEidFromDoc(root) {
+    const fromCanonical = (() => {
+      const canonical = root.querySelector("link[rel='canonical']")?.href || "";
+      const match = canonical.match(/eid\d+/i);
+      return match ? match[0] : "";
+    })();
+    if (fromCanonical) return fromCanonical;
+    return getEidFromDataAttributes(root);
+  }
+
+  function buildOptenUrl(section, identifier) {
+    if (!identifier) return "";
+    return `https://www.opten.hu/cegtar/${section}/${identifier}`;
+  }
+
   async function loadAllData() {
     const currentDoc = document;
     const baseFromPage = parseCegadatlap(currentDoc);
     const base = baseFromPage;
 
-    const registryNumberDigits = normalizeRegistryNumber(base.registryNumber);
+    const registryNumberDigits =
+      normalizeRegistryNumber(base.registryNumber) ||
+      normalizeRegistryNumber(readRegistryNumberFromDoc(currentDoc));
     const eid = getEidFromUrl() || getEidFromDoc(currentDoc);
+    const identifier = eid || registryNumberDigits;
 
-    const cegadatlapUrl = eid ? `https://www.opten.hu/cegtar/cegadatlap/${eid}` : "";
-    const cegriportUrl = eid ? `https://www.opten.hu/cegtar/cegriport/${eid}` : "";
-    const kapcsolatiHaloUrl = eid
-      ? `https://www.opten.hu/cegtar/kapcsolati-halo/${eid}`
-      : registryNumberDigits
-        ? `https://www.opten.hu/cegtar/kapcsolati-halo/${registryNumberDigits}`
-        : "";
+    const cegadatlapUrl = buildOptenUrl("cegadatlap", identifier);
+    const cegriportUrl = buildOptenUrl("cegriport", identifier);
+    const kapcsolatiHaloUrl = buildOptenUrl("kapcsolati-halo", identifier);
 
     const results = { base, report: {}, halo: {} };
     const requests = [];
