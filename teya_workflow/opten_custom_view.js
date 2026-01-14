@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.1.3
+// @version      1.2.0
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -45,6 +45,444 @@
   let cachedData = null;
   let currentData = null;
 
+  const MCC_DB_SOURCE_EN = `
+Category\tBusiness Activity\tMCC Code\tMCC Description
+Health, Beauty & Wellness\tVeterinary\t742\tVeterinary Services
+Services\tOther Services\t763\tAgricultural Cooperatives
+Services\tCraftsman/Contractor\t780\tHorticultural and Landscaping
+Services\tCraftsman/Contractor\t1520\tGeneral Contractors-Residential and Commercial
+Services\tCraftsman/Contractor\t1711\tAir Conditioning, Heating, and Plumbing Contractors
+Services\tCraftsman/Contractor\t1731\tElectrical Contractors
+Services\tCraftsman/Contractor\t1740\tInsulation, Masonry, Plastering, Stonework, and Tile Setting Contractors
+Services\tCraftsman/Contractor\t1750\tCarpentry Contractors
+Services\tCraftsman/Contractor\t1761\tRoofing and Siding, Sheet Metal Work Contractors
+Services\tCraftsman/Contractor\t1771\tConcrete Work Contractors
+Services\tCraftsman/Contractor\t1799\tContractors, Special Trade-not elsewhere classified
+Services\tOther Services\t2741\tMiscellaneous Publishing and Printing
+Services\tOther Services\t2791\tTypesetting, Plate Making, and Related Services
+Services\tOther Services\t2842\tSanitation, Polishing, and Specialty Cleaning Preparations
+Services\tTaxi/Limo/Ride-Hailing Drivers\t4111\tTransportation - Suburban and Local Commuter Passenger, including Ferries
+Health, Beauty & Wellness\tMedical Services\t4119\tAmbulance Services
+Retail\tAutomotive Parts\t5013\tMotor Vehicle Supplies and New Parts
+Services\tTaxi/Limo/Ride-Hailing Drivers\t4121\tLimousines and Taxicabs
+Services\tBus/Shuttle/Coach Services\t4131\tBus Lines
+Services\tMotor Servicing, Freight Carriers, and Trucking\t4214\tMotor Freight Carriers, Trucking‚ Local/Long Distance, Moving and Storage Companies, Local Delivery
+Services\tMotor Servicing, Freight Carriers, and Trucking\t4215\tCourier Services-Air and Ground, Freight Forwarders
+Services\tOther Services\t4225\tPublic Warehousing-Farm Products, Refrigerated Goods, Household Goods Storage
+Leisure & Entertainment\tHospitality & Experiences\t4411\tCruise Lines
+Services\tMotor Servicing, Freight Carriers, and Trucking\t4457\tBoat Leases and Boat Rentals
+Services\tOther Services\t4468\tMarinas, Marine Service/Supplies
+Services\tOther Services\t4511\tAir Carriers, Airlines‚ not elsewhere classified
+Leisure & Entertainment\tTravel Agencies\t4582\tAirports, Airport Terminals, Flying Fields
+Retail\tHardware/Computer/Electronics Shops\t4812\tTelecommunication Equipment Including Telephone Sales
+Leisure & Entertainment\tTravel Agencies\t4722\tTravel Agencies and Tour Operators
+Retail\tAuthorised Reseller of Hardware/Computer/Electronics\t5200\tHome Supply Warehouse Stores
+Services\tOther Services\t4784\tBridge and Road Fees, Tolls
+Retail\tStationary/Office Supplies\t5111\tStationery, Office Supplies, Printing and Writing Paper
+Services\tOther Services\t4789\tTransportation Services-not elsewhere classifed
+Services\tMiscellaneous Repair Shops and Related Services\t4814\tTelecommunication Services including but not limited to prepaid phone services and recurring phone services
+Services\tMiscellaneous Repair Shops and Related Services\t4816\tComputer Network/Information Services
+BLOCK\tBLOCK\t4829\tMoney Transfer
+Services\tOther Services\t4899\tCable, Satellite, and Other Pay Television and Radio Services
+Services\tOther Services\t4900\tUtilities-Electric, Gas, Heating Oil, Sanitary, Water
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5021\tOffice and Commercial Furniture
+Retail\tHardware/Computer/Electronics Shops\t5039\tConstruction Materials-not elsewhere classifed
+Retail\tHardware/Computer/Electronics Shops\t5044\tOffice, Photographic, Photocopy, and Microfilm Equipment
+Retail\tHardware/Computer/Electronics Shops\t5045\tComputers, Computer Peripheral Equipment, Software
+Retail\tOther Retail\t5046\tCommercial Equipment‚ not elsewhere classified
+Health, Beauty & Wellness\tMedical Services\t5047\tDental/Laboratory/Medical/Ophtthalmic Hospital Equipment and Supplies
+Services\tOther Services\t5051\tMetal Service Centers and Offices
+Retail\tHardware/Computer/Electronics Shops\t5065\tElectrical Parts and Equipment
+Retail\tHardware/Computer/Electronics Shops\t5072\tHardware Equipment and Supplies
+Retail\tHardware/Computer/Electronics Shops\t5074\tPlumbing and Heating Equipment
+Retail\tOther Retail\t5085\tIndustrial Supplies-not elsewhere classified
+Retail\tClock, Jeweller, Watch, and Silverware Stores\t5094\tPrecious Stones and Metals, Watches and Jewelry
+Retail\tOther Retail\t5099\tDurable Goods‚ not elsewhere classified
+Health, Beauty & Wellness\tDrugstores, Chemists, Pharmacies\t5122\tDrugs, Drug Proprietors, and Druggists Sundries
+Retail\tClothing/Footwear/Accessories/Apparel\t5131\tPiece Goods, Notions, and Other Dry Goods
+Retail\tClothing/Footwear/Accessories/Apparel\t5137\tMen's, Women's, and Children's Uniforms and Commercial Clothing
+Retail\tClothing/Footwear/Accessories/Apparel\t5139\tCommercial Footwear
+Retail\tOther Retail\t5169\tChemicals and Allied Products‚ not elsewhere classified
+Retail\tOther Retail\t5172\tPetroleum and Petroleum Products
+Retail\tBook Stores\t5192\tBooks, Periodicals, and Newspapers
+Retail\tFlorists\t5193\tFlorists Supplies, Nursery Stock, and Flowers
+Retail\tHardware/Computer/Electronics Shops\t5198\tPaints, Varnishes, and Supplies
+Retail\tOther Retail\t5199\tNondurable Goods‚ not elsewhere classified
+Retail\tHardware/Computer/Electronics Shops\t5211\tBuilding Materials, Lumber Stores
+Retail\tHardware/Computer/Electronics Shops\t5231\tGlass, Paint, Wallpaper Stores
+Retail\tHardware/Computer/Electronics Shops\t5251\tHardware Stores
+Retail\tHardware/Computer/Electronics Shops\t5261\tLawn and Garden Supply Stores
+Retail\tMotor Vehicles (new vehicles only)\t5271\tMobile Home Dealers
+Retail\tOther Retail\t5300\tWholesale Clubs
+Retail\tOther Retail\t5309\tDuty Free Stores
+Retail\tOther Retail\t5310\tDiscount Stores
+Retail\tOther Retail\t5311\tDepartment Stores
+Retail\tOther Retail\t5331\tVariety Stores
+Retail\tOutdoor Market\t5399\tMiscellaneous General Merchandise Stores
+Retail\tOther Retail\t5399\tMiscellaneous General Merchandise Stores
+Retail\tFood/Grocery/Convenience/Corner Shops\t5411\tGrocery Stores, Supermarkets
+Retail\tFood/Grocery/Convenience/Corner Shops\t5422\tFreezer, Locker Meat Provisioners
+Retail\tFood/Grocery/Convenience/Corner Shops\t5441\tCandy, Nut, Confectionery Stores
+Retail\tFood/Grocery/Convenience/Corner Shops\t5451\tDairy Products Stores
+Food and Beverage\tBakery\t5462\tBakeries
+Retail\tFood/Grocery/Convenience/Corner Shops\t5499\tMiscellaneous Food Stores‚ Convenience Stores, Markets, Specialty Stores
+Retail\tMotor Vehicles (new vehicles only)\t5511\tAutomobile and Truck Dealers‚ Sales, Service, Repairs, Parts, and Leasing
+BLOCK\tBLOCK\t5521\t(Used Only) Automobile and Truck Dealers‚ Sales, and Parts
+Retail\tHardware/Computer/Electronics Shops\t5531\tAuto Store, Home Supply Stores
+Retail\tAutomotive Parts\t5532\tAutomotive Tire Stores
+Retail\tAutomotive Parts\t5533\tAutomotive Parts, Accessories Stores
+Services\tMotor Servicing, Freight Carriers, and Trucking\t5541\tService Stations (with or without Ancillary Services)
+Services\tMotor Servicing, Freight Carriers, and Trucking\t5542\tFuel Dispenser, Automated
+Retail\tMotor Vehicles (new vehicles only)\t5551\tBoat Dealers
+Retail\tMotor Vehicles (new vehicles only)\t5561\tCamper Dealers, Recreational and Utility Trailers
+Retail\tMotor Vehicles (new vehicles only)\t5571\tMotorcycle Shops and Dealers
+Retail\tMotor Vehicles (new vehicles only)\t5592\tMotor Home Dealers
+Retail\tMotor Vehicles (new vehicles only)\t5598\tSnowmobile Dealers
+Retail\tMotor Vehicles (new vehicles only)\t5599\tMiscellaneous Automotive, Aircraft, and Farm Equipment Dealers‚ not elsewhere classified
+Retail\tClothing/Footwear/Accessories/Apparel\t5611\tMen's and Boys' Clothing and Accessories Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5621\tWomen's Ready to Wear Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5631\tWomen's Accessory and Specialty Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5641\tChildren's and Infants' Wear Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5651\tFamily Clothing Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5655\tSports Apparel, Riding Apparel Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5661\tShoe Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5681\tFurriers and Fur Shops
+Retail\tClothing/Footwear/Accessories/Apparel\t5691\tMen's and Women's Clothing Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5697\tAlterations, Mending, Seamstresses, Tailors
+Retail\tClothing/Footwear/Accessories/Apparel\t5698\tWig and Toupee Shops
+Retail\tClothing/Footwear/Accessories/Apparel\t5699\tAccessory and Apparel Stores, Miscellaneous
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5712\tEquipment, Furniture, and Home Furnishings Stores (except Appliances)
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5713\tFloor Covering Stores
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5714\tDrapery, Upholstery, and Window Coverings Stores
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5718\tFireplace, Fireplace Screens and Accessories Stores
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5719\tMiscellaneous House Furnishing Specialty Shops
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5722\tHousehold Appliance Stores
+Retail\tHardware/Computer/Electronics Shops\t5732\tElectronic Sales
+Retail\tArt, Music, Photo, and Film Shop\t5733\tMusic Stores‚ Musical Instruments, Pianos, Sheet Music
+Retail\tHardware/Computer/Electronics Shops\t5734\tComputer Software Stores
+Retail\tArt, Music, Photo, and Film Shop\t5735\tRecord Shops
+Food and Beverage\tCatering/Delivery\t5811\tCaterers
+Food and Beverage\tCafé/Restaurant\t5812\tEating Places, Restaurants
+Food and Beverage\tFine Dining\t5812\tEating Places, Restaurants
+Food and Beverage\tBar/Pub/Club\t5813\tBars, Cocktail Lounges, Discotheques, Nightclubs, and Taverns‚ Drinking Places (Alcoholic Beverages)
+Food and Beverage\tFood Truck/Cart\t5814\tFast Food Restaurants
+Food and Beverage\tFast Food Restaurant\t5814\tFast Food Restaurants
+Retail\tOther Retail\t5815\tDigital Goods‚ Audiovisual Media Including Books, Movies, and Music
+BLOCK\tBLOCK\t5816\tDigital Goods - Games
+BLOCK\tBLOCK\t5817\tDigital Goods‚ Software Applications (Excluding Games)
+BLOCK\tBLOCK\t5818\tDigital Goods‚ Multi-Category
+Health, Beauty & Wellness\tDrugstores, Chemists, Pharmacies\t5912\tDrug Stores, Pharmacies
+Retail\tBeer, Wine, and Spirits\t5921\tPackage Stores, Beer, Wine, and Liquor
+Retail\tAntique Shops - Sales, Repairs, and Restoration Services\t5931\tAntique Shops - Second Hand Stores, Used Merchandise Stores
+Services\tMiscellaneous Repair Shops and Related Services\t5932\tSales, Repairs, and Restoration Services
+BLOCK\tBLOCK\t5933\tPawn Shops and Salvage Yards
+Services\tMiscellaneous Repair Shops and Related Services\t5935\tSalvage and Wrecking Yards
+Leisure & Entertainment\tSports/Recreation\t5940\tBicycle Shops‚ Sales and Service
+Leisure & Entertainment\tSports/Recreation\t5941\tSporting Goods Stores
+Retail\tBook Stores\t5942\tBook Stores
+Retail\tStationary/Office Supplies\t5943\tOffice, School Supply, and Stationery Stores
+Retail\tClock, Jeweller, Watch, and Silverware Stores\t5944\tClock, Jewelry, Watch, and Silverware Store
+Retail\tHobby, Toy, and Game Shops\t5945\tGame, Toy, and Hobby Shops
+Retail\tArt, Music, Photo, and Film Shop\t5946\tCamera and Photographic Supply Stores
+Retail\tCard Shops, Gift, Novelty, and Souvenir Shops\t5947\tCard, Gift, Novelty, and Souvenir Shops
+Retail\tClothing/Footwear/Accessories/Apparel\t5948\tLeather Goods and Luggage Stores
+Retail\tClothing/Footwear/Accessories/Apparel\t5949\tFabric, Needlework, Piece Goods, and Sewing Stores
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5950\tCrystal and Glassware Stores
+BLOCK\tBLOCK\t5960\tDirect Marketing‚ Insurance Services
+BLOCK\tBLOCK\t5962\tDirect Marketing‚ Travel-Related Arrangement Services
+Retail\tOther Retail\t5963\tDoor-to-Door Sales
+BLOCK\tBLOCK\t5964\tDirect Marketing‚ Catalog Merchants
+Retail\tOther Retail\t5965\tDirect Marketing‚ Combination Catalog and Retail Merchants
+BLOCK\tBLOCK\t5967\tDirect Marketing‚ Inbound Telemarketing Merchants including Adult services
+BLOCK\tBLOCK\t5968\tDirect Marketing‚ Continuity/Subscription Merchants
+Retail\tOther Retail\t5969\tDirect Marketing‚ Other Direct Marketers‚ not elsewhere classified
+Retail\tArt, Music, Photo, and Film Shop\t5970\tArtist Supply Stores, Craft Shops
+Retail\tArt Dealers and Galleries\t5971\tArt Dealers and Galleries
+Retail\tMuseum/Gallery/Cultural\t5971\tArt Dealers and Galleries
+Retail\tCard Shops, Gift, Novelty, and Souvenir Shops\t5972\tStamp and Coin Stores‚ Philatelic and Numismatic Supplies
+Retail\tOther Retail\t5973\tReligious Goods Stores
+Health, Beauty & Wellness\tMedical Services\t5975\tHearing Aids‚ Sales, Service, Supply Stores
+Health, Beauty & Wellness\tMedical Services\t5976\tOrthopedic Goods‚ Artificial Limb Stores
+Health, Beauty & Wellness\tCosmetic Stores\t5977\tCosmetic Stores
+Retail\tOther Retail\t5983\tFuel Dealers‚ Coal, Fuel Oil, Liquefied Petroleum, Wood
+Retail\tFlorists\t5992\tFlorists
+Retail\tTobacco/Cigar/Vape/E-Cigarette Shop\t5993\tCigar Stores and Stands
+Retail\tNewstand/Magazines\t5994\tNews Dealers and Newsstands
+Retail\tPet Shops\t5995\tPet Shops-Pet Food and Supplies
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5996\tSwimming Pools‚ Sales and Supplies
+Retail\tHardware/Computer/Electronics Shops\t5997\tElectric Razor Stores‚ Sales and Service
+Retail\tFurniture, Home Furnishings, and Equipment Stores\t5998\tTent and Awning Shops
+Retail\tOther Retail\t5999\tMiscellaneous and Specialty Retail Stores
+BLOCK\tBLOCK\t6010\tManual Cash Disbursements‚ Customer Financial Institution
+BLOCK\tBLOCK\t6011\tAutomated Cash Disbursements‚ Customer Financial Institution
+BLOCK\tBLOCK\t6050\tQuasi Cash‚ Customer Financial Institution
+BLOCK\tBLOCK\t6051\tQuasi Cash-Merchant
+BLOCK\tBLOCK\t6211\tSecurities‚ Brokers/Dealers
+BLOCK\tBLOCK\t6300\tInsurance Sales, Underwriting
+Services\tLetting Agents\t6513\tReal Estate Agents and Managers‚ Rentals
+Services\tReal Estate, Propery Rentals\t6513\tReal Estate Agents and Managers‚ Rentals
+BLOCK\tBLOCK\t6540\tPOI Funding Transactions (Exluding MoneySend)
+Leisure & Entertainment\tHospitality & Experiences\t7011\tLodging‚ Hotels, Motels, Resorts‚ not elsewhere classified
+Leisure & Entertainment\tSports/Recreation\t7032\tRecreational and Sporting Camps
+Leisure & Entertainment\tSports/Recreation\t7033\tCampgrounds and Trailer Parks
+Services\tOther Services\t7210\tCleaning, Garment, and Laundry Services
+Services\tOther Services\t7211\tBusiness & Miscellaneous Services
+Services\tOther Services\t7216\tDry Cleaners
+Services\tOther Services\t7217\tCarpet and Upholstery Cleaning
+Services\tPhotography Studios\t7221\tPhotographic Studios
+Health, Beauty & Wellness\tBeauty / Barber\t7230\tBarber and Beauty Shops
+Services\tMiscellaneous Repair Shops and Related Services\t7251\tHat Cleaning Shops, Shoe Repair Shops, Shoe Shine Parlors
+Services\tOther Services\t7261\tFuneral Service and Crematories
+BLOCK\tBLOCK\t7273\tDating Services
+Services\tOther Services\t7277\tDebt, Marriage, Personal‚Äö Counseling Service
+Services\tOther Services\t7278\tBuying/Shopping Clubs, Services
+Services\tShort-Term Rental Services\t7296\tClothing Rental‚ Costumes, Uniforms, and Formal Wear
+Health, Beauty & Wellness\tMassage Parlours\t7297\tMassage Parlors
+Health, Beauty & Wellness\tFitness / Wellness / Spa\t7298\tHealth and Beauty Spas
+Services\tOther Services\t7299\tOther Services‚ not elsewhere classified
+Services\tOther Services\t7311\tAdvertising Services
+Services\tOther Services\t7321\tConsumer Credit Reporting Agencies
+Retail\tArt, Music, Photo, and Film Shop\t7333\tCommercial Art, Graphics, Photography
+Services\tOther Services\t7338\tQuick Copy, Reproduction, and Blueprinting Services
+Services\tOther Services\t7342\tExterminating and Disinfecting Services
+Services\tOther Services\t7349\tCleaning and Maintenance, Janitorial Services
+Services\tOther Services\t7361\tEmployment Agencies, Temporary Help Services
+Services\tOther Services\t7372\tComputer Programming, Data Processing, and Integrated Systems Design Services
+Services\tOther Services\t7375\tInformation Retrieval Services
+Retail\tHardware/Computer/Electronics Shops\t7379\tComputer Maintenance, Repair, and Services‚ not elsewhere classified
+Services\tConsulting\t7392\tConsulting, Management, and Public Relations Services
+Services\tOther Services\t7393\tDetective Agencies, Protective Agencies, Security Services including Armored Cars, Guard Dogs
+Services\tShort-Term Rental Services\t7394\tEquipment Rental and Leasing Services, Furniture Rental, Tool Rental
+Services\tPhotography Studios\t7395\tPhoto Developing, Photofinishing Laboratories
+Services\tOther Services\t7399\tBusiness Services‚ not elsewhere classified
+Services\tMotor Vehicle Rentals\t7512\tAutomobile Rental Agency‚ not elsewhere classified
+Services\tMotor Vehicle Rentals\t7513\tTruck Rental
+Services\tMotor Vehicle Rentals\t7519\tMotor Home and Recreational Vehicle Rental
+Services\tAuto Shops/Garages/Parking Lots\t7523\tAutomobile Parking Lots and Garages
+Services\tAuto Shops/Garages/Parking Lots\t7531\tAutomotive Body Repair Shops
+Services\tAuto Shops/Garages/Parking Lots\t7534\tTire Retreading and Repair Shops
+Services\tAuto Shops/Garages/Parking Lots\t7535\tAutomotive Paint Shops
+Services\tAuto Shops/Garages/Parking Lots\t7538\tAutomotive Service Shops
+Services\tAuto Shops/Garages/Parking Lots\t7542\tCar Washes
+Services\tOther Services\t7549\tTowing Services
+Services\tMiscellaneous Repair Shops and Related Services\t7622\tElectronic Repair Shops
+Services\tMiscellaneous Repair Shops and Related Services\t7623\tAir Conditioning and Refrigeration Repair Shops
+Services\tMiscellaneous Repair Shops and Related Services\t7629\tAppliance Repair Shops, Electrical and Small
+Services\tMiscellaneous Repair Shops and Related Services\t7631\tClock, Jewelry, and Watch Repair Shops
+Services\tMiscellaneous Repair Shops and Related Services\t7641\tFurniture‚ Reupholstery and Repair, Refinishing
+Services\tMiscellaneous Repair Shops and Related Services\t7692\tWelding Repair
+Services\tMiscellaneous Repair Shops and Related Services\t7699\tMiscellaneous Repair Shops and Related Services
+Leisure & Entertainment\tMovies/Film/Video Entertainment\t7829\tMotion Picture and Video Tape Production and Distribution
+Leisure & Entertainment\tMovies/Film/Video Entertainment\t7832\tMotion Picture Theaters
+Services\tShort-Term Rental Services\t7841\tVideo Entertainment Rental Stores
+Leisure & Entertainment\tPerforming Arts\t7911\tDance Halls, Schools, and Studios
+Leisure & Entertainment\tPerforming Arts\t7922\tTheatrical Producers (except Motion Pictures), Ticket Agencies
+Leisure & Entertainment\tPerforming Arts\t7929\tBands, Orchestras, and Miscellaneous Entertainers‚ not elsewhere classified
+Leisure & Entertainment\tSports/Recreation\t7932\tPool and Billiard Establishments
+Leisure & Entertainment\tSports/Recreation\t7933\tBowling Alleys
+Leisure & Entertainment\tSports/Recreation\t7941\tAthletic Fields, Commercial Sports, Professional Sports Clubs, Sports Promoters
+Leisure & Entertainment\tHospitality & Experiences\t7991\tTourist Attractions and Exhibits
+Leisure & Entertainment\tSports/Recreation\t7992\tGolf Courses, Public
+Leisure & Entertainment\tMovies/Film/Video Entertainment\t7993\tVideo Amusement Game Supplies
+Leisure & Entertainment\tMovies/Film/Video Entertainment\t7994\tVideo Game Arcades/Establishments
+BLOCK\tBLOCK\t7995\tGambling Transactions
+Leisure & Entertainment\tEvents/Festivals\t7996\tAmusement Parks, Carnivals, Circuses, Fortune Tellers
+Leisure & Entertainment\tSports/Recreation\t7997\tClubs‚ Country Clubs, Membership (Athletic, Recreation, Sports), Private Golf Courses
+Leisure & Entertainment\tMuseum/Gallery/Cultural\t7998\tAquariums, Dolphinariums, Zoos, and Seaquariums
+Leisure & Entertainment\tEvents/Festivals\t7999\tRecreation Services‚ not elsewhere classified
+Health, Beauty & Wellness\tMedical Services\t8011\tDoctors‚ not elsewhere classified
+Health, Beauty & Wellness\tDentistry\t8021\tDentists, Orthodontists
+Health, Beauty & Wellness\tMedical Services\t8031\tOsteopathic Physicians
+Health, Beauty & Wellness\tMedical Services\t8041\tChiropractors
+Health, Beauty & Wellness\tMedical Services\t8042\tOptometrists, Ophthalmologists
+Health, Beauty & Wellness\tMedical Services\t8043\tOpticians, Optical Goods, and Eyeglasses
+Health, Beauty & Wellness\tMedical Services\t8049\tChiropodists, Podiatrists
+Health, Beauty & Wellness\tMedical Services\t8050\tNursing and Personal Care Facilities
+Health, Beauty & Wellness\tMedical Services\t8062\tHospitals
+Health, Beauty & Wellness\tDentistry\t8071\tDental and Medical Laboratories
+Health, Beauty & Wellness\tMedical Services\t8099\tHealth Practitioners, Medical Services‚Äö not elsewhere classified
+Services\tAttorney/Lawyer/Solicitor\t8111\tAttorneys, Legal Services
+Services\tEducation\t8211\tSchools, Elementary and Secondary
+Services\tEducation\t8220\tColleges, Universities, Professional Schools, and Junior Colleges
+Services\tEducation\t8244\tSchools, Business and Secretarial
+Services\tEducation\t8249\tSchools, Trade and Vocational
+Services\tEducation\t8299\tSchools and Educational Services‚Äö not elsewhere classified
+Services\tOther Services\t8351\tChild Care Services
+Charities, Organisations, Government\tCharity\t8398\tOrganizations, Charitable and Social Service
+Charities, Organisations, Government\tFor-Profit Membership Organisation\t8641\tAssociations‚ Civic, Social, and Fraternal
+BLOCK\tBLOCK\t8651\tOrganizations, Political
+BLOCK\tBLOCK\t8661\tOrganizations, Religious
+Charities, Organisations, Government\tFor-Profit Membership Organisation\t8675\tAutomobile Associations
+Charities, Organisations, Government\tNon-Profit Membership Organisation\t8699\tOrganizations, Membership‚Äö not elsewhere classified
+Charities, Organisations, Government\tFor-Profit Membership Organisation\t8699\tOrganizations, Membership‚Äö not elsewhere classified
+Services\tArchitecural, Engineering and Surveying Services\t8911\tArchitectural, Engineering, and Surveying Services
+Services\tAccounting\t8931\tAccounting, Auditing, and Bookkeeping Services
+BLOCK\tBLOCK\t8999\tProfessional Services‚ not elsewhere classified
+Services\tOther Services\t9222\tFines
+Services\tOther Services\t9311\tTax Payments
+Charities, Organisations, Government\tGovernment Related\t9399\tGovernment Services‚ not elsewhere classified
+Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services‚ Government Only
+`.trim();
+
+  const MCC_TRANSLATION_MAP = [
+    ["Health, Beauty & Wellness", "Egészség, szépség és wellness"],
+    ["Leisure & Entertainment", "Szabadidő és szórakozás"],
+    ["Food and Beverage", "Étel és ital"],
+    ["Charities, Organisations, Government", "Jótékonyság, szervezetek, kormányzat"],
+    ["Services", "Szolgáltatások"],
+    ["Retail", "Kiskereskedelem"],
+    ["Other Services", "Egyéb szolgáltatások"],
+    ["Miscellaneous", "Egyéb"],
+    ["Services", "Szolgáltatások"],
+    ["Service", "Szolgáltatás"],
+    ["Stores", "üzletek"],
+    ["Store", "üzlet"],
+    ["Shops", "boltok"],
+    ["Shop", "bolt"],
+    ["Repair", "javítás"],
+    ["Contractor", "kivitelező"],
+    ["Contractors", "kivitelezők"],
+    ["Medical", "orvosi"],
+    ["Hospital", "kórház"],
+    ["Pharmacy", "gyógyszertár"],
+    ["Pharmacies", "gyógyszertárak"],
+    ["Dental", "fogászati"],
+    ["Laboratory", "laboratóriumi"],
+    ["Beauty", "szépség"],
+    ["Barber", "fodrász"],
+    ["Massage", "masszázs"],
+    ["Fitness", "fitnesz"],
+    ["Spa", "spa"],
+    ["Taxi", "taxi"],
+    ["Limousines", "limuzinok"],
+    ["Bus", "busz"],
+    ["Courier", "futár"],
+    ["Trucking", "fuvarozás"],
+    ["Transportation", "szállítás"],
+    ["Travel Agencies", "utazási irodák"],
+    ["Travel Agency", "utazási iroda"],
+    ["Airports", "repülőterek"],
+    ["Air Carriers", "légifuvarozók"],
+    ["Cruise Lines", "hajóutak"],
+    ["Grocery", "élelmiszer"],
+    ["Supermarkets", "szupermarketek"],
+    ["Bakeries", "pékségek"],
+    ["Restaurants", "éttermek"],
+    ["Bars", "bárok"],
+    ["Nightclubs", "éjszakai klubok"],
+    ["Liquor", "szeszes italok"],
+    ["Jewelry", "ékszer"],
+    ["Books", "könyvek"],
+    ["Florists", "virágboltok"],
+    ["Hardware", "vasáru"],
+    ["Electronics", "elektronika"],
+    ["Computers", "számítógépek"],
+    ["Software", "szoftver"],
+    ["Automobile", "autó"],
+    ["Motorcycle", "motorkerékpár"],
+    ["Boat", "hajó"],
+    ["Camper", "lakókocsi"],
+    ["Clothing", "ruházat"],
+    ["Footwear", "lábbeli"],
+    ["Accessory", "kiegészítő"],
+    ["Furniture", "bútor"],
+    ["Home Furnishings", "lakberendezés"],
+    ["Office", "iroda"],
+    ["Catering", "catering"],
+    ["Fast Food", "gyorsétterem"],
+    ["Digital Goods", "digitális termékek"],
+    ["Insurance", "biztosítás"],
+    ["Marketing", "marketing"],
+    ["Telemarketing", "telemarketing"],
+    ["Gambling", "szerencsejáték"],
+    ["Religious", "vallási"],
+    ["Political", "politikai"]
+  ];
+
+  function translateMccText(value) {
+    if (!value) return "";
+    let text = value;
+    MCC_TRANSLATION_MAP.forEach(([from, to]) => {
+      text = text.replaceAll(from, to);
+    });
+    if (text !== value) {
+      return `${text} (${value})`;
+    }
+    return text;
+  }
+
+  function translateMccSource(source) {
+    const lines = source.split("\n");
+    const [header, ...rest] = lines;
+    const translatedHeader = "Kategória\tTevékenység\tMCC kód\tMCC leírás";
+    const translatedLines = rest.map((line) => {
+      const [category, activity, mcc, description] = line.split("\t");
+      return [
+        translateMccText(category),
+        translateMccText(activity),
+        mcc,
+        translateMccText(description)
+      ].join("\t");
+    });
+    return [translatedHeader, ...translatedLines].join("\n").trim();
+  }
+
+  const MCC_DB_SOURCE = translateMccSource(MCC_DB_SOURCE_EN);
+
+  const RESTRICTED_KEYWORDS = [
+    "klub",
+    "club",
+    "masszázs",
+    "massage",
+    "ékszer",
+    "jewelry",
+    "jótékonys",
+    "charity",
+    "autószerel",
+    "vehicle repair",
+    "utazási iroda",
+    "travel agency",
+    "lőtér",
+    "shooting range",
+    "mesterember",
+    "contractor",
+    "ingatlan",
+    "real estate",
+    "galéria",
+    "art dealer",
+    "autókeresked",
+    "car dealer",
+    "online oktatás",
+    "online education"
+  ];
+
+  const BLOCKED_KEYWORDS = [
+    "pénzátutal",
+    "money transfer",
+    "digital goods",
+    "gambling",
+    "szerencsejáték",
+    "pawn",
+    "zálog",
+    "telemarketing",
+    "dating",
+    "társkereső",
+    "political",
+    "religious",
+    "kaszinó",
+    "casino"
+  ];
+
+  const MCC_DB = MCC_DB_SOURCE.split("\n").slice(1).map((line) => {
+    const [category, activity, mcc, description] = line.split("\t");
+    return {
+      category: (category || "").trim(),
+      activity: (activity || "").trim(),
+      mcc: (mcc || "").trim(),
+      description: (description || "").trim()
+    };
+  });
+
   // -------------------------
   // Helpers
   // -------------------------
@@ -52,6 +490,15 @@
 
   function normalizeSpace(value) {
     return (value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function normalizeForMatch(value) {
+    return normalizeSpace(value)
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   }
 
   function normalizeNumberField(value) {
@@ -76,19 +523,15 @@
     return Math.round(numeric * multiplier);
   }
 
-  function formatAmountWithFt(amount) {
-    if (!Number.isFinite(amount)) return "";
-    return `${amount.toLocaleString("hu-HU")} Ft`;
-  }
-
-  function formatRevenueText(value) {
+  function formatRevenueValue(value) {
     if (!value) return "";
     const normalized = normalizeSpace(value);
-    if (/\b(eFt|mFt)\b/i.test(normalized)) {
-      const parsed = parseHungarianAmount(normalized);
-      if (Number.isFinite(parsed)) return formatAmountWithFt(parsed);
-    }
-    return normalized;
+    const parsed = parseHungarianAmount(normalized);
+    if (Number.isFinite(parsed)) return String(parsed);
+    const withYear = normalized.match(/\b\d{4}\s*:\s*([0-9\s.-]+)/);
+    if (withYear) return extractDigits(withYear[1]);
+    const firstNumber = normalized.match(/([0-9][0-9\s.-]*)/);
+    return firstNumber ? extractDigits(firstNumber[1]) : normalized;
   }
 
   function extractDigits(value) {
@@ -197,6 +640,40 @@
     });
   }
 
+  function requestJson(url, body) {
+    if (typeof GM_xmlhttpRequest === "function") {
+      return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+          method: "POST",
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          data: JSON.stringify(body || {}),
+          onload: (response) => {
+            try {
+              resolve(JSON.parse(response.responseText || "{}"));
+            } catch (error) {
+              reject(error);
+            }
+          },
+          onerror: () => reject(new Error("Request failed"))
+        });
+      });
+    }
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      credentials: "include",
+      body: JSON.stringify(body || {})
+    }).then((response) => response.json());
+  }
+
   // -------------------------
   // Read blocks (Opten DOM)
   // -------------------------
@@ -212,6 +689,88 @@
     if (list.length) return list;
     const fallback = textFromTitle(root, "Főtevékenysége");
     return fallback ? [fallback] : [];
+  }
+
+  function groupActivities(activities, mccMatches) {
+    const groups = new Map();
+    activities.forEach((activity) => {
+      const matches = mccMatches.filter((match) => match.activity === activity);
+      const category = matches[0]?.entry?.category || "Egyéb";
+      if (!groups.has(category)) groups.set(category, []);
+      groups.get(category).push(activity);
+    });
+    return groups;
+  }
+
+  function matchActivitiesToMcc(activities) {
+    const results = [];
+    activities.forEach((activity) => {
+      const normalizedActivity = normalizeForMatch(activity);
+      if (!normalizedActivity) return;
+      const activityTokens = new Set(normalizedActivity.split(" ").filter((token) => token.length > 2));
+
+      let bestMatch = null;
+      let bestScore = 0;
+
+      MCC_DB.forEach((entry) => {
+        const entryText = normalizeForMatch(`${entry.activity} ${entry.description}`);
+        if (!entryText) return;
+        let score = 0;
+        activityTokens.forEach((token) => {
+          if (entryText.includes(token)) score += 1;
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = entry;
+        }
+      });
+
+      if (bestMatch && bestScore >= 2) {
+        results.push({ activity, entry: bestMatch, score: bestScore });
+      }
+    });
+    return results;
+  }
+
+  function evaluateKycStatus(activities) {
+    if (!activities.length) {
+      return {
+        status: "ISMERETLEN",
+        note: "Nincs tevékenységi kör adat.",
+        matches: []
+      };
+    }
+
+    const matches = matchActivitiesToMcc(activities);
+    const normalizedActivities = normalizeForMatch(activities.join(" "));
+
+    const blockedByKeyword = BLOCKED_KEYWORDS.find((keyword) => normalizedActivities.includes(normalizeForMatch(keyword)));
+    const restrictedByKeyword = RESTRICTED_KEYWORDS.find((keyword) => normalizedActivities.includes(normalizeForMatch(keyword)));
+    const blockedByMcc = matches.find((match) => match.entry.category === "BLOCK");
+
+    if (blockedByKeyword || blockedByMcc) {
+      return {
+        status: "BLOCKED",
+        note: blockedByKeyword
+          ? `Tiltott kulcsszó: ${blockedByKeyword}`
+          : `Tiltott MCC: ${blockedByMcc?.entry?.mcc || ""} ${blockedByMcc?.entry?.description || ""}`.trim(),
+        matches
+      };
+    }
+
+    if (restrictedByKeyword) {
+      return {
+        status: "KORLÁTOZOTT",
+        note: `Korlátozott tevékenység kulcsszó: ${restrictedByKeyword}`,
+        matches
+      };
+    }
+
+    return {
+      status: "OK",
+      note: matches.length ? "Talált MCC egyezések alapján KYC szempontból rendben." : "Nincs egyértelmű MCC egyezés.",
+      matches
+    };
   }
 
   function readEmails(root) {
@@ -281,7 +840,7 @@
     const years = Array.from(map.keys()).sort((a, b) => b - a);
     if (years.length) {
       const latest = years[0];
-      return formatRevenueText(map.get(latest));
+      return formatRevenueValue(map.get(latest));
     }
 
     const tableRow = Array.from(root.querySelectorAll("tr"))
@@ -298,23 +857,16 @@
       const value = normalizeSpace(valueCell?.textContent || "");
       if (value) {
         const withUnit = isThousandHuf ? `${value} eFt` : value;
-        return formatRevenueText(withUnit);
+        return formatRevenueValue(withUnit);
       }
     }
 
     const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
-    return formatRevenueText(fallback);
+    return formatRevenueValue(fallback);
   }
 
   function extractRevenueValue(revenueText) {
-    if (!revenueText) return "";
-    const normalized = normalizeSpace(revenueText);
-    const parsed = parseHungarianAmount(normalized);
-    if (Number.isFinite(parsed)) return String(parsed);
-    const withYear = normalized.match(/\b\d{4}\s*:\s*([0-9\s.-]+)/);
-    if (withYear) return extractDigits(withYear[1]);
-    const firstNumber = normalized.match(/([0-9][0-9\s.-]*)/);
-    return firstNumber ? extractDigits(firstNumber[1]) : "";
+    return formatRevenueValue(revenueText);
   }
 
   function calculateEstimatedCardMonthlyRevenue(revenueText) {
@@ -402,9 +954,7 @@
   }
 
   function parseCegriport(root) {
-    const kkvValue = readValueByDataTitle(root, "KKV besorolás", "#basicData") || textFromTitle(root, "KKV besorolás");
     return {
-      kkv: kkvValue,
       revenue: readFinancialRevenue(root),
       quickReport: readQuickReport(root),
       kapcsolatok: readKapcsoltVallalkozasok(root)
@@ -460,6 +1010,67 @@
     };
   }
 
+  function getEidNumber(value) {
+    const digits = extractDigits(value || "");
+    return digits || "";
+  }
+
+  function buildKapcsolatiHaloPayload(eidNumber) {
+    if (!eidNumber) return null;
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const selectedDate = `${now.getFullYear()}-${month}-${day}`;
+    const timestamp = document.querySelector("#khra")?.dataset?.timestamp || null;
+    const lang = document.documentElement.lang || "hu";
+
+    return {
+      ID: Number(eidNumber),
+      lang,
+      Owners: 1,
+      Managers: 1,
+      SelectedDate: selectedDate,
+      YearsBack: 2,
+      vt: 1,
+      PredecessorSuccessor: 1,
+      HideDefunct: 0,
+      IneffectiveRelations: 1,
+      DisusedRelations: 1,
+      AddressConnections: 1,
+      PartialAddresses: 0,
+      HighlightLines: 1,
+      SupplementaryInfo: 1,
+      ClientInfo: 1,
+      ClientInfoName: 1,
+      TimeStamp: timestamp
+    };
+  }
+
+  function parseKapcsolatiHaloResponse(payload) {
+    const boxes = Array.isArray(payload?.ContactNetwork?.Boxes) ? payload.ContactNetwork.Boxes : [];
+    const lines = payload?.ContactNetwork?.ConnectionLines;
+    const lineCount = Array.isArray(lines)
+      ? lines.length
+      : lines && typeof lines === "object"
+        ? Object.keys(lines).length
+        : 0;
+
+    const companyBoxes = boxes.filter((box) => String(box?.Type || "").toLowerCase() === "company");
+    const inspectedBox = boxes.find((box) => String(box?.BoxColumn || "").toLowerCase() === "inspectedcompany");
+    const companyIds = new Set(
+      companyBoxes.map((box) => String(box?.ID ?? box?.Id ?? box?.EID ?? box?.eid ?? "")).filter(Boolean)
+    );
+    if (inspectedBox) {
+      companyIds.delete(String(inspectedBox.ID ?? inspectedBox.Id ?? ""));
+    }
+
+    const companyCount = companyIds.size;
+    return {
+      corporateOwnersCount: companyCount ? String(companyCount) : "",
+      kapcsolatok: lineCount ? String(lineCount) : (companyCount ? String(companyCount) : "")
+    };
+  }
+
   // -------------------------
   // IBAN helpers (iban.hu)
   // -------------------------
@@ -476,6 +1087,11 @@
 
   function parseIbanCheckerFromHtml(html) {
     const doc = htmlToDocument(html);
+    const alert = doc.querySelector(".alert");
+    if (alert) {
+      const alertText = normalizeSpace(alert.textContent || "");
+      if (alertText) return [["IBAN ellenőrzés", alertText]];
+    }
     const table = doc.querySelector("#results table")
       || doc.querySelector("table.table.table-bordered.downloads")
       || doc.querySelector("table.downloads")
@@ -628,6 +1244,7 @@
 
     const results = { base, report: {}, halo: {} };
     const requests = [];
+    const eidNumber = getEidNumber(eid || identifier);
 
     if (window.location.pathname.includes("/cegtar/cegadatlap/")) {
       results.base = baseFromPage;
@@ -686,6 +1303,18 @@
           .then((data) => { results.halo = data || {}; })
           .catch(() => {})
       );
+    }
+
+    if ((!hasHaloData(results.halo)) && eidNumber) {
+      const payload = buildKapcsolatiHaloPayload(eidNumber);
+      if (payload) {
+        requests.push(
+          requestJson("/cegtar/kapcsolati-halo-api", payload)
+            .then((data) => parseKapcsolatiHaloResponse(data || {}))
+            .then((data) => { results.halo = { ...results.halo, ...data }; })
+            .catch(() => {})
+        );
+      }
     }
 
     await Promise.all(requests);
@@ -963,6 +1592,16 @@
     const list = (v) => Array.isArray(v) ? v.filter(Boolean).join("; ") : val(v);
     const numeric = (v) => normalizeNumberField(val(v));
     const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
+    const activities = Array.isArray(data.activities) ? data.activities : [];
+    const kyc = evaluateKycStatus(activities);
+    const mccLines = kyc.matches
+      .map((match) => `${match.entry.mcc} - ${match.entry.activity} (${match.entry.description})`)
+      .filter(Boolean)
+      .join("\n");
+    const grouped = groupActivities(activities, kyc.matches);
+    const groupedActivitiesText = Array.from(grouped.entries())
+      .map(([category, items]) => `${category}: ${items.join(", ")}`)
+      .join("\n");
 
     const signatoryList = (v) => {
       if (!Array.isArray(v)) return val(v);
@@ -979,10 +1618,9 @@
     return {
       "Cégnév": val(data.companyName),
       "Cégforma": val(data.companyForm),
-      "KKV besorolás": val(data.kkv),
       "Alakulás dátuma": val(data.establishmentDate),
       "Bejegyzés dátuma": val(data.registrationDate),
-      "Tevékenységi köre(i)": list(data.activities),
+      "Tevékenységi köre(i)": groupedActivitiesText || list(data.activities),
       "Cég székhelye": val(data.headquarters),
       "Cég telephelye(i)": list(data.telephelyek),
       "Cégjegyzékszám": numeric(data.registryNumber),
@@ -991,6 +1629,9 @@
       "Értékesítés nettó árbevétele": val(data.revenue),
       "Becsült kártyás nettó havi árbevétele": estimatedMonthlyRevenue,
       "Opten gyorsjelentés": val(data.quickReport),
+      "Teya KYC státusz": kyc.status,
+      "Teya KYC megjegyzés": kyc.note,
+      "Teya KYC MCC találatok": mccLines,
       "Cégjegyzésre jogosultak": signatoryList(data.signatories),
       "Hány darab cég a cégben van": numeric(data.corporateOwnersCount),
       "Hány kapcsolata van különböző cégekkel": numeric(data.kapcsolatok),
@@ -1023,10 +1664,19 @@
     const signatories = Array.isArray(data.signatories) ? data.signatories : [];
     const bankAccounts = Array.isArray(data.bankAccounts) ? data.bankAccounts : [];
 
+    const kyc = evaluateKycStatus(activities);
+    const mccLines = kyc.matches
+      .map((match) => `${match.entry.mcc} - ${match.entry.activity} (${match.entry.description})`)
+      .filter(Boolean)
+      .join("\n");
+    const grouped = groupActivities(activities, kyc.matches);
+    const groupedActivitiesText = Array.from(grouped.entries())
+      .map(([category, items]) => `${category}: ${items.join(", ")}`)
+      .join("\n");
+
     const coreRows = [
       buildRow("Cégnév", data.companyName),
       buildRow("Cégforma", data.companyForm),
-      buildRow("KKV besorolás", data.kkv),
       buildRow("Alakulás dátuma", data.establishmentDate),
       buildRow("Bejegyzés dátuma", data.registrationDate),
       buildRow("Cég székhelye", data.headquarters, { multiline: true }),
@@ -1046,9 +1696,17 @@
     body.appendChild(buildSection("Cég adatok", coreRows));
     body.appendChild(buildSection("Számolt mezők", computedRows));
 
-    activities.forEach((activity, index) => {
-      body.appendChild(buildSection(`Tevékenységi kör ${index + 1}`, [buildRow("Tevékenység", activity)]));
-    });
+    if (activities.length) {
+      body.appendChild(buildSection("Tevékenységi körök", [
+        buildRow("Összesítés", groupedActivitiesText || activities.join(", "), { multiline: true })
+      ]));
+    }
+
+    body.appendChild(buildSection("KYC ellenőrzés", [
+      buildRow("Státusz", kyc.status),
+      buildRow("Megjegyzés", kyc.note, { multiline: true }),
+      buildRow("MCC találatok", mccLines, { multiline: true })
+    ]));
 
     telephelyek.forEach((telephely, index) => {
       body.appendChild(buildSection(`Telephely ${index + 1}`, [buildRow("Cím", telephely, { multiline: true })]));
