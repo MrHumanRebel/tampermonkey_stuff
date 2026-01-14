@@ -24,6 +24,7 @@
 
   const INSERTED_LI_ID = "teya-onboarding-li";
   const INSERTED_A_ID  = "teya-onboarding-link";
+  const GREIP_RECAPTCHA_SITE_KEY = "6LeGgMokAAAAAE_Arl354mmiDoYSSYQ8c1Lo74rk";
 
   const SELECTORS = {
     companyName: "#parsedNameTitle",
@@ -45,6 +46,7 @@
   let cachedDataPromise = null;
   let cachedData = null;
   let currentData = null;
+  let greipRecaptchaPromise = null;
 
   const MCC_DB_SOURCE_EN = `
 Category\tBusiness Activity\tMCC Code\tMCC Description
@@ -1056,19 +1058,55 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
         ? Object.keys(lines).length
         : 0;
 
+    const getBoxId = (box) => String(box?.ID ?? box?.Id ?? box?.EID ?? box?.eid ?? "");
+    const getLineIds = (line) => {
+      if (!line || typeof line !== "object") return [];
+      const pairs = [
+        [line.FromID, line.ToID],
+        [line.FromId, line.ToId],
+        [line.fromId, line.toId],
+        [line.from, line.to],
+        [line.SourceID, line.TargetID],
+        [line.SourceId, line.TargetId],
+        [line.sourceId, line.targetId],
+        [line.Source, line.Target]
+      ];
+      for (const [first, second] of pairs) {
+        if (first != null || second != null) {
+          return [String(first ?? ""), String(second ?? "")].filter(Boolean);
+        }
+      }
+      return [];
+    };
+
     const companyBoxes = boxes.filter((box) => String(box?.Type || "").toLowerCase() === "company");
     const inspectedBox = boxes.find((box) => String(box?.BoxColumn || "").toLowerCase() === "inspectedcompany");
     const companyIds = new Set(
-      companyBoxes.map((box) => String(box?.ID ?? box?.Id ?? box?.EID ?? box?.eid ?? "")).filter(Boolean)
+      companyBoxes.map((box) => getBoxId(box)).filter(Boolean)
     );
-    if (inspectedBox) {
-      companyIds.delete(String(inspectedBox.ID ?? inspectedBox.Id ?? ""));
-    }
+    const inspectedId = inspectedBox ? getBoxId(inspectedBox) : "";
+    if (inspectedId) companyIds.delete(inspectedId);
+
+    const connectedCompanyIds = new Set();
+    const connectionLines = Array.isArray(lines) ? lines : lines && typeof lines === "object" ? Object.values(lines) : [];
+    connectionLines.forEach((line) => {
+      const ids = getLineIds(line);
+      if (ids.length < 2) return;
+      const [first, second] = ids;
+      if (inspectedId) {
+        if (first === inspectedId && companyIds.has(second)) connectedCompanyIds.add(second);
+        if (second === inspectedId && companyIds.has(first)) connectedCompanyIds.add(first);
+      } else if (companyIds.has(first) && companyIds.has(second)) {
+        connectedCompanyIds.add(first);
+        connectedCompanyIds.add(second);
+      }
+    });
 
     const companyCount = companyIds.size;
+    const connectionCount = connectedCompanyIds.size || lineCount;
     return {
       corporateOwnersCount: companyCount ? String(companyCount) : "",
-      kapcsolatok: lineCount ? String(lineCount) : (companyCount ? String(companyCount) : "")
+      kapcsolatok: connectionCount ? String(connectionCount) : (companyCount ? String(companyCount) : "")
     };
   }
 
@@ -1106,6 +1144,52 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return details.length ? details : [["IBAN ellenőrzés", emptyMessage]];
   }
 
+  function loadGreipRecaptcha() {
+    if (window.grecaptcha?.execute) {
+      return Promise.resolve(window.grecaptcha);
+    }
+    if (greipRecaptchaPromise) {
+      return greipRecaptchaPromise;
+    }
+    greipRecaptchaPromise = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/api.js?render=${GREIP_RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve(window.grecaptcha || null);
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    });
+    return greipRecaptchaPromise;
+  }
+
+  async function requestGreipToken() {
+    const grecaptcha = await loadGreipRecaptcha();
+    if (!grecaptcha?.execute || !grecaptcha?.ready) {
+      return "";
+    }
+    return new Promise((resolve) => {
+      let settled = false;
+      const finalize = (token = "") => {
+        if (settled) return;
+        settled = true;
+        resolve(token);
+      };
+      const timeoutId = setTimeout(() => finalize(""), 5000);
+      grecaptcha.ready(() => {
+        grecaptcha.execute(GREIP_RECAPTCHA_SITE_KEY, { action: "submit" })
+          .then((token) => {
+            clearTimeout(timeoutId);
+            finalize(token || "");
+          })
+          .catch(() => {
+            clearTimeout(timeoutId);
+            finalize("");
+          });
+      });
+    });
+  }
+
   function requestIbanFromCalculator(account, countryCode = "HU") {
     return new Promise((resolve) => {
       if (typeof GM_xmlhttpRequest !== "function") {
@@ -1128,27 +1212,29 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   function requestIbanChecker(iban) {
-    return new Promise((resolve, reject) => {
+    return (async () => {
       if (typeof GM_xmlhttpRequest !== "function") {
-        reject(new Error("GM_xmlhttpRequest not available"));
-        return;
+        throw new Error("GM_xmlhttpRequest not available");
       }
       const url = new URL("https://greip.io/tools/IBAN-Validation");
       const normalized = normalizeAccount(iban).toUpperCase();
+      const token = await requestGreipToken();
       const params = new URLSearchParams({
         iban: normalized,
-        GreCapToken: "",
+        GreCapToken: token || "",
         submit: ""
       });
       url.search = params.toString();
-      GM_xmlhttpRequest({
-        method: "GET",
-        url: url.toString(),
-        anonymous: true,
-        onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
-        onerror: () => reject(new Error("IBAN checker failed"))
+      return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: url.toString(),
+          anonymous: true,
+          onload: (response) => resolve(parseIbanCheckerFromHtml(response.responseText || "")),
+          onerror: () => reject(new Error("IBAN checker failed"))
+        });
       });
-    });
+    })();
   }
 
   function buildRequestId() {
@@ -1323,6 +1409,9 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
     if (!merged.kapcsolatok && results.halo?.kapcsolatok) {
       merged.kapcsolatok = results.halo.kapcsolatok;
+    }
+    if (!merged.corporateOwnersCount && results.halo?.corporateOwnersCount) {
+      merged.corporateOwnersCount = results.halo.corporateOwnersCount;
     }
 
     return merged;
@@ -1721,6 +1810,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       "Teya KYC megjegyzés": kyc.note,
       "Teya KYC MCC találatok": mccLines,
       "Cégjegyzésre jogosultak": signatoryList(data.signatories),
+      "Hány darab cég a cégben van": numeric(data.corporateOwnersCount),
       "Hány kapcsolata van különböző cégekkel": numeric(data.kapcsolatok),
       "EID": val(data.eid),
       "Forrás URL": val(data.sourceUrl)
@@ -1732,6 +1822,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const cleanedRegistryNumber = normalizeNumberField(data.registryNumber);
     const cleanedTaxId = normalizeNumberField(data.taxId);
     const cleanedKapcsolatok = normalizeNumberField(data.kapcsolatok);
+    const cleanedCorporateOwners = normalizeNumberField(data.corporateOwnersCount);
     const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
     if (headerSub) {
       headerSub.innerHTML = [
@@ -1773,6 +1864,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
     const computedRows = [
       buildRow("Becsült kártyás nettó havi árbevétele", estimatedMonthlyRevenue),
+      buildRow("Hány darab cég a cégben van", cleanedCorporateOwners),
       buildRow("Hány kapcsolata van különböző cégekkel", cleanedKapcsolatok)
     ];
 
