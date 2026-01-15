@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.2.4
+// @version      1.2.6
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -24,6 +24,10 @@
   const INSERTED_LI_ID = "teya-onboarding-li";
   const INSERTED_A_ID  = "teya-onboarding-link";
   const DEFAULT_IBAN_COUNTRY = "HU";
+
+  const MCC_AVG_BASKET_VALUE_HUF = new Map([
+    // TODO: töltsd fel kézzel megbízható, 2025-ös források alapján (MCC -> átlagos kosárérték, HUF).
+  ]);
 
   const SELECTORS = {
     companyName: "#parsedNameTitle",
@@ -1026,7 +1030,8 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const count = companyNames.size || fallbackCount;
     return {
       corporateOwnersCount: count ? String(count) : "",
-      kapcsolatok: count ? String(count) : ""
+      kapcsolatok: count ? String(count) : "",
+      haloMetrics: null
     };
   }
 
@@ -1123,7 +1128,117 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const connectionCount = connectedCompanyIds.size || lineCount;
     return {
       corporateOwnersCount: companyCount ? String(companyCount) : "",
-      kapcsolatok: connectionCount ? String(connectionCount) : (companyCount ? String(companyCount) : "")
+      kapcsolatok: connectionCount ? String(connectionCount) : (companyCount ? String(companyCount) : ""),
+      haloMetrics: buildKapcsolatiHaloMetrics(boxes, connectionLines)
+    };
+  }
+
+  function getHaloBoxLabel(box) {
+    const candidates = [
+      box?.Title,
+      box?.Name,
+      box?.CompanyName,
+      box?.PersonName,
+      box?.DisplayName,
+      box?.Label
+    ];
+    return normalizeSpace(candidates.find((value) => normalizeSpace(value)) || "");
+  }
+
+  function buildKapcsolatiHaloMetrics(boxes, connectionLines) {
+    if (!Array.isArray(boxes) || !boxes.length) return null;
+    const normalizedLines = Array.isArray(connectionLines)
+      ? connectionLines
+      : connectionLines && typeof connectionLines === "object"
+        ? Object.values(connectionLines)
+        : [];
+    const getBoxId = (box) => String(box?.ID ?? box?.Id ?? box?.EID ?? box?.eid ?? "");
+    const getLineIds = (line) => {
+      if (!line || typeof line !== "object") return [];
+      const pairs = [
+        [line.FromID, line.ToID],
+        [line.FromId, line.ToId],
+        [line.fromId, line.toId],
+        [line.from, line.to],
+        [line.SourceID, line.TargetID],
+        [line.SourceId, line.TargetId],
+        [line.sourceId, line.targetId],
+        [line.Source, line.Target]
+      ];
+      for (const [first, second] of pairs) {
+        if (first != null || second != null) {
+          return [String(first ?? ""), String(second ?? "")].filter(Boolean);
+        }
+      }
+      return [];
+    };
+
+    const degrees = new Map();
+    const ids = [];
+    boxes.forEach((box) => {
+      const id = getBoxId(box);
+      if (!id) return;
+      ids.push(id);
+      degrees.set(id, 0);
+    });
+
+    normalizedLines.forEach((line) => {
+      const idsInLine = getLineIds(line);
+      if (idsInLine.length < 2) return;
+      const [first, second] = idsInLine;
+      if (first && degrees.has(first)) degrees.set(first, (degrees.get(first) || 0) + 1);
+      if (second && degrees.has(second)) degrees.set(second, (degrees.get(second) || 0) + 1);
+    });
+
+    const inspectedBox = boxes.find((box) => String(box?.BoxColumn || "").toLowerCase() === "inspectedcompany");
+    const inspectedId = inspectedBox ? getBoxId(inspectedBox) : "";
+    const inspectedDegree = inspectedId ? (degrees.get(inspectedId) || 0) : 0;
+
+    const typeCounts = boxes.reduce((acc, box) => {
+      const type = String(box?.Type || "other").toLowerCase();
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+
+    const totalNodes = ids.length;
+    const totalConnections = normalizedLines.length;
+    const averageDegree = totalNodes ? (2 * totalConnections) / totalNodes : 0;
+    let maxDegree = 0;
+    let maxDegreeLabel = "";
+    degrees.forEach((value, id) => {
+      if (value > maxDegree) {
+        maxDegree = value;
+        const box = boxes.find((entry) => getBoxId(entry) === id);
+        maxDegreeLabel = getHaloBoxLabel(box);
+      }
+    });
+
+    const isolatedNodes = Array.from(degrees.values()).filter((value) => value === 0).length;
+    const companyCount = typeCounts.company || 0;
+    const personCount = typeCounts.person || 0;
+    const addressCount = typeCounts.address || 0;
+    const otherCount = totalNodes - companyCount - personCount - addressCount;
+    const riskFlags = [];
+
+    if (totalNodes >= 20) riskFlags.push("Nagyméretű háló");
+    if (inspectedDegree >= 8) riskFlags.push("Sok közvetlen kapcsolat a vizsgált cégnél");
+    if (companyCount >= 10) riskFlags.push("Sok kapcsolódó cég");
+    if (personCount >= 10) riskFlags.push("Sok kapcsolódó magánszemély");
+    if (averageDegree >= 3) riskFlags.push("Sűrű kapcsolati háló");
+
+    return {
+      totalNodes,
+      totalConnections,
+      averageDegree,
+      maxDegree,
+      maxDegreeLabel,
+      inspectedDegree,
+      companyCount,
+      personCount,
+      addressCount,
+      otherCount,
+      isolatedNodes,
+      riskFlags
     };
   }
 
@@ -3312,6 +3427,54 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .join("\n");
   }
 
+  function formatMccAverageBasketValue(matches) {
+    if (!Array.isArray(matches) || matches.length === 0) {
+      return "Nincs MCC találat.";
+    }
+    const uniqueMcc = Array.from(new Set(matches.map((match) => match.entry.mcc).filter(Boolean)));
+    const lines = uniqueMcc.map((mcc) => {
+      const value = MCC_AVG_BASKET_VALUE_HUF.get(mcc);
+      if (value == null) return `${mcc}: N/A`;
+      const formatted = Number.isFinite(value)
+        ? `${value.toLocaleString("hu-HU")} Ft`
+        : String(value);
+      return `${mcc}: ${formatted}`;
+    });
+    return lines.join("\n");
+  }
+
+  function formatKapcsolatiHaloMetrics(metrics) {
+    if (!metrics) return "";
+    const avgDegree = Number.isFinite(metrics.averageDegree)
+      ? metrics.averageDegree.toFixed(2)
+      : "";
+    const typeLine = [
+      metrics.companyCount ?? "",
+      metrics.personCount ?? "",
+      metrics.addressCount ?? "",
+      metrics.otherCount ?? ""
+    ].some((value) => value !== "")
+      ? `${metrics.companyCount ?? 0} / ${metrics.personCount ?? 0} / ${metrics.addressCount ?? 0} / ${metrics.otherCount ?? 0}`
+      : "";
+    const maxDegreeLine = metrics.maxDegree
+      ? `${metrics.maxDegree}${metrics.maxDegreeLabel ? ` (${metrics.maxDegreeLabel})` : ""}`
+      : "";
+    const riskLine = Array.isArray(metrics.riskFlags) && metrics.riskFlags.length
+      ? metrics.riskFlags.join("; ")
+      : "Nincs kiemelt jelző.";
+
+    return [
+      `Összes csomópont: ${metrics.totalNodes ?? 0}`,
+      `Összes kapcsolat: ${metrics.totalConnections ?? 0}`,
+      avgDegree ? `Átlagos fokszám: ${avgDegree}` : "",
+      metrics.inspectedDegree != null ? `Vizsgált cég közvetlen kapcsolatai: ${metrics.inspectedDegree}` : "",
+      typeLine ? `Cég/Magánszemély/Cím/Egyéb: ${typeLine}` : "",
+      maxDegreeLine ? `Legnagyobb fokszám: ${maxDegreeLine}` : "",
+      metrics.isolatedNodes != null ? `Izolált csomópontok: ${metrics.isolatedNodes}` : "",
+      `KYC jelzők: ${riskLine}`
+    ].filter(Boolean).join("\n");
+  }
+
   async function collectPayload() {
     const data = currentData || await getAllData();
     const val = (v) => v || "";
@@ -3326,6 +3489,8 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .join("\n");
     const grouped = groupActivities(activities, kyc.matches);
     const groupedActivitiesText = formatGroupedActivities(grouped, activities);
+    const haloMetricsText = formatKapcsolatiHaloMetrics(data.haloMetrics);
+    const mccBasketValueText = formatMccAverageBasketValue(kyc.matches);
 
     const signatoryList = (v) => {
       if (!Array.isArray(v)) return val(v);
@@ -3352,10 +3517,12 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       "Email": val(data.emails),
       "Értékesítés nettó árbevétele": val(data.revenue),
       "Becsült kártyás nettó havi árbevétele": estimatedMonthlyRevenue,
+      "MCC átlagos kosárérték (HUF)": mccBasketValueText,
       "Opten gyorsjelentés": val(data.quickReport),
       "Teya KYC státusz": kyc.status,
       "Teya KYC megjegyzés": kyc.note,
       "Teya KYC MCC találatok": mccLines,
+      "Kapcsolati háló KYC metrikák": haloMetricsText,
       "Cégjegyzésre jogosultak": signatoryList(data.signatories),
       "Hány darab cég a cégben van": numeric(data.corporateOwnersCount),
       "Hány kapcsolata van különböző cégekkel": numeric(data.kapcsolatok),
@@ -3395,6 +3562,8 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .join("\n");
     const grouped = groupActivities(activities, kyc.matches);
     const groupedActivitiesText = formatGroupedActivities(grouped, activities);
+    const haloMetricsText = formatKapcsolatiHaloMetrics(data.haloMetrics);
+    const mccBasketValueText = formatMccAverageBasketValue(kyc.matches);
 
     const coreRows = [
       buildRow("Cégnév", data.companyName),
@@ -3411,8 +3580,10 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
     const computedRows = [
       buildRow("Becsült kártyás nettó havi árbevétele", estimatedMonthlyRevenue),
+      buildRow("MCC átlagos kosárérték (HUF)", mccBasketValueText, { multiline: true }),
       buildRow("Hány darab cég a cégben van", cleanedCorporateOwners),
-      buildRow("Hány kapcsolata van különböző cégekkel", cleanedKapcsolatok)
+      buildRow("Hány kapcsolata van különböző cégekkel", cleanedKapcsolatok),
+      buildRow("Kapcsolati háló KYC metrikák", haloMetricsText, { multiline: true })
     ];
 
     body.appendChild(buildSection("Cég adatok", coreRows));
