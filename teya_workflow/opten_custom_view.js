@@ -3543,16 +3543,14 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Servicesâ
       }
     });
 
-    const lines = Array.from(uniqueEntries.values()).map((entry) => {
-      const key = `${entry.mcc}::${entry.activity}`;
-      const value = MCC_AVG_BASKET_VALUE_HUF.get(key);
-      if (value == null) return `${entry.mcc} - ${entry.activity}: N/A`;
-      const formatted = Number.isFinite(value)
-        ? `${value.toLocaleString("hu-HU")} Ft`
-        : String(value);
-      return `${entry.mcc} - ${entry.activity}: ${formatted}`;
-    });
-    return lines.join("\n");
+    const values = Array.from(uniqueEntries.values())
+      .map((entry) => MCC_AVG_BASKET_VALUE_HUF.get(`${entry.mcc}::${entry.activity}`))
+      .filter((value) => Number.isFinite(value));
+
+    if (values.length === 0) return "N/A";
+
+    const averageValue = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+    return `${averageValue.toLocaleString("hu-HU")} Ft`;
   }
 
   function formatKapcsolatiHaloMetrics(metrics) {
