@@ -561,22 +561,43 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Servicesâ
     return normalizeForMatch(value);
   }
 
+  function buildAvgKeyCandidates(value) {
+    if (!value) return [];
+    const candidates = new Set();
+    const normalized = normalizeAvgKey(value);
+    if (normalized) candidates.add(normalized);
+    const withoutParentheses = normalizeAvgKey(value.replace(/\s*\([^)]*\)\s*/g, " "));
+    if (withoutParentheses) candidates.add(withoutParentheses);
+    const parenMatch = value.match(/\(([^)]+)\)/);
+    if (parenMatch) {
+      const inside = normalizeAvgKey(parenMatch[1]);
+      if (inside) candidates.add(inside);
+    }
+    return Array.from(candidates);
+  }
+
+  function hasAvgKeyMatch(aKeys, bKeys) {
+    return aKeys.some((key) => bKeys.includes(key));
+  }
+
   function buildHardcodedMccAvgBasketValueMap() {
     const normalizedTable = HARDCODED_AVG_BASKET_TABLE.map((row) => ({
       ...row,
-      categoryKey: normalizeAvgKey(row.category),
-      activityKeys: [row.activity, ...(row.activityAliases || [])].map((activity) => normalizeAvgKey(activity)),
+      categoryKeys: buildAvgKeyCandidates(row.category),
+      activityKeys: [row.activity, ...(row.activityAliases || [])].flatMap((activity) =>
+        buildAvgKeyCandidates(activity)
+      ),
       mccList: row.mcc || []
     }));
 
     MCC_DB.forEach((entry) => {
-      const entryCategoryKey = normalizeAvgKey(entry.category);
-      const entryActivityKey = normalizeAvgKey(entry.activity);
+      const entryCategoryKeys = buildAvgKeyCandidates(entry.category);
+      const entryActivityKeys = buildAvgKeyCandidates(entry.activity);
 
       const match = normalizedTable.find((row) => {
         if (row.mccList.includes(entry.mcc)) return true;
-        if (row.categoryKey !== entryCategoryKey) return false;
-        return row.activityKeys.includes(entryActivityKey);
+        if (!hasAvgKeyMatch(row.categoryKeys, entryCategoryKeys)) return false;
+        return hasAvgKeyMatch(row.activityKeys, entryActivityKeys);
       });
 
       if (match) {
