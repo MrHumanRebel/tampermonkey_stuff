@@ -27,144 +27,58 @@
   const DEFAULT_IBAN_COUNTRY = "HU";
 
   const MCC_AVG_BASKET_VALUE_HUF = new Map();
-  let mccAvgBasketMapPromise = null;
-
-  const ECB_API_BASE = "https://data-api.ecb.europa.eu/service/data";
-
-  async function requestText(url, headers = {}) {
-    if (typeof GM_xmlhttpRequest === "function") {
-      return new Promise((resolve, reject) => {
-        GM_xmlhttpRequest({
-          method: "GET",
-          url,
-          headers,
-          onload: (response) => resolve(response.responseText || ""),
-          onerror: () => reject(new Error("Request failed"))
-        });
-      });
-    }
-
-    const response = await fetch(url, { headers });
-    if (!response.ok) throw new Error(`Request failed (${response.status})`);
-    return response.text();
-  }
-
-  async function fetchEcbCsv(flow, key, params = {}) {
-    const url = new URL(`${ECB_API_BASE}/${flow}/${key}`);
-    Object.entries(params).forEach(([paramKey, value]) => url.searchParams.set(paramKey, value));
-    url.searchParams.set("format", "csvdata");
-
-    const text = await requestText(url.toString(), { "Accept": "text/csv" });
-    const lines = text.trim().split("\n");
-    if (!lines.length) return [];
-    const header = lines[0].split(",");
-    const idxTime = header.indexOf("TIME_PERIOD");
-    const idxVal = header.indexOf("OBS_VALUE");
-    if (idxTime === -1 || idxVal === -1) throw new Error("Unexpected ECB CSV format");
-
-    const out = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(",");
-      const time = cols[idxTime];
-      const value = Number(cols[idxVal]);
-      if (time && Number.isFinite(value)) out.push({ t: time, v: value });
-    }
-    return out;
-  }
-
-  function sumObs(obs) {
-    return obs.reduce((acc, item) => acc + item.v, 0);
-  }
-
-  async function fetchAvgEurHuf_2025() {
-    const obs = await fetchEcbCsv("EXR", "M.HUF.EUR.SP00.A", {
-      startPeriod: "2025-01",
-      endPeriod: "2025-12"
-    });
-    const avg = sumObs(obs) / obs.length;
-    return avg;
-  }
-
-  async function computeBasketAvgHufForMccList(mccList, eurHufAvg) {
-    const startPeriod = "2025-Q1";
-    const endPeriod = "2025-Q4";
-
-    let totalEur = 0;
-    let totalPn = 0;
-
-    for (const mcc of mccList) {
-      const keyEur = `Q.HU._Z.W0.NR.${mcc}.N.EUR`;
-      const keyPn = `Q.HU._Z.W0.NR.${mcc}.N.PN`;
-      let eurObs;
-      let pnObs;
-
-      try {
-        eurObs = await fetchEcbCsv("PMC", keyEur, { startPeriod, endPeriod });
-        pnObs = await fetchEcbCsv("PMC", keyPn, { startPeriod, endPeriod });
-      } catch (_) {
-        try {
-          const keyEurRemote = `Q.HU._Z.W0.R.${mcc}.N.EUR`;
-          const keyPnRemote = `Q.HU._Z.W0.R.${mcc}.N.PN`;
-          eurObs = await fetchEcbCsv("PMC", keyEurRemote, { startPeriod, endPeriod });
-          pnObs = await fetchEcbCsv("PMC", keyPnRemote, { startPeriod, endPeriod });
-        } catch (_) {
-          continue;
-        }
-      }
-
-      totalEur += sumObs(eurObs);
-      totalPn += sumObs(pnObs);
-    }
-
-    if (totalPn <= 0) return null;
-
-    const avgEur = totalEur / totalPn;
-    const avgHuf = avgEur * eurHufAvg;
-    return Math.round(avgHuf);
-  }
-
-  const PRICING_BASKETS = [
-    { name: "GROCERY", mcc: ["5411", "5422", "5441", "5451", "5462", "5499"] },
-    { name: "RESTAURANTS", mcc: ["5812", "5814", "5811"] },
-    { name: "BARS", mcc: ["5813"] },
-    { name: "FUEL", mcc: ["5541", "5542"] },
-    { name: "HOTELS", mcc: ["7011"] },
-    { name: "PHARMACY", mcc: ["5912", "5122"] },
-    { name: "BEAUTY_WELLNESS", mcc: ["7230", "7298", "7297", "5977"] },
-    { name: "TRANSPORT", mcc: ["4111", "4121", "4131", "4214", "4215", "4784", "4789"] },
-    { name: "RETAIL_DURABLE", mcc: ["5712", "5722", "5732", "5734", "5045", "5944", "5094"] },
-    { name: "SERVICES", mcc: ["7392", "7399", "7210", "7216", "7349", "8111", "8931"] }
+  const HARDCODED_AVG_BASKET_TABLE = [
+    { category: "Services", activity: "Accounting", avg: 25000 },
+    { category: "Services", activity: "Architectural / Engineering / Surveying", avg: 60000, activityAliases: ["Architecural, Engineering and Surveying Services"] },
+    { category: "Services", activity: "Attorney / Lawyer / Solicitor", avg: 45000, activityAliases: ["Attorney/Lawyer/Solicitor"] },
+    { category: "Services", activity: "Auto Shops / Garages", avg: 35000, mcc: ["7531", "7534", "7535", "7538", "7542"] },
+    { category: "Services", activity: "Parking Lots", avg: 2500, mcc: ["7523"] },
+    { category: "Services", activity: "Bus / Shuttle / Coach Services", avg: 6000, activityAliases: ["Bus/Shuttle/Coach Services"] },
+    { category: "Services", activity: "Consulting", avg: 50000 },
+    { category: "Services", activity: "Craftsman / Contractor", avg: 80000, activityAliases: ["Craftsman/Contractor"] },
+    { category: "Services", activity: "Education", avg: 12000 },
+    { category: "Services", activity: "Letting Agents (ingatlan)", avg: 70000, activityAliases: ["Letting Agents"] },
+    { category: "Services", activity: "Misc. Repair Shops", avg: 18000, activityAliases: ["Miscellaneous Repair Shops and Related Services"] },
+    { category: "Services", activity: "Motor Servicing / Freight / Trucking", avg: 40000, activityAliases: ["Motor Servicing, Freight Carriers, and Trucking"] },
+    { category: "Services", activity: "Motor Vehicle Rentals", avg: 25000 },
+    { category: "Health, Beauty & Wellness", activity: "Beauty / Barber", avg: 6500 },
+    { category: "Health, Beauty & Wellness", activity: "Cosmetic Stores", avg: 9000 },
+    { category: "Health, Beauty & Wellness", activity: "Dentistry", avg: 35000 },
+    { category: "Health, Beauty & Wellness", activity: "Drugstores / Pharmacies", avg: 5500, activityAliases: ["Drugstores, Chemists, Pharmacies"] },
+    { category: "Health, Beauty & Wellness", activity: "Fitness / Wellness / Spa", avg: 14000 },
+    { category: "Health, Beauty & Wellness", activity: "Massage Parlours", avg: 12000 },
+    { category: "Health, Beauty & Wellness", activity: "Medical Services", avg: 30000 },
+    { category: "Health, Beauty & Wellness", activity: "Veterinary", avg: 18000 },
+    { category: "Food and Beverage", activity: "Bakery", avg: 1800 },
+    { category: "Food and Beverage", activity: "Café / Restaurant", avg: 6500, activityAliases: ["Café/Restaurant"] },
+    { category: "Food and Beverage", activity: "Bar / Pub / Club", avg: 4500, activityAliases: ["Bar/Pub/Club"] },
+    { category: "Food and Beverage", activity: "Catering / Delivery", avg: 9500, activityAliases: ["Catering/Delivery"] },
+    { category: "Food and Beverage", activity: "Fast Food Restaurant", avg: 3200 },
+    { category: "Food and Beverage", activity: "Fine Dining", avg: 20000 },
+    { category: "Food and Beverage", activity: "Food Truck / Cart", avg: 2800, activityAliases: ["Food Truck/Cart"] },
+    { category: "Leisure & Entertainment", activity: "Events / Festivals", avg: 10000, activityAliases: ["Events/Festivals"] },
+    { category: "Leisure & Entertainment", activity: "Hospitality & Experiences", avg: 18000 },
+    { category: "Leisure & Entertainment", activity: "Movies / Film / Video Entertainment", avg: 3500, activityAliases: ["Movies/Film/Video Entertainment"] },
+    { category: "Leisure & Entertainment", activity: "Museum / Gallery / Cultural", avg: 3500, activityAliases: ["Museum/Gallery/Cultural"] },
+    { category: "Leisure & Entertainment", activity: "Performing Arts", avg: 8000 },
+    { category: "Leisure & Entertainment", activity: "Sports / Recreation", avg: 9000, activityAliases: ["Sports/Recreation"] },
+    { category: "Leisure & Entertainment", activity: "Travel Agencies", avg: 60000 },
+    { category: "Charities, Organisations, Government", activity: "Charity", avg: 5000 },
+    { category: "Charities, Organisations, Government", activity: "Government Related", avg: 12000 },
+    { category: "Charities, Organisations, Government", activity: "Non-Profit Membership Organisation", avg: 8000 },
+    { category: "Charities, Organisations, Government", activity: "For-Profit Membership Organisation", avg: 15000 },
+    { category: "Retail", activity: "Food / Grocery / Convenience / Corner Shops", avg: 4500, activityAliases: ["Food/Grocery/Convenience/Corner Shops"] },
+    { category: "Retail", activity: "Clothing / Footwear / Accessories", avg: 12000, activityAliases: ["Clothing/Footwear/Accessories/Apparel"] },
+    { category: "Retail", activity: "Book Stores", avg: 6000 },
+    { category: "Retail", activity: "Florists", avg: 8000 },
+    { category: "Retail", activity: "Automotive Parts", avg: 20000 },
+    { category: "Retail", activity: "Hardware / Computer / Electronics (reseller)", avg: 35000, activityAliases: ["Hardware/Computer/Electronics Shops", "Authorised Reseller of Hardware/Computer/Electronics"] },
+    { category: "Retail", activity: "Art Dealers / Galleries", avg: 25000, activityAliases: ["Art Dealers and Galleries", "Museum/Gallery/Cultural"] },
+    { category: "Retail", activity: "Gift / Novelty / Souvenir", avg: 7000, activityAliases: ["Card Shops, Gift, Novelty, and Souvenir Shops"] },
+    { category: "Retail", activity: "Clock / Jeweller / Watch / Silverware", avg: 30000, activityAliases: ["Clock, Jeweller, Watch, and Silverware Stores"] },
+    { category: "Retail", activity: "Antique / Restoration Shops", avg: 18000, activityAliases: ["Antique Shops - Sales, Repairs, and Restoration Services"] },
+    { category: "Retail", activity: "Beer, Wine, and Spirits (bolt)", avg: 9000, activityAliases: ["Beer, Wine, and Spirits"] }
   ];
-
-  async function buildMccAvgBasketValueMap_2025_HU() {
-    const eurHufAvg = await fetchAvgEurHuf_2025();
-
-    for (const basket of PRICING_BASKETS) {
-      const avgHuf = await computeBasketAvgHufForMccList(basket.mcc, eurHufAvg);
-      if (avgHuf == null) continue;
-      for (const mcc of basket.mcc) {
-        MCC_AVG_BASKET_VALUE_HUF.set(mcc, avgHuf);
-      }
-    }
-
-    return MCC_AVG_BASKET_VALUE_HUF;
-  }
-
-  function ensureMccAvgBasketValueMap() {
-    if (MCC_AVG_BASKET_VALUE_HUF.size > 0) return Promise.resolve(MCC_AVG_BASKET_VALUE_HUF);
-    if (!mccAvgBasketMapPromise) {
-      mccAvgBasketMapPromise = buildMccAvgBasketValueMap_2025_HU()
-        .then((map) => {
-          if (currentData) renderDrawer(currentData);
-          return map;
-        })
-        .catch((error) => {
-          console.warn("ECB kosárérték betöltés sikertelen:", error);
-          return MCC_AVG_BASKET_VALUE_HUF;
-        });
-    }
-    return mccAvgBasketMapPromise;
-  }
 
   const SELECTORS = {
     companyName: "#parsedNameTitle",
@@ -643,9 +557,39 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       .trim();
   }
 
+  function normalizeAvgKey(value) {
+    return normalizeForMatch(value);
+  }
+
+  function buildHardcodedMccAvgBasketValueMap() {
+    const normalizedTable = HARDCODED_AVG_BASKET_TABLE.map((row) => ({
+      ...row,
+      categoryKey: normalizeAvgKey(row.category),
+      activityKeys: [row.activity, ...(row.activityAliases || [])].map((activity) => normalizeAvgKey(activity)),
+      mccList: row.mcc || []
+    }));
+
+    MCC_DB.forEach((entry) => {
+      const entryCategoryKey = normalizeAvgKey(entry.category);
+      const entryActivityKey = normalizeAvgKey(entry.activity);
+
+      const match = normalizedTable.find((row) => {
+        if (row.mccList.includes(entry.mcc)) return true;
+        if (row.categoryKey !== entryCategoryKey) return false;
+        return row.activityKeys.includes(entryActivityKey);
+      });
+
+      if (match) {
+        MCC_AVG_BASKET_VALUE_HUF.set(`${entry.mcc}::${entry.activity}`, match.avg);
+      }
+    });
+  }
+
   function normalizeNumberField(value) {
     return (value || "").replace(/[\s-]+/g, "");
   }
+
+  buildHardcodedMccAvgBasketValueMap();
 
   function parseHungarianAmount(value) {
     if (!value) return null;
@@ -3568,18 +3512,24 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     if (!Array.isArray(matches) || matches.length === 0) {
       return "Nincs MCC találat.";
     }
-    if (MCC_AVG_BASKET_VALUE_HUF.size === 0) {
-      ensureMccAvgBasketValueMap();
-      return "MCC kosárértékek betöltése folyamatban...";
-    }
-    const uniqueMcc = Array.from(new Set(matches.map((match) => match.entry.mcc).filter(Boolean)));
-    const lines = uniqueMcc.map((mcc) => {
-      const value = MCC_AVG_BASKET_VALUE_HUF.get(mcc);
-      if (value == null) return `${mcc}: N/A`;
+    const uniqueEntries = new Map();
+    matches.forEach((match) => {
+      const entry = match.entry;
+      if (!entry?.mcc || !entry?.activity) return;
+      const key = `${entry.mcc}::${entry.activity}`;
+      if (!uniqueEntries.has(key)) {
+        uniqueEntries.set(key, entry);
+      }
+    });
+
+    const lines = Array.from(uniqueEntries.values()).map((entry) => {
+      const key = `${entry.mcc}::${entry.activity}`;
+      const value = MCC_AVG_BASKET_VALUE_HUF.get(key);
+      if (value == null) return `${entry.mcc} - ${entry.activity}: N/A`;
       const formatted = Number.isFinite(value)
         ? `${value.toLocaleString("hu-HU")} Ft`
         : String(value);
-      return `${mcc}: ${formatted}`;
+      return `${entry.mcc} - ${entry.activity}: ${formatted}`;
     });
     return lines.join("\n");
   }
