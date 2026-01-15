@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Opten – Teya Onboarding menüpont (Riport fölé, no default redirect)
 // @namespace    https://teya.local/
-// @version      1.2.6
+// @version      1.2.7
 // @description  "Teya Onboarding" menüpont beszúrása a bal oldali menübe a Riport fölé, default navigáció nélkül. Oldalsó drawer + mezőnkénti copy, onboardinghoz szükséges adatokkal.
 // @author       You
 // @match        https://www.opten.hu/*
@@ -11,6 +11,7 @@
 // @grant        GM_xmlhttpRequest
 // @connect      iban.hu
 // @connect      www.iban.hu
+// @connect      data-api.ecb.europa.eu
 // ==/UserScript==
 
 (() => {
@@ -25,9 +26,145 @@
   const INSERTED_A_ID  = "teya-onboarding-link";
   const DEFAULT_IBAN_COUNTRY = "HU";
 
-  const MCC_AVG_BASKET_VALUE_HUF = new Map([
-    // TODO: töltsd fel kézzel megbízható, 2025-ös források alapján (MCC -> átlagos kosárérték, HUF).
-  ]);
+  const MCC_AVG_BASKET_VALUE_HUF = new Map();
+  let mccAvgBasketMapPromise = null;
+
+  const ECB_API_BASE = "https://data-api.ecb.europa.eu/service/data";
+
+  async function requestText(url, headers = {}) {
+    if (typeof GM_xmlhttpRequest === "function") {
+      return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+          method: "GET",
+          url,
+          headers,
+          onload: (response) => resolve(response.responseText || ""),
+          onerror: () => reject(new Error("Request failed"))
+        });
+      });
+    }
+
+    const response = await fetch(url, { headers });
+    if (!response.ok) throw new Error(`Request failed (${response.status})`);
+    return response.text();
+  }
+
+  async function fetchEcbCsv(flow, key, params = {}) {
+    const url = new URL(`${ECB_API_BASE}/${flow}/${key}`);
+    Object.entries(params).forEach(([paramKey, value]) => url.searchParams.set(paramKey, value));
+    url.searchParams.set("format", "csvdata");
+
+    const text = await requestText(url.toString(), { "Accept": "text/csv" });
+    const lines = text.trim().split("\n");
+    if (!lines.length) return [];
+    const header = lines[0].split(",");
+    const idxTime = header.indexOf("TIME_PERIOD");
+    const idxVal = header.indexOf("OBS_VALUE");
+    if (idxTime === -1 || idxVal === -1) throw new Error("Unexpected ECB CSV format");
+
+    const out = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",");
+      const time = cols[idxTime];
+      const value = Number(cols[idxVal]);
+      if (time && Number.isFinite(value)) out.push({ t: time, v: value });
+    }
+    return out;
+  }
+
+  function sumObs(obs) {
+    return obs.reduce((acc, item) => acc + item.v, 0);
+  }
+
+  async function fetchAvgEurHuf_2025() {
+    const obs = await fetchEcbCsv("EXR", "M.HUF.EUR.SP00.A", {
+      startPeriod: "2025-01",
+      endPeriod: "2025-12"
+    });
+    const avg = sumObs(obs) / obs.length;
+    return avg;
+  }
+
+  async function computeBasketAvgHufForMccList(mccList, eurHufAvg) {
+    const startPeriod = "2025-Q1";
+    const endPeriod = "2025-Q4";
+
+    let totalEur = 0;
+    let totalPn = 0;
+
+    for (const mcc of mccList) {
+      const keyEur = `Q.HU._Z.W0.NR.${mcc}.N.EUR`;
+      const keyPn = `Q.HU._Z.W0.NR.${mcc}.N.PN`;
+      let eurObs;
+      let pnObs;
+
+      try {
+        eurObs = await fetchEcbCsv("PMC", keyEur, { startPeriod, endPeriod });
+        pnObs = await fetchEcbCsv("PMC", keyPn, { startPeriod, endPeriod });
+      } catch (_) {
+        try {
+          const keyEurRemote = `Q.HU._Z.W0.R.${mcc}.N.EUR`;
+          const keyPnRemote = `Q.HU._Z.W0.R.${mcc}.N.PN`;
+          eurObs = await fetchEcbCsv("PMC", keyEurRemote, { startPeriod, endPeriod });
+          pnObs = await fetchEcbCsv("PMC", keyPnRemote, { startPeriod, endPeriod });
+        } catch (_) {
+          continue;
+        }
+      }
+
+      totalEur += sumObs(eurObs);
+      totalPn += sumObs(pnObs);
+    }
+
+    if (totalPn <= 0) return null;
+
+    const avgEur = totalEur / totalPn;
+    const avgHuf = avgEur * eurHufAvg;
+    return Math.round(avgHuf);
+  }
+
+  const PRICING_BASKETS = [
+    { name: "GROCERY", mcc: ["5411", "5422", "5441", "5451", "5462", "5499"] },
+    { name: "RESTAURANTS", mcc: ["5812", "5814", "5811"] },
+    { name: "BARS", mcc: ["5813"] },
+    { name: "FUEL", mcc: ["5541", "5542"] },
+    { name: "HOTELS", mcc: ["7011"] },
+    { name: "PHARMACY", mcc: ["5912", "5122"] },
+    { name: "BEAUTY_WELLNESS", mcc: ["7230", "7298", "7297", "5977"] },
+    { name: "TRANSPORT", mcc: ["4111", "4121", "4131", "4214", "4215", "4784", "4789"] },
+    { name: "RETAIL_DURABLE", mcc: ["5712", "5722", "5732", "5734", "5045", "5944", "5094"] },
+    { name: "SERVICES", mcc: ["7392", "7399", "7210", "7216", "7349", "8111", "8931"] }
+  ];
+
+  async function buildMccAvgBasketValueMap_2025_HU() {
+    const eurHufAvg = await fetchAvgEurHuf_2025();
+
+    for (const basket of PRICING_BASKETS) {
+      const avgHuf = await computeBasketAvgHufForMccList(basket.mcc, eurHufAvg);
+      if (avgHuf == null) continue;
+      for (const mcc of basket.mcc) {
+        MCC_AVG_BASKET_VALUE_HUF.set(mcc, avgHuf);
+      }
+    }
+
+    return MCC_AVG_BASKET_VALUE_HUF;
+  }
+
+  function ensureMccAvgBasketValueMap() {
+    if (MCC_AVG_BASKET_VALUE_HUF.size > 0) return Promise.resolve(MCC_AVG_BASKET_VALUE_HUF);
+    if (!mccAvgBasketMapPromise) {
+      mccAvgBasketMapPromise = buildMccAvgBasketValueMap_2025_HU()
+        .then((map) => {
+          if (currentData) renderDrawer(currentData);
+          return map;
+        })
+        .catch((error) => {
+          console.warn("ECB kosárérték betöltés sikertelen:", error);
+          return MCC_AVG_BASKET_VALUE_HUF;
+        });
+    }
+    return mccAvgBasketMapPromise;
+  }
 
   const SELECTORS = {
     companyName: "#parsedNameTitle",
@@ -3430,6 +3567,10 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   function formatMccAverageBasketValue(matches) {
     if (!Array.isArray(matches) || matches.length === 0) {
       return "Nincs MCC találat.";
+    }
+    if (MCC_AVG_BASKET_VALUE_HUF.size === 0) {
+      ensureMccAvgBasketValueMap();
+      return "MCC kosárértékek betöltése folyamatban...";
     }
     const uniqueMcc = Array.from(new Set(matches.map((match) => match.entry.mcc).filter(Boolean)));
     const lines = uniqueMcc.map((mcc) => {
