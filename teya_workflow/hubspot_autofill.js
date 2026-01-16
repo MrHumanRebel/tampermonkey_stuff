@@ -131,11 +131,22 @@
 
   function addFillButtons() {
     const closeButtons = document.querySelectorAll(
-      "button[aria-label='Close'], button[aria-label='Close panel'], button[data-test-id*='close'], button[data-test-id*='Close']"
+      [
+        "header button[aria-label='Close']",
+        "header button[aria-label='Close panel']",
+        "header button[data-test-id*='close']",
+        "header button[data-test-id*='Close']",
+        "[data-test-id*='header'] button[aria-label='Close']",
+        "[data-test-id*='header'] button[aria-label='Close panel']",
+        "[data-test-id*='header'] button[data-test-id*='close']",
+        "[data-test-id*='header'] button[data-test-id*='Close']"
+      ].join(", ")
     );
 
     closeButtons.forEach((closeButton) => {
-      const parent = closeButton.parentElement;
+      const parent = closeButton.closest("header")
+        || closeButton.closest("[data-test-id*='header']")
+        || closeButton.parentElement;
       if (!parent || parent.querySelector(`.${BUTTON_CLASS}`)) {
         return;
       }
