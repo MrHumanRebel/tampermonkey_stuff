@@ -1718,8 +1718,13 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const titleEls = Array.from(root.querySelectorAll(".data-title"));
     titleEls.forEach((el) => {
       const text = normalizeSpace(el.textContent);
-      const match = text.match(/Nettó árbevétel\s*\((\d{4})\)/i);
-      if (!match) return;
+      const normalized = text.toLowerCase();
+      const netMatch = text.match(/Nettó árbevétel\s*\((\d{4})\)/i);
+      const incomeMatch = !netMatch && normalized.includes("bevétel")
+        ? text.match(/(\d{4})/) || []
+        : [];
+      const match = netMatch || incomeMatch;
+      if (!match || !match[1]) return;
       const year = parseInt(match[1], 10);
       const row = el.closest(".row") || el.parentElement;
       const value = normalizeSpace(row?.querySelector(".data-value")?.textContent || "");
@@ -1732,25 +1737,41 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       return formatRevenueValue(map.get(latest));
     }
 
-    const tableRow = Array.from(root.querySelectorAll("tr"))
-      .find((row) => normalizeSpace(row.querySelector(".row-title")?.textContent || "").toLowerCase()
-        .includes("értékesítés nettó árbevétele"));
-    if (tableRow) {
-      const table = tableRow.closest("table");
+    const readTableRowValue = (row) => {
+      if (!row) return "";
+      const table = row.closest("table");
       const isThousandHuf = normalizeSpace(table?.textContent || "").toLowerCase().includes("ezer huf");
-      const cells = Array.from(tableRow.querySelectorAll("td"));
+      const cells = Array.from(row.querySelectorAll("td"));
       const valueCell = cells.slice(1).find((cell) => {
         const value = normalizeSpace(cell.textContent || "");
         return value && value !== "-";
       });
       const value = normalizeSpace(valueCell?.textContent || "");
-      if (value) {
-        const withUnit = isThousandHuf ? `${value} eFt` : value;
-        return formatRevenueValue(withUnit);
-      }
+      if (!value) return "";
+      return isThousandHuf ? `${value} eFt` : value;
+    };
+
+    const netRevenueRow = Array.from(root.querySelectorAll("tr"))
+      .find((row) => normalizeSpace(row.querySelector(".row-title")?.textContent || "").toLowerCase()
+        .includes("értékesítés nettó árbevétele"));
+    const netRevenueValue = readTableRowValue(netRevenueRow);
+    if (netRevenueValue) {
+      return formatRevenueValue(netRevenueValue);
     }
 
-    const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata") || "";
+    const incomeRow = Array.from(root.querySelectorAll("tr"))
+      .find((row) => {
+        const title = normalizeSpace(row.querySelector(".row-title")?.textContent || "").toLowerCase();
+        return title.includes("bevétel") && !title.includes("nettó árbevétel");
+      });
+    const incomeValue = readTableRowValue(incomeRow);
+    if (incomeValue) {
+      return formatRevenueValue(incomeValue);
+    }
+
+    const fallback = readValueByDataTitle(root, "Nettó árbevétel", "#shortfinancialdata")
+      || readValueByDataTitle(root, "Bevétel", "#shortfinancialdata")
+      || "";
     return formatRevenueValue(fallback);
   }
 
