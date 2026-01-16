@@ -144,7 +144,9 @@
     );
 
     closeButtons.forEach((closeButton) => {
-      const parent = closeButton.closest("header")
+      const actionTarget = findActionTarget(closeButton);
+      const parent = actionTarget?.container
+        || closeButton.closest("header")
         || closeButton.closest("[data-test-id*='header']")
         || closeButton.parentElement;
       if (!parent || parent.querySelector(`.${BUTTON_CLASS}`)) {
@@ -157,8 +159,36 @@
       fillButton.textContent = "Fill JSON";
       fillButton.addEventListener("click", () => handleFillClick(closeButton));
 
-      parent.insertBefore(fillButton, closeButton);
+      if (actionTarget?.referenceButton) {
+        parent.insertBefore(fillButton, actionTarget.referenceButton);
+      } else {
+        parent.insertBefore(fillButton, closeButton);
+      }
     });
+  }
+
+  function findActionTarget(closeButton) {
+    const dialog = closeButton.closest("[role='dialog']")
+      || closeButton.closest("[data-test-id*='panel']")
+      || document;
+    const buttons = Array.from(dialog.querySelectorAll("button"));
+    const saveButton = buttons.find((button) => isButtonLabel(button, /save/i));
+    const cancelButton = buttons.find((button) => isButtonLabel(button, /cancel/i));
+    const referenceButton = cancelButton || saveButton;
+
+    if (!referenceButton || !referenceButton.parentElement) {
+      return null;
+    }
+
+    return {
+      container: referenceButton.parentElement,
+      referenceButton
+    };
+  }
+
+  function isButtonLabel(button, regex) {
+    const text = (button.textContent || button.getAttribute("aria-label") || "").trim();
+    return regex.test(text);
   }
 
   async function handleFillClick(closeButton) {
