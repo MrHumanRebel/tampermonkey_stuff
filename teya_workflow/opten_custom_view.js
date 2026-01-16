@@ -1413,14 +1413,17 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   }
 
   function readRegistryNumberFromDoc(root) {
-    const fromLabel = textFromLabel(root, "Cégjegyzékszám");
-    if (fromLabel) return normalizeSpace(fromLabel.split("(")[0]);
+    const fromRegistry = textFromLabel(root, "Cégjegyzékszám");
+    if (fromRegistry) return normalizeSpace(fromRegistry.split("(")[0]);
+
+    const fromEv = textFromLabel(root, "Nyilvántartási szám");
+    if (fromEv) return normalizeSpace(fromEv.split("(")[0]);
 
     const head = normalizeSpace(root.querySelector("#subhead-1 .data-line--content")?.textContent || "");
     if (head) return normalizeSpace(head.split("(")[0]);
 
     const title = normalizeSpace(root.querySelector(".kh-heading .fs-medium")?.textContent || "");
-    const match = title.match(/Cégjegyzékszám:\s*([0-9 ]+)/i);
+    const match = title.match(/(?:Cégjegyzékszám|Nyilvántartási\s*szám):\s*([0-9 ]+)/i);
     return match ? normalizeSpace(match[1]) : "";
   }
 
@@ -1439,7 +1442,9 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return {
       companyName: name || "",
       taxId,
-      registryNumber: textFrom(root, SELECTORS.registryNumber) || textFromLabel(root, "Cégjegyzékszám"),
+      registryNumber: textFrom(root, SELECTORS.registryNumber)
+        || textFromLabel(root, "Cégjegyzékszám")
+        || textFromLabel(root, "Nyilvántartási szám"),
       address: textFrom(root, SELECTORS.address) || normalizeSpace(root.querySelector("#subhead-5 .head-title a")?.textContent),
       eid: getEidFromUrl(),
       sourceUrl: window.location.href
@@ -1628,6 +1633,43 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     return "";
   }
 
+  function readEvOwnerInfo(root) {
+    const name = textFromLabel(root, "Egyéni vállalkozó neve")
+      || textFromLabel(root, "Vállalkozó neve")
+      || textFromLabel(root, "Vállalkozó");
+    const address = textFromLabel(root, "Lakcím")
+      || textFromLabel(root, "Lakóhely")
+      || textFromLabel(root, "Személyes lakcím");
+    const birth = textFromLabel(root, "Születés ideje")
+      || textFromLabel(root, "Születési ideje");
+    const taxId = textFromLabel(root, "Adóazonosító jel")
+      || textFromLabel(root, "Adóazonosító");
+
+    return {
+      name: normalizeSpace(name),
+      address: normalizeSpace(address),
+      birth: normalizeSpace(birth),
+      taxId: normalizeSpace(taxId)
+    };
+  }
+
+  function buildEvSignatory(root, companyForm) {
+    const owner = readEvOwnerInfo(root);
+    const hasOwnerData = [owner.name, owner.address, owner.birth, owner.taxId].some((value) => value);
+    const normalizedForm = normalizeSpace(companyForm).toLowerCase();
+    const isEv = normalizedForm.includes("egyéni");
+    if (!hasOwnerData && !isEv) return null;
+
+    return {
+      name: owner.name || "ISMERETLEN",
+      role: "Egyéni vállalkozó",
+      address: owner.address || "ISMERETLEN",
+      birth: owner.birth || "ISMERETLEN",
+      taxId: owner.taxId || "ISMERETLEN",
+      hatalyos: "ISMERETLEN"
+    };
+  }
+
   function readQuickReport(root) {
     const quickReport = root.querySelector("#quickReport");
     if (quickReport) {
@@ -1787,13 +1829,16 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   function parseCegadatlap(root) {
     const base = buildPayload(root);
     const registryNumber = base.registryNumber || readRegistryNumberFromDoc(root);
+    const companyForm = textFromLabel(root, "Cégforma") || textFromTitle(root, "Cégforma");
+    const signatories = readAuthorizedSignatories(root);
+    const evSignatory = signatories.length ? null : buildEvSignatory(root, companyForm);
 
     return {
       companyName: base.companyName,
       taxId: base.taxId,
       registryNumber,
       address: base.address,
-      companyForm: textFromLabel(root, "Cégforma") || textFromTitle(root, "Cégforma"),
+      companyForm,
       establishmentDate: textFromLabel(root, "Alakulás dátuma"),
       registrationDate: textFromLabel(root, "Bejegyzés dátuma"),
       activities: readTevekenysegek(root),
@@ -1801,7 +1846,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       telephelyek: readTelephelyek(root),
       statisticalNumber: normalizeSpace(root.querySelector("#subhead-20 h3")?.textContent || ""),
       emails: readEmails(root),
-      signatories: readAuthorizedSignatories(root),
+      signatories: signatories.length ? signatories : (evSignatory ? [evSignatory] : []),
       bankAccounts: readBankAccounts(root)
     };
   }
@@ -4370,7 +4415,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       "Tevékenységi köre(i)": groupedActivitiesText || listActivities(data.activities),
       "Cég székhelye": val(data.headquarters),
       "Cég telephelye(i)": list(data.telephelyek),
-      "Cégjegyzékszám": numeric(data.registryNumber),
+      "Cégjegyzékszám / Nyilvántartási szám": numeric(data.registryNumber),
       "Adószám": numeric(data.taxId),
       "Email": val(data.emails),
       "Értékesítés nettó árbevétele": val(data.revenue),
@@ -4398,7 +4443,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const estimatedMonthlyRevenue = calculateEstimatedCardMonthlyRevenue(data.revenue);
     if (headerSub) {
       headerSub.innerHTML = [
-        cleanedRegistryNumber ? `<span>Cégjegyzékszám: ${cleanedRegistryNumber}</span>` : "",
+        cleanedRegistryNumber ? `<span>Cégjegyzékszám / Nyilvántartási szám: ${cleanedRegistryNumber}</span>` : "",
         cleanedTaxId ? `<span>Adószám: ${cleanedTaxId}</span>` : "",
         data.address ? `<span>${data.address}</span>` : ""
       ].filter(Boolean).join("");
@@ -4429,7 +4474,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       buildRow("Alakulás dátuma", data.establishmentDate),
       buildRow("Bejegyzés dátuma", data.registrationDate),
       buildRow("Cég székhelye", data.headquarters, { multiline: true }),
-      buildRow("Cégjegyzékszám", cleanedRegistryNumber),
+      buildRow("Cégjegyzékszám / Nyilvántartási szám", cleanedRegistryNumber),
       buildRow("Adószám", cleanedTaxId),
       buildRow("Email", data.emails, { multiline: true }),
       buildRow("Értékesítés nettó árbevétele", data.revenue),
