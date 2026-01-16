@@ -130,6 +130,8 @@
   }
 
   function addFillButtons() {
+    addDealViewButton();
+
     const closeButtons = document.querySelectorAll(
       [
         "header button[aria-label='Close']",
@@ -153,42 +155,38 @@
         return;
       }
 
-      const fillButton = document.createElement("button");
-      fillButton.type = "button";
-      fillButton.className = BUTTON_CLASS;
-      fillButton.textContent = "Fill JSON";
-      fillButton.addEventListener("click", () => handleFillClick(closeButton));
-
-      if (actionTarget?.referenceButton) {
-        parent.insertBefore(fillButton, actionTarget.referenceButton);
-      } else {
-        parent.insertBefore(fillButton, closeButton);
-      }
+      const fillButton = createFillButton(closeButton);
+      parent.insertBefore(fillButton, closeButton);
     });
   }
 
-  function findActionTarget(closeButton) {
-    const dialog = closeButton.closest("[role='dialog']")
-      || closeButton.closest("[data-test-id*='panel']")
-      || document;
-    const buttons = Array.from(dialog.querySelectorAll("button"));
-    const saveButton = buttons.find((button) => isButtonLabel(button, /save/i));
-    const cancelButton = buttons.find((button) => isButtonLabel(button, /cancel/i));
-    const referenceButton = cancelButton || saveButton;
-
-    if (!referenceButton || !referenceButton.parentElement) {
-      return null;
+  function addDealViewButton() {
+    const aboutHeading = findAboutDealHeading();
+    if (!aboutHeading) {
+      return;
     }
 
-    return {
-      container: referenceButton.parentElement,
-      referenceButton
-    };
+    const container = aboutHeading.parentElement;
+    if (!container || container.querySelector(`.${BUTTON_CLASS}`)) {
+      return;
+    }
+
+    const fillButton = createFillButton();
+    container.insertBefore(fillButton, aboutHeading);
   }
 
-  function isButtonLabel(button, regex) {
-    const text = (button.textContent || button.getAttribute("aria-label") || "").trim();
-    return regex.test(text);
+  function findAboutDealHeading() {
+    const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, [role='heading']"));
+    return headings.find((heading) => heading.textContent.trim().toLowerCase() === "about this deal");
+  }
+
+  function createFillButton(closeButton) {
+    const fillButton = document.createElement("button");
+    fillButton.type = "button";
+    fillButton.className = BUTTON_CLASS;
+    fillButton.textContent = "Fill JSON";
+    fillButton.addEventListener("click", () => handleFillClick(closeButton));
+    return fillButton;
   }
 
   async function handleFillClick(closeButton) {
@@ -223,7 +221,10 @@
   }
 
   function findFormRoot(closeButton) {
-    return closeButton.closest("form") || closeButton.closest("[role='dialog']") || document.querySelector("form");
+    const fromButton = closeButton
+      ? (closeButton.closest("form") || closeButton.closest("[role='dialog']"))
+      : null;
+    return fromButton || document.querySelector("form") || document.querySelector("[role='main']");
   }
 
   async function maybeSelectDetails(data) {
