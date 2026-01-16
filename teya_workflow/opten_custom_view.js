@@ -1635,15 +1635,27 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
 
   function readEvOwnerInfo(root) {
     const name = textFromLabel(root, "Egyéni vállalkozó neve")
+      || textFromTitle(root, "Egyéni vállalkozó neve")
       || textFromLabel(root, "Vállalkozó neve")
-      || textFromLabel(root, "Vállalkozó");
+      || textFromTitle(root, "Vállalkozó neve")
+      || textFromLabel(root, "Vállalkozó")
+      || textFromTitle(root, "Vállalkozó")
+      || textFromLabel(root, "Név")
+      || textFromTitle(root, "Név");
     const address = textFromLabel(root, "Lakcím")
+      || textFromTitle(root, "Lakcím")
       || textFromLabel(root, "Lakóhely")
-      || textFromLabel(root, "Személyes lakcím");
+      || textFromTitle(root, "Lakóhely")
+      || textFromLabel(root, "Személyes lakcím")
+      || textFromTitle(root, "Személyes lakcím");
     const birth = textFromLabel(root, "Születés ideje")
-      || textFromLabel(root, "Születési ideje");
+      || textFromTitle(root, "Születés ideje")
+      || textFromLabel(root, "Születési ideje")
+      || textFromTitle(root, "Születési ideje");
     const taxId = textFromLabel(root, "Adóazonosító jel")
-      || textFromLabel(root, "Adóazonosító");
+      || textFromTitle(root, "Adóazonosító jel")
+      || textFromLabel(root, "Adóazonosító")
+      || textFromTitle(root, "Adóazonosító");
 
     return {
       name: normalizeSpace(name),
@@ -1656,8 +1668,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
   function buildEvSignatory(root, companyForm) {
     const owner = readEvOwnerInfo(root);
     const hasOwnerData = [owner.name, owner.address, owner.birth, owner.taxId].some((value) => value);
-    const normalizedForm = normalizeSpace(companyForm).toLowerCase();
-    const isEv = normalizedForm.includes("egyéni");
+    const isEv = isEvCompanyForm(companyForm);
     if (!hasOwnerData && !isEv) return null;
 
     return {
@@ -1668,6 +1679,11 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       taxId: owner.taxId || "ISMERETLEN",
       hatalyos: "ISMERETLEN"
     };
+  }
+
+  function isEvCompanyForm(companyForm) {
+    const normalizedForm = normalizeSpace(companyForm).toLowerCase();
+    return normalizedForm.includes("egyéni");
   }
 
   function readQuickReport(root) {
@@ -1852,7 +1868,11 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
     const registryNumber = base.registryNumber || readRegistryNumberFromDoc(root);
     const companyForm = textFromLabel(root, "Cégforma") || textFromTitle(root, "Cégforma");
     const signatories = readAuthorizedSignatories(root);
-    const evSignatory = signatories.length ? null : buildEvSignatory(root, companyForm);
+    const evSignatory = buildEvSignatory(root, companyForm);
+    const isEv = isEvCompanyForm(companyForm);
+    const resolvedSignatories = isEv && evSignatory
+      ? [evSignatory]
+      : (signatories.length ? signatories : (evSignatory ? [evSignatory] : []));
 
     return {
       companyName: base.companyName,
@@ -1867,7 +1887,7 @@ Charities, Organisations, Government\tGovernment Related\t9402\tPostal Services�
       telephelyek: readTelephelyek(root),
       statisticalNumber: normalizeSpace(root.querySelector("#subhead-20 h3")?.textContent || ""),
       emails: readEmails(root),
-      signatories: signatories.length ? signatories : (evSignatory ? [evSignatory] : []),
+      signatories: resolvedSignatories,
       bankAccounts: readBankAccounts(root)
     };
   }
