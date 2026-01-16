@@ -146,7 +146,9 @@
     );
 
     closeButtons.forEach((closeButton) => {
-      const parent = closeButton.closest("header")
+      const actionTarget = findActionTarget(closeButton);
+      const parent = actionTarget?.container
+        || closeButton.closest("header")
         || closeButton.closest("[data-test-id*='header']")
         || closeButton.parentElement;
       if (!parent || parent.querySelector(`.${BUTTON_CLASS}`)) {
