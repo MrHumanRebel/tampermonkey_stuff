@@ -55,6 +55,50 @@
     description: { dynamic: "dealDescription" }
   };
 
+
+  const BUSINESS_CATEGORY_HINTS = [
+    {
+      category: "Food and Beverage",
+      activity: "Café / Restaurant",
+      needles: ["etterem", "kavezo", "kávézó", "cafe", "restaurant", "vendeglatas", "vendéglátás", "bar", "pub", "bisztro", "bistro"]
+    },
+    {
+      category: "Food and Beverage",
+      activity: "Catering / Delivery",
+      needles: ["catering", "kiszallitas", "kiszállítás", "delivery", "etelfutar", "ételfutár"]
+    },
+    {
+      category: "Retail",
+      activity: "Food / Grocery / Convenience / Corner Shops",
+      needles: ["kiskereskedelem", "elelmiszer", "élelmiszer", "grocery", "convenience", "bolt", "aruhaz", "áruház"]
+    },
+    {
+      category: "Retail",
+      activity: "Furniture, Home Furnishings, and Equipment Stores",
+      needles: ["butor", "bútor", "lakberendezes", "lakberendezés", "home furnishing", "5719", "4755"]
+    },
+    {
+      category: "Services",
+      activity: "Craftsman / Contractor",
+      needles: ["epitoipar", "építőipar", "villanyszereles", "villanyszerelés", "burkolas", "burkolás", "festes", "festés", "tetofedes", "tetőfedés", "kozmuepites", "közműépítés"]
+    },
+    {
+      category: "Services",
+      activity: "Letting Agents",
+      needles: ["ingatlan", "real estate", "letting", "6811", "6812", "6832"]
+    },
+    {
+      category: "Services",
+      activity: "Consulting",
+      needles: ["tanacsadas", "tanácsadás", "consulting", "uzletviteli", "üzletviteli", "7020"]
+    },
+    {
+      category: "Health, Beauty & Wellness",
+      activity: "Beauty / Barber",
+      needles: ["fodrasz", "fodrász", "kozmetika", "kozmetikus", "szepseg", "szépség", "barber", "beauty"]
+    }
+  ];
+
   const BANK_KEYWORDS = {
     OTP: ["otp"],
     "K&H": ["k&h", "kh bank", "k h"],
@@ -257,13 +301,13 @@
     fillButton.type = "button";
     fillButton.className = BUTTON_CLASS;
     fillButton.textContent = "Fill JSON";
-    fillButton.addEventListener("click", () => handleFillClick(closeButton));
+    fillButton.addEventListener("click", () => handleFillClick({ closeButton, triggerButton: fillButton }));
     return fillButton;
   }
 
-  async function handleFillClick(closeButton) {
+  async function handleFillClick(context = {}) {
     debug("Fill JSON clicked");
-    const formRoot = findFormRoot(closeButton);
+    const formRoot = findFormRoot(context);
     if (!formRoot) {
       alert("Nem található aktív form.");
       return;
@@ -297,11 +341,31 @@
     debug("Fill JSON finished");
   }
 
-  function findFormRoot(closeButton) {
-    const fromButton = closeButton
-      ? (closeButton.closest("form") || closeButton.closest("[role='dialog']"))
-      : null;
-    return fromButton || document.querySelector("form") || document.querySelector("[role='main']");
+  function findFormRoot(context = {}) {
+    const { closeButton, triggerButton } = context;
+
+    const candidates = [
+      triggerButton?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      triggerButton?.closest("[data-test-id='crm-card-content']"),
+      closeButton?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      closeButton?.closest("form"),
+      closeButton?.closest("[role='dialog']"),
+      findAboutDealHeading()?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      document.querySelector("[data-sidebar-card-type='PropertiesCard'] [data-selenium-test='profile-properties']")?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      document.querySelector("[data-selenium-test='profile-properties']"),
+      document.querySelector("form"),
+      document.querySelector("[role='main']")
+    ].filter(Boolean);
+
+    const root = candidates[0] || null;
+    debug("Resolved form root", {
+      candidateCount: candidates.length,
+      rootTag: root?.tagName || null,
+      rootTestId: root?.getAttribute?.("data-test-id") || null,
+      rootSidebarType: root?.getAttribute?.("data-sidebar-card-type") || null
+    });
+
+    return root;
   }
 
   async function maybeSelectDetails(data) {
@@ -409,6 +473,7 @@
     await fillByPropertySelectors(formRoot, data, contact);
 
     const fields = Array.from(formRoot.querySelectorAll("label"));
+    debug("Collected label fields", { count: fields.length });
 
     for (const label of fields) {
       const labelText = label.textContent.trim();
@@ -450,16 +515,6 @@
       if (/Business Activity/i.test(labelText) && context.businessActivity) {
         debugField("Business mapping", labelText, context.businessActivity);
       await fillFieldForLabel(label, context.businessActivity);
-        continue;
-      }
-
-      if (/Business Category/i.test(labelText) && context.businessCategory) {
-        await fillFieldForLabel(label, context.businessCategory);
-        continue;
-      }
-
-      if (/Business Activity/i.test(labelText) && context.businessActivity) {
-        await fillFieldForLabel(label, context.businessActivity);
         continue;
       }
 
@@ -661,7 +716,8 @@
         continue;
       }
 
-      const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
+      const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`)
+        || document.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
       if (!field) {
         debug("Property field not found", { propertyId, value });
         continue;
@@ -722,16 +778,40 @@
   }
 
   async function fillFieldForLabel(label, value) {
-    const container = label.closest("[data-test-id='FormControl']") || label.parentElement;
+    const labelText = label.textContent?.trim() || "";
+    const forId = label.getAttribute("for");
+    const forElement = forId ? document.getElementById(forId) : null;
+
+    if (forElement) {
+      if (forElement.matches("input, textarea")) {
+        const resolved = Array.isArray(value) ? value.join(", ") : value;
+        debugField("Text fill via label[for]", labelText, resolved, { type: forElement.type || forElement.tagName });
+        await setInputValue(forElement, resolved);
+        return;
+      }
+
+      if (forElement.matches("button[data-dropdown]")) {
+        if (Array.isArray(value)) {
+          debugField("Dropdown multi fill via label[for]", labelText, value);
+          await selectDropdownValues(forElement, value);
+        } else {
+          debugField("Dropdown single fill via label[for]", labelText, value);
+          await selectDropdownValue(forElement, value);
+        }
+        return;
+      }
+    }
+
+    const container = label.closest("[data-test-id='DisplayOptimizedFormControl'], [data-test-id='FormControl']") || label.parentElement;
     if (!container) {
-      debug("No container for label", { labelText: label.textContent?.trim() || "" });
+      debug("No container for label", { labelText });
       return;
     }
 
     const textInput = container.querySelector("input[type='text'], input[type='number'], input[type='date'], textarea");
     if (textInput) {
       const resolved = Array.isArray(value) ? value.join(", ") : value;
-      debugField("Text fill", label.textContent?.trim() || "", resolved, { type: textInput.type || textInput.tagName });
+      debugField("Text fill", labelText, resolved, { type: textInput.type || textInput.tagName });
       await setInputValue(textInput, resolved);
       return;
     }
@@ -739,10 +819,10 @@
     const dropdownButton = container.querySelector("button[data-dropdown]");
     if (dropdownButton) {
       if (Array.isArray(value)) {
-        debugField("Dropdown multi fill", label.textContent?.trim() || "", value);
+        debugField("Dropdown multi fill", labelText, value);
         await selectDropdownValues(dropdownButton, value);
       } else {
-        debugField("Dropdown single fill", label.textContent?.trim() || "", value);
+        debugField("Dropdown single fill", labelText, value);
         await selectDropdownValue(dropdownButton, value);
       }
     }
@@ -853,20 +933,24 @@
   function inferBusinessMapping(activityText) {
     const normalized = normalizeText(activityText);
 
-    const rules = [
-      { needle: "kiskereskedelem", category: "Retail", activity: "Home furnishing and household retail" },
-      { needle: "vendeglatas", category: "Hospitality", activity: "Restaurant / catering" },
-      { needle: "epitoipar", category: "Construction", activity: "Construction services" },
-      { needle: "ingatlan", category: "Real estate", activity: "Real estate services" },
-      { needle: "reklam", category: "Services", activity: "Marketing services" }
-    ];
+    for (const hint of BUSINESS_CATEGORY_HINTS) {
+      const matchedNeedle = hint.needles.find((needle) => normalized.includes(normalizeText(needle)));
+      if (matchedNeedle) {
+        const mapping = {
+          category: hint.category,
+          activity: hint.activity
+        };
+        debug("Business category matched", { matchedNeedle, mapping });
+        return mapping;
+      }
+    }
 
-    const hit = rules.find((rule) => normalized.includes(rule.needle));
-
-    return hit || {
+    const fallback = {
       category: "Services",
-      activity: "General business services"
+      activity: "Consulting"
     };
+    debug("Business category fallback used", fallback);
+    return fallback;
   }
 
   function inferBankProvider(bankRaw) {
@@ -912,7 +996,11 @@
       return { firstName: "", lastName: "" };
     }
 
-    const cleaned = raw.replace(/\(.*?\)/g, "").trim();
+    const cleaned = raw
+      .replace(/\(.*?\)/g, "")
+      .replace(/^\d+\)\s*/, "")
+      .replace(/^Név:\s*/i, "")
+      .trim();
     const parts = cleaned.split(/\s+/).filter(Boolean);
     if (parts.length === 1) {
       return { firstName: parts[0], lastName: "" };
