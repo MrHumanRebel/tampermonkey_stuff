@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HubSpot – Opten JSON Autofill
 // @namespace    https://teya.local/
-// @version      0.1.0
+// @version      0.2.0
 // @description  Adds a "Fill JSON" button in HubSpot forms to autofill data from Opten JSON exports.
 // @author       You
 // @match        https://app-eu1.hubspot.com/*
@@ -14,6 +14,8 @@
 
   const BUTTON_CLASS = "teya-fill-json-button";
   const OVERLAY_ID = "teya-fill-json-overlay";
+  const LOG_PREFIX = "[TEYA Fill JSON]";
+  const DEBUG_ENABLED = true;
 
   const STATIC_VALUES = {
     "Deal type": "New Customer",
@@ -28,13 +30,11 @@
     { match: /Company Name/i, key: "Cégnév" },
     { match: /Company Address|Address/i, key: "Cég székhelye" },
     { match: /Tax ID|VAT|Adószám/i, key: "Adószám" },
-    { match: /Registration Number|Company Registration|Registry Number/i, key: "Cégjegyzékszám / Nyilvántartási szám" },
+    { match: /Registration Number|Company Registration|Registry Number/i, key: "Cégjegyzékszám \/ Nyilvántartási szám" },
     { match: /Email/i, key: "Email" },
-    { match: /Phone/i, key: "Telefon" },
-    { match: /Business Category/i, key: "Tevékenységi köre(i)" },
-    { match: /Business Activity/i, key: "Tevékenységi köre(i)" },
+    { match: /Phone|Telefon/i, key: "Telefon" },
     { match: /Annual Revenue|Net Revenue|Értékesítés nettó árbevétele/i, key: "Értékesítés nettó árbevétele" },
-    { match: /Monthly Card Revenue|Becsült kártyás nettó havi árbevétele/i, key: "Becsült kártyás nettó havi árbevétele" },
+    { match: /Monthly Card Revenue|Becsült kártyás nettó havi árbevétele|Sales expected monthly TPV/i, key: "Becsült kártyás nettó havi árbevétele" },
     { match: /MCC Average Basket|MCC átlagos kosárérték/i, key: "MCC átlagos kosárérték (HUF)" }
   ];
 
@@ -43,21 +43,100 @@
     lastName: /Last Name/i
   };
 
+  const PROPERTY_RULES = {
+    hubspot_owner_id: { static: "Deal owner" },
+    company_name: { keys: ["Cégnév"] },
+    dealtype: { static: "Deal type" },
+    email: { keys: ["Email", "E-mail"] },
+    phone: { keys: ["Telefon", "Telefonszám", "Phone"] },
+    first_name: { contact: "firstName" },
+    last_name: { contact: "lastName" },
+    hs_priority: { static: "Priority" },
+    description: { dynamic: "dealDescription" }
+  };
+
+
+  const BUSINESS_CATEGORY_HINTS = [
+    {
+      category: "Food and Beverage",
+      activity: "Café / Restaurant",
+      needles: ["etterem", "kavezo", "kávézó", "cafe", "restaurant", "vendeglatas", "vendéglátás", "bar", "pub", "bisztro", "bistro"]
+    },
+    {
+      category: "Food and Beverage",
+      activity: "Catering / Delivery",
+      needles: ["catering", "kiszallitas", "kiszállítás", "delivery", "etelfutar", "ételfutár"]
+    },
+    {
+      category: "Retail",
+      activity: "Food / Grocery / Convenience / Corner Shops",
+      needles: ["kiskereskedelem", "elelmiszer", "élelmiszer", "grocery", "convenience", "bolt", "aruhaz", "áruház"]
+    },
+    {
+      category: "Retail",
+      activity: "Furniture, Home Furnishings, and Equipment Stores",
+      needles: ["butor", "bútor", "lakberendezes", "lakberendezés", "home furnishing", "5719", "4755"]
+    },
+    {
+      category: "Services",
+      activity: "Craftsman / Contractor",
+      needles: ["epitoipar", "építőipar", "villanyszereles", "villanyszerelés", "burkolas", "burkolás", "festes", "festés", "tetofedes", "tetőfedés", "kozmuepites", "közműépítés"]
+    },
+    {
+      category: "Services",
+      activity: "Letting Agents",
+      needles: ["ingatlan", "real estate", "letting", "6811", "6812", "6832"]
+    },
+    {
+      category: "Services",
+      activity: "Consulting",
+      needles: ["tanacsadas", "tanácsadás", "consulting", "uzletviteli", "üzletviteli", "7020"]
+    },
+    {
+      category: "Health, Beauty & Wellness",
+      activity: "Beauty / Barber",
+      needles: ["fodrasz", "fodrász", "kozmetika", "kozmetikus", "szepseg", "szépség", "barber", "beauty"]
+    }
+  ];
+
+  const BANK_KEYWORDS = {
+    OTP: ["otp"],
+    "K&H": ["k&h", "kh bank", "k h"],
+    MBH: ["mbh", "mkb", "takarék"],
+    Raiffeisen: ["raiffeisen"],
+    Erste: ["erste"],
+    CIB: ["cib"],
+    UniCredit: ["unicredit"],
+    Revolut: ["revolut"],
+    Wise: ["wise"]
+  };
+
   const STYLE = `
     .${BUTTON_CLASS} {
       margin-right: 8px;
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: 1px solid #ff4800;
-      background: #ff4800;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid #ff6a2a;
+      background: linear-gradient(135deg, #ff5a1f 0%, #ff7a29 100%);
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       font-size: 12px;
-      line-height: 1.2;
+      line-height: 1;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(255, 90, 31, 0.28);
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
     }
     .${BUTTON_CLASS}:hover {
-      filter: brightness(0.95);
+      filter: brightness(1.03);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(255, 90, 31, 0.35);
+    }
+    .${BUTTON_CLASS}:active {
+      transform: translateY(0);
     }
     #${OVERLAY_ID} {
       position: fixed;
@@ -106,6 +185,30 @@
       cursor: pointer;
     }
   `;
+
+  function debug(message, details) {
+    if (!DEBUG_ENABLED) {
+      return;
+    }
+
+    if (typeof details === "undefined") {
+      console.log(`${LOG_PREFIX} ${message}`);
+      return;
+    }
+
+    console.log(`${LOG_PREFIX} ${message}`, details);
+  }
+
+  function debugField(action, labelText, value, extra = {}) {
+    const preview = typeof value === "string"
+      ? value.slice(0, 120)
+      : value;
+
+    debug(`${action} | field="${labelText}"`, {
+      value: preview,
+      ...extra
+    });
+  }
 
   injectStyles();
   initObserver();
@@ -160,6 +263,19 @@
     });
   }
 
+  function findActionTarget(element) {
+    if (!element) {
+      return null;
+    }
+
+    const actionsContainer = element.closest("[data-selenium-test='crm-card-actions']")
+      || element.closest("[data-test-id='crm-card-content']")?.querySelector("[data-selenium-test='crm-card-actions']")
+      || element.closest("header")
+      || element.parentElement;
+
+    return { container: actionsContainer };
+  }
+
   function addDealViewButton() {
     const aboutHeading = findAboutDealHeading();
     if (!aboutHeading) {
@@ -185,12 +301,13 @@
     fillButton.type = "button";
     fillButton.className = BUTTON_CLASS;
     fillButton.textContent = "Fill JSON";
-    fillButton.addEventListener("click", () => handleFillClick(closeButton));
+    fillButton.addEventListener("click", () => handleFillClick({ closeButton, triggerButton: fillButton }));
     return fillButton;
   }
 
-  async function handleFillClick(closeButton) {
-    const formRoot = findFormRoot(closeButton);
+  async function handleFillClick(context = {}) {
+    debug("Fill JSON clicked");
+    const formRoot = findFormRoot(context);
     if (!formRoot) {
       alert("Nem található aktív form.");
       return;
@@ -211,20 +328,44 @@
     let data;
     try {
       data = JSON.parse(jsonText);
+      debug("JSON parsed successfully", { keys: Object.keys(data || {}), keyCount: Object.keys(data || {}).length });
     } catch (error) {
+      debug("JSON parse failed", { error: String(error) });
       alert("A JSON nem olvasható.");
       return;
     }
 
     const selection = await maybeSelectDetails(data);
+    debug("Selection resolved", selection);
     await fillForm(formRoot, data, selection);
+    debug("Fill JSON finished");
   }
 
-  function findFormRoot(closeButton) {
-    const fromButton = closeButton
-      ? (closeButton.closest("form") || closeButton.closest("[role='dialog']"))
-      : null;
-    return fromButton || document.querySelector("form") || document.querySelector("[role='main']");
+  function findFormRoot(context = {}) {
+    const { closeButton, triggerButton } = context;
+
+    const candidates = [
+      triggerButton?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      triggerButton?.closest("[data-test-id='crm-card-content']"),
+      closeButton?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      closeButton?.closest("form"),
+      closeButton?.closest("[role='dialog']"),
+      findAboutDealHeading()?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      document.querySelector("[data-sidebar-card-type='PropertiesCard'] [data-selenium-test='profile-properties']")?.closest("[data-sidebar-card-type='PropertiesCard']"),
+      document.querySelector("[data-selenium-test='profile-properties']"),
+      document.querySelector("form"),
+      document.querySelector("[role='main']")
+    ].filter(Boolean);
+
+    const root = candidates[0] || null;
+    debug("Resolved form root", {
+      candidateCount: candidates.length,
+      rootTag: root?.tagName || null,
+      rootTestId: root?.getAttribute?.("data-test-id") || null,
+      rootSidebarType: root?.getAttribute?.("data-sidebar-card-type") || null
+    });
+
+    return root;
   }
 
   async function maybeSelectDetails(data) {
@@ -233,6 +374,8 @@
 
     const needsOfficer = officers.length > 1;
     const needsBank = bankAccounts.length > 1;
+
+    debug("Parsed selectable details", { officers, bankAccounts, needsOfficer, needsBank });
 
     if (!needsOfficer && !needsBank) {
       return {
@@ -247,7 +390,7 @@
       overlay.innerHTML = `
         <div class="teya-modal">
           <h2>Válassz adatot a kitöltéshez</h2>
-          ${needsOfficer ? buildSelect("Cégjegyzésre jogosult", "teya-officer", officers) : ""}
+          ${needsOfficer ? buildSelect("Kapcsolattartó / Cégjegyzésre jogosult", "teya-officer", officers) : ""}
           ${needsBank ? buildSelect("Bankszámla", "teya-bank", bankAccounts) : ""}
           <div class="actions">
             <button type="button" class="teya-confirm">Kitöltés</button>
@@ -322,9 +465,15 @@
   }
 
   async function fillForm(formRoot, data, selection) {
-    const fields = Array.from(formRoot.querySelectorAll("label"));
+    debug("Starting fillForm");
     const officerName = selection?.officer || data["Cégjegyzésre jogosultak"] || "";
     const contact = splitName(officerName);
+    const context = buildContext(data, selection);
+
+    await fillByPropertySelectors(formRoot, data, contact);
+
+    const fields = Array.from(formRoot.querySelectorAll("label"));
+    debug("Collected label fields", { count: fields.length });
 
     for (const label of fields) {
       const labelText = label.textContent.trim();
@@ -332,19 +481,40 @@
         continue;
       }
 
+      debug("Processing label", { labelText });
+
+      if (await applySmartDefaults(label, labelText, data, context, contact)) {
+        continue;
+      }
+
       const staticValue = getStaticValue(labelText);
       if (staticValue !== null) {
+        debugField("Static mapping", labelText, staticValue);
         await fillFieldForLabel(label, staticValue);
         continue;
       }
 
       if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
-        await fillFieldForLabel(label, contact.firstName);
+        debugField("Contact mapping", labelText, contact.firstName);
+      await fillFieldForLabel(label, contact.firstName);
         continue;
       }
 
       if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
-        await fillFieldForLabel(label, contact.lastName);
+        debugField("Contact mapping", labelText, contact.lastName);
+      await fillFieldForLabel(label, contact.lastName);
+        continue;
+      }
+
+      if (/Business Category/i.test(labelText) && context.businessCategory) {
+        debugField("Business mapping", labelText, context.businessCategory);
+      await fillFieldForLabel(label, context.businessCategory);
+        continue;
+      }
+
+      if (/Business Activity/i.test(labelText) && context.businessActivity) {
+        debugField("Business mapping", labelText, context.businessActivity);
+      await fillFieldForLabel(label, context.businessActivity);
         continue;
       }
 
@@ -352,10 +522,249 @@
       if (rule) {
         const value = data[rule.key];
         if (value) {
+          debugField("Label mapping", labelText, value, { sourceKey: rule.key });
           await fillFieldForLabel(label, value);
+        } else {
+          debug("Label mapping skipped (no source value)", { labelText, sourceKey: rule.key });
         }
       }
     }
+  }
+
+  function buildContext(data, selection) {
+    const address = getDataValue(data, ["Cég székhelye", "Cég telephelye(i)"]);
+    const bankRaw = selection?.bankAccount || parseBankAccounts(data)[0] || "";
+    const bankProvider = inferBankProvider(bankRaw);
+    const activityText = getDataValue(data, ["Tevékenységi köre(i)"]);
+    const businessMapping = inferBusinessMapping(activityText);
+
+    const context = {
+      monthlyTPV: normalizeAmount(getDataValue(data, ["Becsült kártyás nettó havi árbevétele"])),
+      expectedUseDate: formatDate(addDays(new Date(), 7)),
+      storeStreet: extractStreet(address),
+      storeCostCode: extractPostalCode(address) || getDataValue(data, ["Cégjegyzékszám / Nyilvántartási szám", "EID"]),
+      bankProvider,
+      businessCategory: businessMapping.category,
+      businessActivity: businessMapping.activity
+    };
+
+    debug("Computed fill context", context);
+    return context;
+  }
+
+  async function applySmartDefaults(label, labelText, data, context, contact) {
+    if (/NSR Acquiring/i.test(labelText)) {
+      return true;
+    }
+
+    if (/Products of Interest/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products of Interest default" });
+      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
+      return true;
+    }
+
+    if (/Products Sold/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products Sold default" });
+      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
+      return true;
+    }
+
+    if (/Decision Maker Contacted/i.test(labelText)) {
+      debugField("Smart default", labelText, "Yes", { reason: "Decision maker contacted" });
+      await fillFieldForLabel(label, "Yes");
+      return true;
+    }
+
+    if (/Identification of Need/i.test(labelText)) {
+      debugField("Smart default", labelText, "Looking for value-added products", { reason: "Identification of Need" });
+      await fillFieldForLabel(label, "Looking for value-added products");
+      return true;
+    }
+
+    if (/Number of Stores/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
+      await fillFieldForLabel(label, "1");
+      return true;
+    }
+
+    if (/Seasonality/i.test(labelText)) {
+      debugField("Smart default", labelText, "Normal", { reason: "Seasonality default" });
+      await fillFieldForLabel(label, "Normal");
+      return true;
+    }
+
+    if (/Priority/i.test(labelText)) {
+      debugField("Smart default", labelText, "Medium", { reason: "Priority default" });
+      await fillFieldForLabel(label, "Medium");
+      return true;
+    }
+
+    if (/Deal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "New Customer", { reason: "Deal Type default" });
+      await fillFieldForLabel(label, "New Customer");
+      return true;
+    }
+
+    if (/Sales expected monthly TPV/i.test(labelText) && context.monthlyTPV) {
+      debugField("Smart default", labelText, context.monthlyTPV, { reason: "Monthly TPV from Opten" });
+      await fillFieldForLabel(label, context.monthlyTPV);
+      return true;
+    }
+
+    if (/Contract Term/i.test(labelText)) {
+      debugField("Smart default", labelText, "12", { reason: "Contract term default" });
+      await fillFieldForLabel(label, "12");
+      return true;
+    }
+
+    if (/Terminal Unit Price/i.test(labelText)) {
+      debugField("Smart default", labelText, "-1600", { reason: "Terminal unit price default" });
+      await fillFieldForLabel(label, "-1600");
+      return true;
+    }
+
+    if (/Terminal Price Interval/i.test(labelText)) {
+      debugField("Smart default", labelText, "Monthly", { reason: "Terminal interval default" });
+      await fillFieldForLabel(label, "Monthly");
+      return true;
+    }
+
+    if (/Number of Terminals/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
+      await fillFieldForLabel(label, "1");
+      return true;
+    }
+
+    if (/Expected Use Date/i.test(labelText)) {
+      debugField("Smart default", labelText, context.expectedUseDate, { reason: "Expected use date +7 days" });
+      await fillFieldForLabel(label, context.expectedUseDate);
+      return true;
+    }
+
+    if (/Store Street/i.test(labelText) && context.storeStreet) {
+      debugField("Smart default", labelText, context.storeStreet, { reason: "Store street from address" });
+      await fillFieldForLabel(label, context.storeStreet);
+      return true;
+    }
+
+    if (/Store Cost Code/i.test(labelText) && context.storeCostCode) {
+      debugField("Smart default", labelText, context.storeCostCode, { reason: "Store cost code derived" });
+      await fillFieldForLabel(label, context.storeCostCode);
+      return true;
+    }
+
+    if (/Terminal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "Sunmi", { reason: "Terminal type default" });
+      await fillFieldForLabel(label, "Sunmi");
+      return true;
+    }
+
+    if (/Acquiring Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
+      await fillFieldForLabel(label, context.bankProvider);
+      return true;
+    }
+
+    if (/Banking Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
+      await fillFieldForLabel(label, context.bankProvider);
+      return true;
+    }
+
+    if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
+      debugField("Contact mapping", labelText, contact.firstName);
+      await fillFieldForLabel(label, contact.firstName);
+      return true;
+    }
+
+    if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
+      debugField("Contact mapping", labelText, contact.lastName);
+      await fillFieldForLabel(label, contact.lastName);
+      return true;
+    }
+
+    if (/Business Category/i.test(labelText) && context.businessCategory) {
+      debugField("Business mapping", labelText, context.businessCategory);
+      await fillFieldForLabel(label, context.businessCategory);
+      return true;
+    }
+
+    if (/Business Activity/i.test(labelText) && context.businessActivity) {
+      debugField("Business mapping", labelText, context.businessActivity);
+      await fillFieldForLabel(label, context.businessActivity);
+      return true;
+    }
+
+    return false;
+  }
+
+  async function fillByPropertySelectors(formRoot, data, contact) {
+    for (const [propertyId, rule] of Object.entries(PROPERTY_RULES)) {
+      let value = "";
+
+      if (rule.static) {
+        value = getStaticValue(rule.static);
+      } else if (rule.contact) {
+        value = contact?.[rule.contact] || "";
+      } else if (rule.keys) {
+        value = getDataValue(data, rule.keys);
+      } else if (rule.dynamic === "dealDescription") {
+        value = buildDealDescription(data);
+      }
+
+      if (!value) {
+        continue;
+      }
+
+      const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`)
+        || document.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
+      if (!field) {
+        debug("Property field not found", { propertyId, value });
+        continue;
+      }
+
+      debug("Property selector fill", { propertyId, value });
+      await fillElementValue(field, value);
+    }
+  }
+
+  function getDataValue(data, keys) {
+    for (const key of keys) {
+      if (typeof data?.[key] === "string" && data[key].trim()) {
+        return data[key].trim();
+      }
+    }
+
+    return "";
+  }
+
+  function buildDealDescription(data) {
+    const summaryKeys = [
+      "Cégforma",
+      "Alakulás dátuma",
+      "Bejegyzés dátuma",
+      "Cég székhelye",
+      "Adószám",
+      "Cégjegyzékszám / Nyilvántartási szám",
+      "Tevékenységi köre(i)",
+      "Teya KYC státusz",
+      "Teya KYC megjegyzés",
+      "Opten gyorsjelentés",
+      "Forrás URL"
+    ];
+
+    const lines = summaryKeys
+      .map((key) => {
+        const value = data?.[key];
+        if (!value || !String(value).trim()) {
+          return "";
+        }
+
+        return `${key}: ${String(value).trim()}`;
+      })
+      .filter(Boolean);
+
+    return lines.join("\n");
   }
 
   function getStaticValue(labelText) {
@@ -369,42 +778,217 @@
   }
 
   async function fillFieldForLabel(label, value) {
-    const container = label.closest("[data-test-id='FormControl']") || label.parentElement;
+    const labelText = label.textContent?.trim() || "";
+    const forId = label.getAttribute("for");
+    const forElement = forId ? document.getElementById(forId) : null;
+
+    if (forElement) {
+      if (forElement.matches("input, textarea")) {
+        const resolved = Array.isArray(value) ? value.join(", ") : value;
+        debugField("Text fill via label[for]", labelText, resolved, { type: forElement.type || forElement.tagName });
+        await setInputValue(forElement, resolved);
+        return;
+      }
+
+      if (forElement.matches("button[data-dropdown]")) {
+        if (Array.isArray(value)) {
+          debugField("Dropdown multi fill via label[for]", labelText, value);
+          await selectDropdownValues(forElement, value);
+        } else {
+          debugField("Dropdown single fill via label[for]", labelText, value);
+          await selectDropdownValue(forElement, value);
+        }
+        return;
+      }
+    }
+
+    const container = label.closest("[data-test-id='DisplayOptimizedFormControl'], [data-test-id='FormControl']") || label.parentElement;
     if (!container) {
+      debug("No container for label", { labelText });
       return;
     }
 
-    const textInput = container.querySelector("input[type='text'], textarea");
+    const textInput = container.querySelector("input[type='text'], input[type='number'], input[type='date'], textarea");
     if (textInput) {
-      setInputValue(textInput, value);
+      const resolved = Array.isArray(value) ? value.join(", ") : value;
+      debugField("Text fill", labelText, resolved, { type: textInput.type || textInput.tagName });
+      await setInputValue(textInput, resolved);
       return;
     }
 
     const dropdownButton = container.querySelector("button[data-dropdown]");
     if (dropdownButton) {
-      await selectDropdownValue(dropdownButton, value);
+      if (Array.isArray(value)) {
+        debugField("Dropdown multi fill", labelText, value);
+        await selectDropdownValues(dropdownButton, value);
+      } else {
+        debugField("Dropdown single fill", labelText, value);
+        await selectDropdownValue(dropdownButton, value);
+      }
     }
   }
 
-  function setInputValue(input, value) {
+  async function fillElementValue(field, value) {
+    if (field.matches("input, textarea")) {
+      await setInputValue(field, value);
+      return;
+    }
+
+    if (field.matches("button[data-dropdown]")) {
+      if (Array.isArray(value)) {
+        await selectDropdownValues(field, value);
+      } else {
+        await selectDropdownValue(field, value);
+      }
+    }
+  }
+
+  async function setInputValue(input, value) {
+    const stringValue = String(value ?? "");
+
     input.focus();
-    input.value = value;
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.click();
+    await wait(40);
+
+    const prototype = input.tagName === "TEXTAREA"
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+
+    if (descriptor?.set) {
+      descriptor.set.call(input, stringValue);
+    } else {
+      input.value = stringValue;
+    }
+
+    input.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "insertText",
+      data: stringValue
+    }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
+
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter", code: "Enter", bubbles: true }));
+
+    input.blur();
+    await clickAway(input);
+    await wait(120);
+    debug("Input committed", { field: input.getAttribute("id") || input.getAttribute("data-selenium-test") || input.name || input.tagName, value: stringValue });
+  }
+
+  async function selectDropdownValues(button, values) {
+    for (const value of values) {
+      const current = normalizeText(button.textContent || "");
+      if (current.includes(normalizeText(value))) {
+        continue;
+      }
+
+      await selectDropdownValue(button, value);
+      await wait(120);
+    }
   }
 
   async function selectDropdownValue(button, value) {
     button.click();
 
-    await wait(100);
+    await wait(120);
 
+    const normalizedTarget = normalizeText(value);
     const options = Array.from(document.querySelectorAll("[data-option-text='true']"));
-    const option = options.find((item) => item.textContent.trim().toLowerCase() === value.toLowerCase())
-      || options.find((item) => item.textContent.trim().toLowerCase().includes(value.toLowerCase()));
+
+    const option = options.find((item) => normalizeText(item.textContent || "") === normalizedTarget)
+      || options.find((item) => normalizeText(item.textContent || "").includes(normalizedTarget))
+      || options.find((item) => normalizedTarget.includes(normalizeText(item.textContent || "")));
 
     if (option) {
       option.click();
+      debug("Dropdown option selected", { target: value, optionText: option.textContent?.trim() || "" });
+      await wait(80);
+      await clickAway(button);
+      await wait(120);
+    } else {
+      debug("Dropdown option not found", { target: value });
+      await clickAway(button);
     }
+  }
+
+
+  async function clickAway(sourceElement) {
+    const target = sourceElement.closest("[data-properties-card-id]")
+      || sourceElement.closest("[role='main']")
+      || document.body;
+
+    const rect = target.getBoundingClientRect();
+    const x = Math.max(5, Math.floor(rect.left + Math.min(20, rect.width - 5)));
+    const y = Math.max(5, Math.floor(rect.top + Math.min(20, rect.height - 5)));
+
+    target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+    await wait(40);
+  }
+
+  function inferBusinessMapping(activityText) {
+    const normalized = normalizeText(activityText);
+
+    for (const hint of BUSINESS_CATEGORY_HINTS) {
+      const matchedNeedle = hint.needles.find((needle) => normalized.includes(normalizeText(needle)));
+      if (matchedNeedle) {
+        const mapping = {
+          category: hint.category,
+          activity: hint.activity
+        };
+        debug("Business category matched", { matchedNeedle, mapping });
+        return mapping;
+      }
+    }
+
+    const fallback = {
+      category: "Services",
+      activity: "Consulting"
+    };
+    debug("Business category fallback used", fallback);
+    return fallback;
+  }
+
+  function inferBankProvider(bankRaw) {
+    const normalized = normalizeText(bankRaw);
+    const found = Object.entries(BANK_KEYWORDS).find(([, aliases]) => aliases.some((alias) => normalized.includes(normalizeText(alias))));
+    return found ? found[0] : "";
+  }
+
+  function normalizeAmount(value) {
+    if (!value) {
+      return "";
+    }
+
+    const digits = String(value).replace(/[^0-9-]/g, "");
+    return digits || "";
+  }
+
+  function extractStreet(address) {
+    if (!address) {
+      return "";
+    }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
   function splitName(raw) {
@@ -412,7 +996,11 @@
       return { firstName: "", lastName: "" };
     }
 
-    const cleaned = raw.replace(/\(.*?\)/g, "").trim();
+    const cleaned = raw
+      .replace(/\(.*?\)/g, "")
+      .replace(/^\d+\)\s*/, "")
+      .replace(/^Név:\s*/i, "")
+      .trim();
     const parts = cleaned.split(/\s+/).filter(Boolean);
     if (parts.length === 1) {
       return { firstName: parts[0], lastName: "" };
@@ -430,6 +1018,12 @@
     return newDate;
   }
 
+  function addDays(date, days) {
+    const newDate = new Date(date.getTime());
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+  }
+
   function formatDate(date) {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -442,7 +1036,7 @@
   }
 
   function escapeHtml(value) {
-    return value
+    return String(value)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
