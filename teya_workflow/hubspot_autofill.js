@@ -745,6 +745,30 @@
       await fillElementValue(field, value);
       await humanPause();
     }
+
+    return "";
+  }
+
+  function buildDealDescription(data) {
+    const summaryKeys = [
+      "Adószám",
+      "Cég székhelye",
+      "Alakulás dátuma",
+      "Bejegyzés dátuma"
+    ];
+
+    const lines = summaryKeys
+      .map((key) => {
+        const value = data?.[key];
+        if (!value || !String(value).trim()) {
+          return "";
+        }
+
+        return `${key}: ${String(value).trim()}`;
+      })
+      .filter(Boolean);
+
+    return lines.join("\n");
   }
 
   function getDataValue(data, keys) {
@@ -886,6 +910,7 @@
 
     input.blur();
     await clickAway(input);
+    await waitForSaveConfirmation(resolveFieldName(input));
     await humanPause();
     debug("Input committed", { field: input.getAttribute("id") || input.getAttribute("data-selenium-test") || input.name || input.tagName, value: stringValue });
   }
@@ -919,10 +944,13 @@
       debug("Dropdown option selected", { target: value, optionText: option.textContent?.trim() || "" });
       await wait(80);
       await clickAway(button);
+      await waitForSaveConfirmation(resolveFieldName(button));
       await humanPause();
     } else {
       debug("Dropdown option not found", { target: value });
       await clickAway(button);
+      await waitForSaveConfirmation(resolveFieldName(button));
+      await humanPause();
     }
 
     const parts = address.split(",");
@@ -957,6 +985,172 @@
     target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
     target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
     await humanPause(80, 180);
+  }
+
+  function inferBusinessMapping(activityText) {
+    const normalized = normalizeText(activityText);
+
+    for (const hint of BUSINESS_CATEGORY_HINTS) {
+      const matchedNeedle = hint.needles.find((needle) => normalized.includes(normalizeText(needle)));
+      if (matchedNeedle) {
+        const mapping = {
+          category: hint.category,
+          activity: hint.activity
+        };
+        debug("Business category matched", { matchedNeedle, mapping });
+        return mapping;
+      }
+    }
+
+    const fallback = {
+      category: "Services",
+      activity: "Consulting"
+    };
+    debug("Business category fallback used", fallback);
+    return fallback;
+  }
+
+  function inferBankProvider(bankRaw) {
+    const normalized = normalizeText(bankRaw);
+    const found = Object.entries(BANK_KEYWORDS).find(([, aliases]) => aliases.some((alias) => normalized.includes(normalizeText(alias))));
+    return found ? found[0] : "";
+  }
+
+  function normalizeAmount(value) {
+    if (!value) {
+      return "";
+    }
+
+    const digits = String(value).replace(/[^0-9-]/g, "");
+    return digits || "";
+  }
+
+  function extractStreet(address) {
+    if (!address) {
+      return "";
+    }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+
+  async function clickAway(sourceElement) {
+    const target = sourceElement.closest("[data-properties-card-id]")
+      || sourceElement.closest("[role='main']")
+      || document.body;
+
+    const rect = target.getBoundingClientRect();
+    const x = Math.max(5, Math.floor(rect.left + Math.min(20, rect.width - 5)));
+    const y = Math.max(5, Math.floor(rect.top + Math.min(20, rect.height - 5)));
+
+    target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+    await humanPause(80, 180);
+  }
+
+  function resolveFieldName(element) {
+    const id = element?.getAttribute?.("id");
+    if (id) {
+      const label = document.querySelector(`label[for='${CSS.escape(id)}']`);
+      const text = label?.textContent?.trim();
+      if (text) {
+        return text;
+      }
+    }
+
+    const labelledBy = element?.getAttribute?.("aria-labelledby") || "";
+    if (labelledBy) {
+      const ids = labelledBy.split(/\s+/).filter(Boolean);
+      for (const refId of ids) {
+        const el = document.getElementById(refId);
+        const txt = el?.textContent?.trim();
+        if (txt) {
+          return txt;
+        }
+      }
+    }
+
+    return element?.getAttribute?.("data-selenium-test") || element?.name || element?.tagName || "field";
+  }
+
+  function getToastTexts() {
+    const selectors = [
+      "[data-layer-for='FloatingAlertList']",
+      "[role='status']",
+      "[aria-live]",
+      "[data-test-id*='Alert']",
+      "[data-test-id*='alert']"
+    ];
+
+    const texts = [];
+    selectors.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        const txt = node.textContent?.replace(/\s+/g, " ").trim();
+        if (txt) {
+          texts.push(txt);
+        }
+      });
+    });
+
+    return texts;
+  }
+
+  function toastIncludes(pattern) {
+    return getToastTexts().some((text) => pattern.test(text));
+  }
+
+  async function waitForCondition(checkFn, timeoutMs = 6000, pollMs = 120) {
+    const started = Date.now();
+    while ((Date.now() - started) < timeoutMs) {
+      if (checkFn()) {
+        return true;
+      }
+
+      await wait(pollMs);
+    }
+
+    return false;
+  }
+
+  async function waitForSaveConfirmation(fieldName = "field") {
+    const savingRegex = /saving changes/i;
+    const savedRegex = /changes saved/i;
+
+    debug("Waiting for save confirmation", { fieldName });
+
+    const appeared = await waitForCondition(
+      () => toastIncludes(savingRegex) || toastIncludes(savedRegex),
+      4500,
+      120
+    );
+
+    if (!appeared) {
+      debug("Save banner not detected in time", { fieldName });
+      await humanPause(320, 520);
+      return;
+    }
+
+    if (toastIncludes(savingRegex)) {
+      await waitForCondition(() => toastIncludes(savedRegex), 7000, 120);
+    }
+
+    debug(`"${fieldName}" changes saved`);
   }
 
   function inferBusinessMapping(activityText) {
