@@ -337,10 +337,15 @@
       return;
     }
 
-    const selection = await maybeSelectDetails(data);
-    debug("Selection resolved", selection);
-    await fillForm(formRoot, data, selection);
-    debug("Fill JSON finished");
+    try {
+      const selection = await maybeSelectDetails(data);
+      debug("Selection resolved", selection);
+      await fillForm(formRoot, data, selection);
+      debug("Fill JSON finished");
+    } catch (error) {
+      debug("Fill JSON failed", { error: String(error) });
+      alert(`Fill JSON hiba: ${String(error)}`);
+    }
   }
 
   function findFormRoot(context = {}) {
@@ -745,30 +750,6 @@
       await fillElementValue(field, value);
       await humanPause();
     }
-
-    return "";
-  }
-
-  function buildDealDescription(data) {
-    const summaryKeys = [
-      "Adószám",
-      "Cég székhelye",
-      "Alakulás dátuma",
-      "Bejegyzés dátuma"
-    ];
-
-    const lines = summaryKeys
-      .map((key) => {
-        const value = data?.[key];
-        if (!value || !String(value).trim()) {
-          return "";
-        }
-
-        return `${key}: ${String(value).trim()}`;
-      })
-      .filter(Boolean);
-
-    return lines.join("\n");
   }
 
   function getDataValue(data, keys) {
@@ -928,6 +909,11 @@
   }
 
   async function selectDropdownValue(button, value) {
+    if (!button) {
+      debug("Dropdown target button missing", { target: value });
+      return;
+    }
+
     button.click();
 
     await humanPause(120, 240);
@@ -952,100 +938,6 @@
       await waitForSaveConfirmation(resolveFieldName(button));
       await humanPause();
     }
-
-    const parts = address.split(",");
-    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
-  }
-
-  function extractPostalCode(address) {
-    const match = String(address || "").match(/\b(\d{4})\b/);
-    return match ? match[1] : "";
-  }
-
-  function normalizeText(value) {
-    return String(value || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
-  }
-
-
-  async function clickAway(sourceElement) {
-    const target = sourceElement.closest("[data-properties-card-id]")
-      || sourceElement.closest("[role='main']")
-      || document.body;
-
-    const rect = target.getBoundingClientRect();
-    const x = Math.max(5, Math.floor(rect.left + Math.min(20, rect.width - 5)));
-    const y = Math.max(5, Math.floor(rect.top + Math.min(20, rect.height - 5)));
-
-    target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y }));
-    target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
-    target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
-    await humanPause(80, 180);
-  }
-
-  function inferBusinessMapping(activityText) {
-    const normalized = normalizeText(activityText);
-
-    for (const hint of BUSINESS_CATEGORY_HINTS) {
-      const matchedNeedle = hint.needles.find((needle) => normalized.includes(normalizeText(needle)));
-      if (matchedNeedle) {
-        const mapping = {
-          category: hint.category,
-          activity: hint.activity
-        };
-        debug("Business category matched", { matchedNeedle, mapping });
-        return mapping;
-      }
-    }
-
-    const fallback = {
-      category: "Services",
-      activity: "Consulting"
-    };
-    debug("Business category fallback used", fallback);
-    return fallback;
-  }
-
-  function inferBankProvider(bankRaw) {
-    const normalized = normalizeText(bankRaw);
-    const found = Object.entries(BANK_KEYWORDS).find(([, aliases]) => aliases.some((alias) => normalized.includes(normalizeText(alias))));
-    return found ? found[0] : "";
-  }
-
-  function normalizeAmount(value) {
-    if (!value) {
-      return "";
-    }
-
-    const digits = String(value).replace(/[^0-9-]/g, "");
-    return digits || "";
-  }
-
-  function extractStreet(address) {
-    if (!address) {
-      return "";
-    }
-
-    const parts = address.split(",");
-    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
-  }
-
-  function extractPostalCode(address) {
-    const match = String(address || "").match(/\b(\d{4})\b/);
-    return match ? match[1] : "";
-  }
-
-  function normalizeText(value) {
-    return String(value || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
   }
 
 
@@ -1095,7 +987,11 @@
       "[role='status']",
       "[aria-live]",
       "[data-test-id*='Alert']",
-      "[data-test-id*='alert']"
+      "[data-test-id*='alert']",
+      "[class*='Alert']",
+      "[class*='alert']",
+      "[class*='Toast']",
+      "[class*='toast']"
     ];
 
     const texts = [];
@@ -1129,8 +1025,8 @@
   }
 
   async function waitForSaveConfirmation(fieldName = "field") {
-    const savingRegex = /saving changes/i;
-    const savedRegex = /changes saved/i;
+    const savingRegex = /saving changes|mentes folyamatban|mentés folyamatban/i;
+    const savedRegex = /changes saved|saved|mentve|sikeresen mentve/i;
 
     debug("Waiting for save confirmation", { fieldName });
 
@@ -1141,13 +1037,17 @@
     );
 
     if (!appeared) {
-      debug("Save banner not detected in time", { fieldName });
-      await humanPause(320, 520);
+      debug("Save banner not detected in time, using fallback delay", { fieldName });
+      await humanPause(700, 1100);
       return;
     }
 
     if (toastIncludes(savingRegex)) {
-      await waitForCondition(() => toastIncludes(savedRegex), 7000, 120);
+      const saved = await waitForCondition(() => toastIncludes(savedRegex), 7000, 120);
+      if (!saved) {
+        debug("Saving detected but saved banner missing, using fallback delay", { fieldName });
+        await humanPause(700, 1100);
+      }
     }
 
     debug(`"${fieldName}" changes saved`);
