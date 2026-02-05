@@ -13,6 +13,7 @@ Small collection of my personal Tampermonkey userscripts.
 - [Scripts](#scripts)
   - [chatgpt_pdf.js](#chatgpt_pdfjs)
   - [bunkerweb_debloat.js](#bunkerweb_debloatjs)
+  - [github_accept_current_for_all.user.js](#github_accept_current_for_alluserjs)
 - [Installation](#installation)
 - [Development](#development)
 - [License](#license)
@@ -67,6 +68,23 @@ Personal userscript for simplifying / decluttering the BunkerWeb web UI.
 
 ---
 
+### `github_accept_current_for_all.user.js`
+
+**GitHub PR merge conflict helper**
+
+Adds a floating action button on GitHub conflict-resolution pages (`/pull/<id>/conflicts`) that does the repetitive actions for you in one click.
+
+**Features**
+
+- Clicks **Accept current change** on all available conflict blocks.
+- Clicks **Mark as resolved** for files once they become resolvable.
+- Repeats in short cycles until no further actions remain.
+- Moves through files with **Next** so it can process an entire conflict session.
+
+Useful when you intentionally want to keep the current branch side for all conflicts in a large PR.
+
+---
+
 ## Installation
 
 You need a userscript manager such as **Tampermonkey** (or compatible):
@@ -75,6 +93,7 @@ You need a userscript manager such as **Tampermonkey** (or compatible):
 2. Open the script you want in this repo:
    - `chatgpt_pdf.js`
    - `bunkerweb_debloat.js`
+   - `github_accept_current_for_all.user.js`
 3. Click the **Raw** button in GitHub.
 4. Tampermonkey should offer to install the script automatically.  
    If not:
