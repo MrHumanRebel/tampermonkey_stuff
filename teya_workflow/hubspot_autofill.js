@@ -14,6 +14,8 @@
 
   const BUTTON_CLASS = "teya-fill-json-button";
   const OVERLAY_ID = "teya-fill-json-overlay";
+  const LOG_PREFIX = "[TEYA Fill JSON]";
+  const DEBUG_ENABLED = true;
 
   const STATIC_VALUES = {
     "Deal type": "New Customer",
@@ -140,6 +142,30 @@
     }
   `;
 
+  function debug(message, details) {
+    if (!DEBUG_ENABLED) {
+      return;
+    }
+
+    if (typeof details === "undefined") {
+      console.log(`${LOG_PREFIX} ${message}`);
+      return;
+    }
+
+    console.log(`${LOG_PREFIX} ${message}`, details);
+  }
+
+  function debugField(action, labelText, value, extra = {}) {
+    const preview = typeof value === "string"
+      ? value.slice(0, 120)
+      : value;
+
+    debug(`${action} | field="${labelText}"`, {
+      value: preview,
+      ...extra
+    });
+  }
+
   injectStyles();
   initObserver();
 
@@ -236,6 +262,7 @@
   }
 
   async function handleFillClick(closeButton) {
+    debug("Fill JSON clicked");
     const formRoot = findFormRoot(closeButton);
     if (!formRoot) {
       alert("Nem található aktív form.");
@@ -257,13 +284,17 @@
     let data;
     try {
       data = JSON.parse(jsonText);
+      debug("JSON parsed successfully", { keys: Object.keys(data || {}), keyCount: Object.keys(data || {}).length });
     } catch (error) {
+      debug("JSON parse failed", { error: String(error) });
       alert("A JSON nem olvasható.");
       return;
     }
 
     const selection = await maybeSelectDetails(data);
+    debug("Selection resolved", selection);
     await fillForm(formRoot, data, selection);
+    debug("Fill JSON finished");
   }
 
   function findFormRoot(closeButton) {
@@ -279,6 +310,8 @@
 
     const needsOfficer = officers.length > 1;
     const needsBank = bankAccounts.length > 1;
+
+    debug("Parsed selectable details", { officers, bankAccounts, needsOfficer, needsBank });
 
     if (!needsOfficer && !needsBank) {
       return {
@@ -368,6 +401,7 @@
   }
 
   async function fillForm(formRoot, data, selection) {
+    debug("Starting fillForm");
     const officerName = selection?.officer || data["Cégjegyzésre jogosultak"] || "";
     const contact = splitName(officerName);
     const context = buildContext(data, selection);
@@ -382,23 +416,40 @@
         continue;
       }
 
+      debug("Processing label", { labelText });
+
       if (await applySmartDefaults(label, labelText, data, context, contact)) {
         continue;
       }
 
       const staticValue = getStaticValue(labelText);
       if (staticValue !== null) {
+        debugField("Static mapping", labelText, staticValue);
         await fillFieldForLabel(label, staticValue);
         continue;
       }
 
       if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
-        await fillFieldForLabel(label, contact.firstName);
+        debugField("Contact mapping", labelText, contact.firstName);
+      await fillFieldForLabel(label, contact.firstName);
         continue;
       }
 
       if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
-        await fillFieldForLabel(label, contact.lastName);
+        debugField("Contact mapping", labelText, contact.lastName);
+      await fillFieldForLabel(label, contact.lastName);
+        continue;
+      }
+
+      if (/Business Category/i.test(labelText) && context.businessCategory) {
+        debugField("Business mapping", labelText, context.businessCategory);
+      await fillFieldForLabel(label, context.businessCategory);
+        continue;
+      }
+
+      if (/Business Activity/i.test(labelText) && context.businessActivity) {
+        debugField("Business mapping", labelText, context.businessActivity);
+      await fillFieldForLabel(label, context.businessActivity);
         continue;
       }
 
@@ -416,7 +467,10 @@
       if (rule) {
         const value = data[rule.key];
         if (value) {
+          debugField("Label mapping", labelText, value, { sourceKey: rule.key });
           await fillFieldForLabel(label, value);
+        } else {
+          debug("Label mapping skipped (no source value)", { labelText, sourceKey: rule.key });
         }
       }
     }
@@ -429,7 +483,7 @@
     const activityText = getDataValue(data, ["Tevékenységi köre(i)"]);
     const businessMapping = inferBusinessMapping(activityText);
 
-    return {
+    const context = {
       monthlyTPV: normalizeAmount(getDataValue(data, ["Becsült kártyás nettó havi árbevétele"])),
       expectedUseDate: formatDate(addDays(new Date(), 7)),
       storeStreet: extractStreet(address),
@@ -438,6 +492,9 @@
       businessCategory: businessMapping.category,
       businessActivity: businessMapping.activity
     };
+
+    debug("Computed fill context", context);
+    return context;
   }
 
   async function applySmartDefaults(label, labelText, data, context, contact) {
@@ -446,116 +503,139 @@
     }
 
     if (/Products of Interest/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products of Interest default" });
       await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
       return true;
     }
 
     if (/Products Sold/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products Sold default" });
       await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
       return true;
     }
 
     if (/Decision Maker Contacted/i.test(labelText)) {
+      debugField("Smart default", labelText, "Yes", { reason: "Decision maker contacted" });
       await fillFieldForLabel(label, "Yes");
       return true;
     }
 
     if (/Identification of Need/i.test(labelText)) {
+      debugField("Smart default", labelText, "Looking for value-added products", { reason: "Identification of Need" });
       await fillFieldForLabel(label, "Looking for value-added products");
       return true;
     }
 
     if (/Number of Stores/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
       await fillFieldForLabel(label, "1");
       return true;
     }
 
     if (/Seasonality/i.test(labelText)) {
+      debugField("Smart default", labelText, "Normal", { reason: "Seasonality default" });
       await fillFieldForLabel(label, "Normal");
       return true;
     }
 
     if (/Priority/i.test(labelText)) {
+      debugField("Smart default", labelText, "Medium", { reason: "Priority default" });
       await fillFieldForLabel(label, "Medium");
       return true;
     }
 
     if (/Deal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "New Customer", { reason: "Deal Type default" });
       await fillFieldForLabel(label, "New Customer");
       return true;
     }
 
     if (/Sales expected monthly TPV/i.test(labelText) && context.monthlyTPV) {
+      debugField("Smart default", labelText, context.monthlyTPV, { reason: "Monthly TPV from Opten" });
       await fillFieldForLabel(label, context.monthlyTPV);
       return true;
     }
 
     if (/Contract Term/i.test(labelText)) {
+      debugField("Smart default", labelText, "12", { reason: "Contract term default" });
       await fillFieldForLabel(label, "12");
       return true;
     }
 
     if (/Terminal Unit Price/i.test(labelText)) {
+      debugField("Smart default", labelText, "-1600", { reason: "Terminal unit price default" });
       await fillFieldForLabel(label, "-1600");
       return true;
     }
 
     if (/Terminal Price Interval/i.test(labelText)) {
+      debugField("Smart default", labelText, "Monthly", { reason: "Terminal interval default" });
       await fillFieldForLabel(label, "Monthly");
       return true;
     }
 
     if (/Number of Terminals/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
       await fillFieldForLabel(label, "1");
       return true;
     }
 
     if (/Expected Use Date/i.test(labelText)) {
+      debugField("Smart default", labelText, context.expectedUseDate, { reason: "Expected use date +7 days" });
       await fillFieldForLabel(label, context.expectedUseDate);
       return true;
     }
 
     if (/Store Street/i.test(labelText) && context.storeStreet) {
+      debugField("Smart default", labelText, context.storeStreet, { reason: "Store street from address" });
       await fillFieldForLabel(label, context.storeStreet);
       return true;
     }
 
     if (/Store Cost Code/i.test(labelText) && context.storeCostCode) {
+      debugField("Smart default", labelText, context.storeCostCode, { reason: "Store cost code derived" });
       await fillFieldForLabel(label, context.storeCostCode);
       return true;
     }
 
     if (/Terminal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "Sunmi", { reason: "Terminal type default" });
       await fillFieldForLabel(label, "Sunmi");
       return true;
     }
 
     if (/Acquiring Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
       await fillFieldForLabel(label, context.bankProvider);
       return true;
     }
 
     if (/Banking Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
       await fillFieldForLabel(label, context.bankProvider);
       return true;
     }
 
     if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
+      debugField("Contact mapping", labelText, contact.firstName);
       await fillFieldForLabel(label, contact.firstName);
       return true;
     }
 
     if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
+      debugField("Contact mapping", labelText, contact.lastName);
       await fillFieldForLabel(label, contact.lastName);
       return true;
     }
 
     if (/Business Category/i.test(labelText) && context.businessCategory) {
+      debugField("Business mapping", labelText, context.businessCategory);
       await fillFieldForLabel(label, context.businessCategory);
       return true;
     }
 
     if (/Business Activity/i.test(labelText) && context.businessActivity) {
+      debugField("Business mapping", labelText, context.businessActivity);
       await fillFieldForLabel(label, context.businessActivity);
       return true;
     }
@@ -583,9 +663,11 @@
 
       const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
       if (!field) {
+        debug("Property field not found", { propertyId, value });
         continue;
       }
 
+      debug("Property selector fill", { propertyId, value });
       await fillElementValue(field, value);
     }
   }
@@ -642,20 +724,25 @@
   async function fillFieldForLabel(label, value) {
     const container = label.closest("[data-test-id='FormControl']") || label.parentElement;
     if (!container) {
+      debug("No container for label", { labelText: label.textContent?.trim() || "" });
       return;
     }
 
     const textInput = container.querySelector("input[type='text'], input[type='number'], input[type='date'], textarea");
     if (textInput) {
-      await setInputValue(textInput, Array.isArray(value) ? value.join(", ") : value);
+      const resolved = Array.isArray(value) ? value.join(", ") : value;
+      debugField("Text fill", label.textContent?.trim() || "", resolved, { type: textInput.type || textInput.tagName });
+      await setInputValue(textInput, resolved);
       return;
     }
 
     const dropdownButton = container.querySelector("button[data-dropdown]");
     if (dropdownButton) {
       if (Array.isArray(value)) {
+        debugField("Dropdown multi fill", label.textContent?.trim() || "", value);
         await selectDropdownValues(dropdownButton, value);
       } else {
+        debugField("Dropdown single fill", label.textContent?.trim() || "", value);
         await selectDropdownValue(dropdownButton, value);
       }
     }
@@ -708,6 +795,7 @@
     input.blur();
     await clickAway(input);
     await wait(120);
+    debug("Input committed", { field: input.getAttribute("id") || input.getAttribute("data-selenium-test") || input.name || input.tagName, value: stringValue });
   }
 
   async function selectDropdownValues(button, values) {
@@ -736,38 +824,14 @@
 
     if (option) {
       option.click();
+      debug("Dropdown option selected", { target: value, optionText: option.textContent?.trim() || "" });
       await wait(80);
       await clickAway(button);
       await wait(120);
     } else {
+      debug("Dropdown option not found", { target: value });
       await clickAway(button);
     }
-
-    const digits = String(value).replace(/[^0-9-]/g, "");
-    return digits || "";
-  }
-
-  function extractStreet(address) {
-    if (!address) {
-      return "";
-    }
-
-    const parts = address.split(",");
-    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
-  }
-
-  function extractPostalCode(address) {
-    const match = String(address || "").match(/\b(\d{4})\b/);
-    return match ? match[1] : "";
-  }
-
-  function normalizeText(value) {
-    return String(value || "")
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
   }
 
 
