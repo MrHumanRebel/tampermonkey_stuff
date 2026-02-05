@@ -13,6 +13,7 @@
   "use strict";
 
   const BUTTON_CLASS = "teya-fill-json-button";
+  const BUTTON_WIDE_CLASS = "teya-fill-json-button-wide";
   const OVERLAY_ID = "teya-fill-json-overlay";
   const LOG_PREFIX = "[TEYA Fill JSON]";
   const DEBUG_ENABLED = true;
@@ -140,6 +141,13 @@
     .${BUTTON_CLASS}:active {
       transform: translateY(0);
     }
+    .${BUTTON_WIDE_CLASS} {
+      width: 100%;
+      margin-top: 8px;
+      justify-content: center;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
     #${OVERLAY_ID} {
       position: fixed;
       inset: 0;
@@ -235,7 +243,7 @@
   }
 
   function addFillButtons() {
-    addDealViewButton();
+    addActivityBarButton();
 
     const closeButtons = document.querySelectorAll(
       [
@@ -278,19 +286,46 @@
     return { container: actionsContainer };
   }
 
-  function addDealViewButton() {
-    const aboutHeading = findAboutDealHeading();
-    if (!aboutHeading) {
+  function addActivityBarButton() {
+    const existing = document.getElementById("teya-fill-json-wide-wrapper");
+    if (existing) {
       return;
     }
 
-    const container = aboutHeading.parentElement;
-    if (!container || container.querySelector(`.${BUTTON_CLASS}`)) {
+    const actionKeywords = ["note", "notes", "email", "emails", "call", "calls", "task", "tasks", "meeting", "meetings", "more"];
+    const clickable = Array.from(document.querySelectorAll("button, a, [role='button']"));
+
+    const actionButtons = clickable.filter((element) => {
+      const text = normalizeText(element.textContent || "");
+      return actionKeywords.some((keyword) => text === keyword || text.startsWith(`${keyword} `));
+    });
+
+    const targetRow = actionButtons
+      .map((button) => button.closest("div, section, nav"))
+      .find((container) => {
+        if (!container) {
+          return false;
+        }
+
+        const content = normalizeText(container.textContent || "");
+        const found = ["note", "email", "call", "task", "meeting"]
+          .filter((keyword) => content.includes(keyword));
+        return found.length >= 4;
+      });
+
+    if (!targetRow) {
+      debug("Activity action row not found for wide Fill JSON button");
       return;
     }
 
+    const wrapper = document.createElement("div");
+    wrapper.id = "teya-fill-json-wide-wrapper";
+    wrapper.style.width = "100%";
     const fillButton = createFillButton();
-    container.insertBefore(fillButton, aboutHeading);
+    fillButton.classList.add(BUTTON_WIDE_CLASS);
+    wrapper.appendChild(fillButton);
+    targetRow.insertAdjacentElement("afterend", wrapper);
+    debug("Inserted wide Fill JSON button under activity actions");
   }
 
   function findAboutDealHeading() {
@@ -543,6 +578,209 @@
         } else {
           debug("Label mapping skipped (no source value)", { labelText, sourceKey: rule.key });
         }
+
+        return `${key}: ${String(value).trim()}`;
+      })
+      .filter(Boolean);
+
+    return lines.join("\n");
+  }
+
+  function buildContext(data, selection) {
+    const address = getDataValue(data, ["Cég székhelye", "Cég telephelye(i)"]);
+    const bankRaw = selection?.bankAccount || parseBankAccounts(data)[0] || "";
+    const bankProvider = inferBankProvider(bankRaw);
+    const activityText = getDataValue(data, ["Tevékenységi köre(i)"]);
+    const businessMapping = inferBusinessMapping(activityText);
+
+    const context = {
+      monthlyTPV: normalizeAmount(getDataValue(data, ["Becsült kártyás nettó havi árbevétele"])),
+      expectedUseDate: formatDate(addDays(new Date(), 7)),
+      storeStreet: extractStreet(address),
+      storeCostCode: extractPostalCode(address) || getDataValue(data, ["Cégjegyzékszám / Nyilvántartási szám", "EID"]),
+      bankProvider,
+      businessCategory: businessMapping.category,
+      businessActivity: businessMapping.activity
+    };
+
+    debug("Computed fill context", context);
+    return context;
+  }
+
+  async function applySmartDefaults(label, labelText, data, context, contact) {
+    if (/NSR Acquiring/i.test(labelText)) {
+      return true;
+    }
+
+    if (/Other Products of Interest/i.test(labelText)) {
+      debug("Smart default skipped", { labelText, reason: "Must stay empty" });
+      return true;
+    }
+
+    if (/Products of Interest/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products of Interest default" });
+      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
+      return true;
+    }
+
+    if (/Products Sold/i.test(labelText)) {
+      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products Sold default" });
+      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
+      return true;
+    }
+
+    if (/Decision Maker Contacted/i.test(labelText)) {
+      debugField("Smart default", labelText, "Yes", { reason: "Decision maker contacted" });
+      await fillFieldForLabel(label, "Yes");
+      return true;
+    }
+
+    if (/Identification of Need/i.test(labelText)) {
+      debugField("Smart default", labelText, "Looking for value-added products", { reason: "Identification of Need" });
+      await fillFieldForLabel(label, "Looking for value-added products");
+      return true;
+    }
+
+    if (/Number of Stores/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
+      await fillFieldForLabel(label, "1");
+      return true;
+    }
+
+    if (/Seasonality/i.test(labelText)) {
+      debugField("Smart default", labelText, "Normal", { reason: "Seasonality default" });
+      await fillFieldForLabel(label, "Normal");
+      return true;
+    }
+
+    if (/Priority/i.test(labelText)) {
+      debugField("Smart default", labelText, "Medium", { reason: "Priority default" });
+      await fillFieldForLabel(label, "Medium");
+      return true;
+    }
+
+    if (/Deal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "New Customer", { reason: "Deal Type default" });
+      await fillFieldForLabel(label, "New Customer");
+      return true;
+    }
+
+    if (/Sales expected monthly TPV/i.test(labelText) && context.monthlyTPV) {
+      debugField("Smart default", labelText, context.monthlyTPV, { reason: "Monthly TPV from Opten" });
+      await fillFieldForLabel(label, context.monthlyTPV);
+      return true;
+    }
+
+    if (/Contract Term/i.test(labelText)) {
+      debugField("Smart default", labelText, "12", { reason: "Contract term default" });
+      await fillFieldForLabel(label, "12");
+      return true;
+    }
+
+    if (/Terminal Unit Price/i.test(labelText)) {
+      debugField("Smart default", labelText, "-1600", { reason: "Terminal unit price default" });
+      await fillFieldForLabel(label, "-1600");
+      return true;
+    }
+
+    if (/Terminal Price Interval/i.test(labelText)) {
+      debugField("Smart default", labelText, "Monthly", { reason: "Terminal interval default" });
+      await fillFieldForLabel(label, "Monthly");
+      return true;
+    }
+
+    if (/Number of Terminals/i.test(labelText)) {
+      debugField("Smart default", labelText, "1", { reason: "Count default" });
+      await fillFieldForLabel(label, "1");
+      return true;
+    }
+
+    if (/Expected Use Date/i.test(labelText)) {
+      debugField("Smart default", labelText, context.expectedUseDate, { reason: "Expected use date +7 days" });
+      await fillFieldForLabel(label, context.expectedUseDate);
+      return true;
+    }
+
+    if (/Store Street/i.test(labelText) && context.storeStreet) {
+      debugField("Smart default", labelText, context.storeStreet, { reason: "Store street from address" });
+      await fillFieldForLabel(label, context.storeStreet);
+      return true;
+    }
+
+    if (/Store Cost Code/i.test(labelText) && context.storeCostCode) {
+      debugField("Smart default", labelText, context.storeCostCode, { reason: "Store cost code derived" });
+      await fillFieldForLabel(label, context.storeCostCode);
+      return true;
+    }
+
+    if (/Terminal Type/i.test(labelText)) {
+      debugField("Smart default", labelText, "Sunmi", { reason: "Terminal type default" });
+      await fillFieldForLabel(label, "Sunmi");
+      return true;
+    }
+
+    if (/Acquiring Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
+      await fillFieldForLabel(label, context.bankProvider);
+      return true;
+    }
+
+    if (/Banking Provider/i.test(labelText) && context.bankProvider) {
+      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
+      await fillFieldForLabel(label, context.bankProvider);
+      return true;
+    }
+
+    if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
+      debugField("Contact mapping", labelText, contact.firstName);
+      await fillFieldForLabel(label, contact.firstName);
+      return true;
+    }
+
+    if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
+      debugField("Contact mapping", labelText, contact.lastName);
+      await fillFieldForLabel(label, contact.lastName);
+      return true;
+    }
+
+    if (/Business Category/i.test(labelText) && context.businessCategory) {
+      debugField("Business mapping", labelText, context.businessCategory);
+      await fillFieldForLabel(label, context.businessCategory);
+      return true;
+    }
+
+    if (/Business Activity/i.test(labelText) && context.businessActivity) {
+      debugField("Business mapping", labelText, context.businessActivity);
+      await fillFieldForLabel(label, context.businessActivity);
+      return true;
+    }
+
+    return false;
+  }
+
+  async function fillByPropertySelectors(formRoot, data, contact) {
+    for (const [propertyId, rule] of Object.entries(PROPERTY_RULES)) {
+      let value = "";
+
+      if (rule.static) {
+        value = getStaticValue(rule.static);
+      } else if (rule.contact) {
+        value = contact?.[rule.contact] || "";
+      } else if (rule.keys) {
+        value = getDataValue(data, rule.keys);
+      } else if (rule.dynamic === "dealDescription") {
+        value = buildDealDescription(data);
+      }
+
+      if (!value) {
+        continue;
+      }
+
+      const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`)
+        || document.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
+      if (!field) {
+        debug("Property field not found", { propertyId, value });
+        continue;
       }
 
       await humanPause();
@@ -784,241 +1022,6 @@
     return lines.join("\n");
   }
 
-  function buildContext(data, selection) {
-    const address = getDataValue(data, ["Cég székhelye", "Cég telephelye(i)"]);
-    const bankRaw = selection?.bankAccount || parseBankAccounts(data)[0] || "";
-    const bankProvider = inferBankProvider(bankRaw);
-    const activityText = getDataValue(data, ["Tevékenységi köre(i)"]);
-    const businessMapping = inferBusinessMapping(activityText);
-
-    const context = {
-      monthlyTPV: normalizeAmount(getDataValue(data, ["Becsült kártyás nettó havi árbevétele"])),
-      expectedUseDate: formatDate(addDays(new Date(), 7)),
-      storeStreet: extractStreet(address),
-      storeCostCode: extractPostalCode(address) || getDataValue(data, ["Cégjegyzékszám / Nyilvántartási szám", "EID"]),
-      bankProvider,
-      businessCategory: businessMapping.category,
-      businessActivity: businessMapping.activity
-    };
-
-    debug("Computed fill context", context);
-    return context;
-  }
-
-  async function applySmartDefaults(label, labelText, data, context, contact) {
-    if (/NSR Acquiring/i.test(labelText)) {
-      return true;
-    }
-
-    if (/Other Products of Interest/i.test(labelText)) {
-      debug("Smart default skipped", { labelText, reason: "Must stay empty" });
-      return true;
-    }
-
-    if (/Products of Interest/i.test(labelText)) {
-      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products of Interest default" });
-      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
-      return true;
-    }
-
-    if (/Products Sold/i.test(labelText)) {
-      debugField("Smart default", labelText, ["Acquiring", "Physical Terminal"], { reason: "Products Sold default" });
-      await fillFieldForLabel(label, ["Acquiring", "Physical Terminal"]);
-      return true;
-    }
-
-    if (/Decision Maker Contacted/i.test(labelText)) {
-      debugField("Smart default", labelText, "Yes", { reason: "Decision maker contacted" });
-      await fillFieldForLabel(label, "Yes");
-      return true;
-    }
-
-    if (/Identification of Need/i.test(labelText)) {
-      debugField("Smart default", labelText, "Looking for value-added products", { reason: "Identification of Need" });
-      await fillFieldForLabel(label, "Looking for value-added products");
-      return true;
-    }
-
-    if (/Number of Stores/i.test(labelText)) {
-      debugField("Smart default", labelText, "1", { reason: "Count default" });
-      await fillFieldForLabel(label, "1");
-      return true;
-    }
-
-    if (/Seasonality/i.test(labelText)) {
-      debugField("Smart default", labelText, "Normal", { reason: "Seasonality default" });
-      await fillFieldForLabel(label, "Normal");
-      return true;
-    }
-
-    if (/Priority/i.test(labelText)) {
-      debugField("Smart default", labelText, "Medium", { reason: "Priority default" });
-      await fillFieldForLabel(label, "Medium");
-      return true;
-    }
-
-    if (/Deal Type/i.test(labelText)) {
-      debugField("Smart default", labelText, "New Customer", { reason: "Deal Type default" });
-      await fillFieldForLabel(label, "New Customer");
-      return true;
-    }
-
-    if (/Sales expected monthly TPV/i.test(labelText) && context.monthlyTPV) {
-      debugField("Smart default", labelText, context.monthlyTPV, { reason: "Monthly TPV from Opten" });
-      await fillFieldForLabel(label, context.monthlyTPV);
-      return true;
-    }
-
-    if (/Contract Term/i.test(labelText)) {
-      debugField("Smart default", labelText, "12", { reason: "Contract term default" });
-      await fillFieldForLabel(label, "12");
-      return true;
-    }
-
-    if (/Terminal Unit Price/i.test(labelText)) {
-      debugField("Smart default", labelText, "-1600", { reason: "Terminal unit price default" });
-      await fillFieldForLabel(label, "-1600");
-      return true;
-    }
-
-    if (/Terminal Price Interval/i.test(labelText)) {
-      debugField("Smart default", labelText, "Monthly", { reason: "Terminal interval default" });
-      await fillFieldForLabel(label, "Monthly");
-      return true;
-    }
-
-    if (/Number of Terminals/i.test(labelText)) {
-      debugField("Smart default", labelText, "1", { reason: "Count default" });
-      await fillFieldForLabel(label, "1");
-      return true;
-    }
-
-    if (/Expected Use Date/i.test(labelText)) {
-      debugField("Smart default", labelText, context.expectedUseDate, { reason: "Expected use date +7 days" });
-      await fillFieldForLabel(label, context.expectedUseDate);
-      return true;
-    }
-
-    if (/Store Street/i.test(labelText) && context.storeStreet) {
-      debugField("Smart default", labelText, context.storeStreet, { reason: "Store street from address" });
-      await fillFieldForLabel(label, context.storeStreet);
-      return true;
-    }
-
-    if (/Store Cost Code/i.test(labelText) && context.storeCostCode) {
-      debugField("Smart default", labelText, context.storeCostCode, { reason: "Store cost code derived" });
-      await fillFieldForLabel(label, context.storeCostCode);
-      return true;
-    }
-
-    if (/Terminal Type/i.test(labelText)) {
-      debugField("Smart default", labelText, "Sunmi", { reason: "Terminal type default" });
-      await fillFieldForLabel(label, "Sunmi");
-      return true;
-    }
-
-    if (/Acquiring Provider/i.test(labelText) && context.bankProvider) {
-      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
-      await fillFieldForLabel(label, context.bankProvider);
-      return true;
-    }
-
-    if (/Banking Provider/i.test(labelText) && context.bankProvider) {
-      debugField("Smart default", labelText, context.bankProvider, { reason: "Provider from bank account" });
-      await fillFieldForLabel(label, context.bankProvider);
-      return true;
-    }
-
-    if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
-      debugField("Contact mapping", labelText, contact.firstName);
-      await fillFieldForLabel(label, contact.firstName);
-      return true;
-    }
-
-    if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
-      debugField("Contact mapping", labelText, contact.lastName);
-      await fillFieldForLabel(label, contact.lastName);
-      return true;
-    }
-
-    if (/Business Category/i.test(labelText) && context.businessCategory) {
-      debugField("Business mapping", labelText, context.businessCategory);
-      await fillFieldForLabel(label, context.businessCategory);
-      return true;
-    }
-
-    if (/Business Activity/i.test(labelText) && context.businessActivity) {
-      debugField("Business mapping", labelText, context.businessActivity);
-      await fillFieldForLabel(label, context.businessActivity);
-      return true;
-    }
-
-    return false;
-  }
-
-  async function fillByPropertySelectors(formRoot, data, contact) {
-    for (const [propertyId, rule] of Object.entries(PROPERTY_RULES)) {
-      let value = "";
-
-      if (rule.static) {
-        value = getStaticValue(rule.static);
-      } else if (rule.contact) {
-        value = contact?.[rule.contact] || "";
-      } else if (rule.keys) {
-        value = getDataValue(data, rule.keys);
-      } else if (rule.dynamic === "dealDescription") {
-        value = buildDealDescription(data);
-      }
-
-      if (!value) {
-        continue;
-      }
-
-      const field = formRoot.querySelector(`[data-selenium-test='property-input-${propertyId}']`)
-        || document.querySelector(`[data-selenium-test='property-input-${propertyId}']`);
-      if (!field) {
-        debug("Property field not found", { propertyId, value });
-        continue;
-      }
-
-      debug("Property selector fill", { propertyId, value });
-      await fillElementValue(field, value);
-      await humanPause();
-    }
-  }
-
-  function getDataValue(data, keys) {
-    for (const key of keys) {
-      if (typeof data?.[key] === "string" && data[key].trim()) {
-        return data[key].trim();
-      }
-    }
-
-    return "";
-  }
-
-  function buildDealDescription(data) {
-    const summaryKeys = [
-      "Adószám",
-      "Cég székhelye",
-      "Alakulás dátuma",
-      "Bejegyzés dátuma"
-    ];
-
-    const lines = summaryKeys
-      .map((key) => {
-        const value = data?.[key];
-        if (!value || !String(value).trim()) {
-          return "";
-        }
-
-        return `${key}: ${String(value).trim()}`;
-      })
-      .filter(Boolean);
-
-    return lines.join("\n");
-  }
-
   function getStaticValue(labelText) {
     const direct = Object.keys(STATIC_VALUES).find((key) => key.toLowerCase() === labelText.toLowerCase());
     if (!direct) {
@@ -1096,6 +1099,11 @@
   }
 
   async function setInputValue(input, value, fieldNameHint = "") {
+    if (!input || input.disabled || input.readOnly) {
+      debug("Input skipped (disabled/readonly)", { fieldNameHint });
+      return;
+    }
+
     const stringValue = String(value ?? "");
 
     input.focus();
@@ -1108,17 +1116,34 @@
     const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
 
     if (descriptor?.set) {
-      descriptor.set.call(input, stringValue);
+      descriptor.set.call(input, "");
     } else {
-      input.value = stringValue;
+      input.value = "";
     }
-
     input.dispatchEvent(new InputEvent("input", {
       bubbles: true,
       cancelable: true,
-      inputType: "insertText",
-      data: stringValue
+      inputType: "deleteContentBackward",
+      data: ""
     }));
+
+    for (const ch of stringValue) {
+      const nextValue = `${input.value || ""}${ch}`;
+      if (descriptor?.set) {
+        descriptor.set.call(input, nextValue);
+      } else {
+        input.value = nextValue;
+      }
+
+      input.dispatchEvent(new InputEvent("input", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: ch
+      }));
+      await humanPause(14, 32);
+    }
+
     input.dispatchEvent(new Event("change", { bubbles: true }));
 
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true }));
@@ -1132,14 +1157,27 @@
   }
 
   async function selectDropdownValues(button, values, fieldNameHint = "") {
-    for (const value of values) {
-      const current = normalizeText(button.textContent || "");
-      if (current.includes(normalizeText(value))) {
-        continue;
-      }
+    await clearDropdownSelections(button);
 
+    for (const value of values) {
       await selectDropdownValue(button, value, fieldNameHint);
       await humanPause();
+    }
+  }
+
+  async function clearDropdownSelections(button) {
+    const container = button.closest("[data-test-id='DisplayOptimizedFormControl'], [data-test-id='FormControl']") || button.parentElement;
+    if (!container) {
+      return;
+    }
+
+    const clearButtons = Array.from(container.querySelectorAll(
+      "button[aria-label*='Remove'], button[aria-label*='remove'], button[aria-label*='Clear'], button[aria-label*='clear'], [data-test-id*='remove']"
+    ));
+
+    for (const clearButton of clearButtons) {
+      clearButton.click();
+      await humanPause(50, 100);
     }
   }
 
@@ -1173,6 +1211,117 @@
       await waitForSaveConfirmation(fieldNameHint || resolveFieldName(button));
       await humanPause();
     }
+
+    return normalizedText.includes(`"${normalizedFieldName}"`)
+      || normalizedText.includes(`'${normalizedFieldName}'`)
+      || normalizedText.includes(normalizedFieldName);
+  }
+
+  async function waitForCondition(checkFn, timeoutMs = 6000, pollMs = 120) {
+    const started = Date.now();
+    while ((Date.now() - started) < timeoutMs) {
+      if (checkFn()) {
+        return true;
+      }
+
+      await wait(pollMs);
+    }
+
+    return false;
+  }
+
+  async function waitForSaveConfirmation(fieldName = "field") {
+    const savingRegex = /saving changes|mentes folyamatban|mentés folyamatban/i;
+    const savedRegex = /changes saved|saved|mentve|sikeresen mentve/i;
+    const baselineToasts = getToastTexts();
+
+    debug("Waiting for save confirmation", { fieldName });
+
+    const seenSavingForField = await waitForCondition(() => {
+      const current = getToastTexts();
+      return current.some((text) => !baselineToasts.includes(text)
+        && savingRegex.test(text)
+        && saveToastMatchesField(text, fieldName));
+    }, 6500, 120);
+
+    const seenSavedForField = await waitForCondition(() => {
+      const current = getToastTexts();
+      return current.some((text) => !baselineToasts.includes(text)
+        && savedRegex.test(text)
+        && saveToastMatchesField(text, fieldName));
+    }, seenSavingForField ? 9000 : 6500, 120);
+
+    if (!seenSavedForField) {
+      debug("Field-specific save banner not detected in time, using fallback delay", {
+        fieldName,
+        seenSavingForField
+      });
+      await humanPause(900, 1400);
+      return;
+    }
+
+    debug(`"${fieldName}" changes saved`);
+  }
+
+  function inferBusinessMapping(activityText) {
+    const normalized = normalizeText(activityText);
+
+    for (const hint of BUSINESS_CATEGORY_HINTS) {
+      const matchedNeedle = hint.needles.find((needle) => normalized.includes(normalizeText(needle)));
+      if (matchedNeedle) {
+        const mapping = {
+          category: hint.category,
+          activity: hint.activity
+        };
+        debug("Business category matched", { matchedNeedle, mapping });
+        return mapping;
+      }
+    }
+
+    const fallback = {
+      category: "Services",
+      activity: "Consulting"
+    };
+    debug("Business category fallback used", fallback);
+    return fallback;
+  }
+
+  function inferBankProvider(bankRaw) {
+    const normalized = normalizeText(bankRaw);
+    const found = Object.entries(BANK_KEYWORDS).find(([, aliases]) => aliases.some((alias) => normalized.includes(normalizeText(alias))));
+    return found ? found[0] : "";
+  }
+
+  function normalizeAmount(value) {
+    if (!value) {
+      return "";
+    }
+
+    const digits = String(value).replace(/[^0-9-]/g, "");
+    return digits || "";
+  }
+
+  function extractStreet(address) {
+    if (!address) {
+      return "";
+    }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
 
