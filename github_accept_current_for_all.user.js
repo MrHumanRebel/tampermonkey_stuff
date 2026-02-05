@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub conflicts: Accept current change for all
 // @namespace    https://github.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds a one-click button on GitHub PR conflict pages to accept all "current" changes and mark files as resolved.
 // @author       you
 // @match        https://github.com/*/*/pull/*/conflicts
@@ -13,46 +13,124 @@
   'use strict';
 
   const BUTTON_ID = 'tm-accept-current-for-all-btn';
+  const MAX_FILE_PASSES = 500;
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  const normalizeText = (value) => (value || '').replace(/\s+/g, ' ').trim();
+
   const isClickable = (el) => {
-    if (!el) return false;
-    if (el.disabled) return false;
-    if (el.getAttribute('aria-disabled') === 'true') return false;
+    if (!el || !el.isConnected) return false;
+
+    const ariaDisabled = el.getAttribute('aria-disabled');
+    if (ariaDisabled === 'true') return false;
+
+    if ('disabled' in el && el.disabled) return false;
+
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+
     return true;
   };
 
-  const byText = (regex) =>
-    Array.from(document.querySelectorAll('button')).filter((btn) => regex.test(btn.textContent || ''));
+  function clickElement(el) {
+    if (!isClickable(el)) return false;
 
-  async function resolveAllConflicts() {
+    el.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'center' });
+    el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    el.click();
+
+    return true;
+  }
+
+  function queryActionElements() {
+    return Array.from(document.querySelectorAll('button, summary, [role="button"], .btn, .Button'));
+  }
+
+  function findByText(regex) {
+    return queryActionElements().filter((el) => regex.test(normalizeText(el.textContent)));
+  }
+
+  function findAcceptCurrentButtons() {
+    const regexes = [
+      /accept current change/i,
+      /use current/i,
+      /choose current/i
+    ];
+
+    return queryActionElements().filter((el) => {
+      const label = normalizeText(el.textContent);
+      const aria = normalizeText(el.getAttribute('aria-label'));
+
+      return regexes.some((regex) => regex.test(label) || regex.test(aria));
+    });
+  }
+
+  async function acceptAllInCurrentFile() {
+    let acceptedCount = 0;
+
+    for (let cycle = 0; cycle < 120; cycle += 1) {
+      const buttons = findAcceptCurrentButtons().filter(isClickable);
+      if (!buttons.length) break;
+
+      for (const btn of buttons) {
+        if (clickElement(btn)) {
+          acceptedCount += 1;
+          await sleep(40);
+        }
+      }
+
+      await sleep(140);
+    }
+
+    return acceptedCount;
+  }
+
+  async function markCurrentFileResolved() {
+    await sleep(120);
+
+    const resolveButtons = findByText(/mark as resolved/i).filter(isClickable);
+    for (const btn of resolveButtons) {
+      if (clickElement(btn)) {
+        await sleep(200);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  async function goToNextFile() {
+    await sleep(120);
+
+    const nextButtons = findByText(/^next$/i).filter(isClickable);
+    for (const btn of nextButtons) {
+      if (clickElement(btn)) {
+        await sleep(260);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  async function resolveAllConflictsInAllFiles() {
     let acceptedCount = 0;
     let resolvedCount = 0;
 
-    for (let cycle = 0; cycle < 60; cycle += 1) {
-      let hasAction = false;
+    for (let filePass = 0; filePass < MAX_FILE_PASSES; filePass += 1) {
+      const acceptedNow = await acceptAllInCurrentFile();
+      acceptedCount += acceptedNow;
 
-      const acceptButtons = byText(/Accept\s+current\s+change/i).filter(isClickable);
-      for (const btn of acceptButtons) {
-        btn.click();
-        acceptedCount += 1;
-        hasAction = true;
-        await sleep(50);
-      }
-
-      await sleep(200);
-
-      const resolveButtons = byText(/Mark\s+as\s+resolved/i).filter(isClickable);
-      for (const btn of resolveButtons) {
-        btn.click();
+      const resolvedNow = await markCurrentFileResolved();
+      if (resolvedNow) {
         resolvedCount += 1;
-        hasAction = true;
-        await sleep(50);
       }
 
-      if (!hasAction) break;
-      await sleep(250);
+      const moved = await goToNextFile();
+      if (!moved) break;
     }
 
     return { acceptedCount, resolvedCount };
@@ -87,14 +165,14 @@
       btn.textContent = 'Processing...';
 
       try {
-        const { acceptedCount, resolvedCount } = await resolveAllConflicts();
-        btn.textContent = `Done: accepted ${acceptedCount}, resolved ${resolvedCount}`;
+        const { acceptedCount, resolvedCount } = await resolveAllConflictsInAllFiles();
+        btn.textContent = `Done: accepted ${acceptedCount}, resolved files ${resolvedCount}`;
       } catch (err) {
         console.error('[TM] Failed to resolve all conflicts:', err);
         btn.textContent = 'Failed (see console)';
       }
 
-      await sleep(2200);
+      await sleep(2600);
       btn.textContent = originalText;
       btn.disabled = false;
     });
@@ -102,10 +180,10 @@
     document.body.appendChild(btn);
   }
 
-  const init = () => {
+  function init() {
     if (!/\/pull\/\d+\/conflicts/.test(location.pathname)) return;
     addButton();
-  };
+  }
 
   init();
 

@@ -79,6 +79,7 @@ Adds a floating action button on GitHub conflict-resolution pages (`/pull/<id>/c
 - Clicks **Accept current change** on all available conflict blocks.
 - Clicks **Mark as resolved** for files once they become resolvable.
 - Repeats in short cycles until no further actions remain.
+- Moves through files with **Next** so it can process an entire conflict session.
 
 Useful when you intentionally want to keep the current branch side for all conflicts in a large PR.
 
