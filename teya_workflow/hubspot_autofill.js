@@ -464,6 +464,15 @@
     return accounts;
   }
 
+  function collectFillLabels(formRoot) {
+    const scoped = Array.from(formRoot.querySelectorAll("label"));
+    const sidebarLabels = Array.from(document.querySelectorAll("[data-sidebar-card-type='PropertiesCard'] label"));
+    const profileLabels = Array.from(document.querySelectorAll("[data-selenium-test='profile-properties'] label"));
+
+    const all = [...scoped, ...sidebarLabels, ...profileLabels];
+    return Array.from(new Set(all));
+  }
+
   async function fillForm(formRoot, data, selection) {
     debug("Starting fillForm");
     const officerName = selection?.officer || data["Cégjegyzésre jogosultak"] || "";
@@ -472,7 +481,7 @@
 
     await fillByPropertySelectors(formRoot, data, contact);
 
-    const fields = Array.from(formRoot.querySelectorAll("label"));
+    const fields = collectFillLabels(formRoot);
     debug("Collected label fields", { count: fields.length });
 
     for (const label of fields) {
@@ -740,17 +749,10 @@
 
   function buildDealDescription(data) {
     const summaryKeys = [
-      "Cégforma",
-      "Alakulás dátuma",
-      "Bejegyzés dátuma",
-      "Cég székhelye",
       "Adószám",
-      "Cégjegyzékszám / Nyilvántartási szám",
-      "Tevékenységi köre(i)",
-      "Teya KYC státusz",
-      "Teya KYC megjegyzés",
-      "Opten gyorsjelentés",
-      "Forrás URL"
+      "Cég székhelye",
+      "Alakulás dátuma",
+      "Bejegyzés dátuma"
     ];
 
     const lines = summaryKeys
@@ -1006,9 +1008,10 @@
       return { firstName: parts[0], lastName: "" };
     }
 
+    // Hungarian source names are commonly in "LastName FirstName" order.
     return {
-      firstName: parts.slice(0, -1).join(" "),
-      lastName: parts.slice(-1).join(" ")
+      firstName: parts.slice(1).join(" "),
+      lastName: parts[0]
     };
   }
 
