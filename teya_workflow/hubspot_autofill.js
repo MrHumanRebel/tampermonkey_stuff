@@ -924,6 +924,23 @@
       debug("Dropdown option not found", { target: value });
       await clickAway(button);
     }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
 
