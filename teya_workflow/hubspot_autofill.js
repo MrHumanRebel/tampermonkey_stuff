@@ -475,6 +475,11 @@
       return true;
     }
 
+    if (/Priority/i.test(labelText)) {
+      await fillFieldForLabel(label, "Medium");
+      return true;
+    }
+
     if (/Deal Type/i.test(labelText)) {
       await fillFieldForLabel(label, "New Customer");
       return true;
@@ -642,7 +647,7 @@
 
     const textInput = container.querySelector("input[type='text'], input[type='number'], input[type='date'], textarea");
     if (textInput) {
-      setInputValue(textInput, Array.isArray(value) ? value.join(", ") : value);
+      await setInputValue(textInput, Array.isArray(value) ? value.join(", ") : value);
       return;
     }
 
@@ -658,7 +663,7 @@
 
   async function fillElementValue(field, value) {
     if (field.matches("input, textarea")) {
-      setInputValue(field, value);
+      await setInputValue(field, value);
       return;
     }
 
@@ -671,12 +676,38 @@
     }
   }
 
-  function setInputValue(input, value) {
+  async function setInputValue(input, value) {
+    const stringValue = String(value ?? "");
+
     input.focus();
-    input.value = value;
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.click();
+    await wait(40);
+
+    const prototype = input.tagName === "TEXTAREA"
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
+
+    if (descriptor?.set) {
+      descriptor.set.call(input, stringValue);
+    } else {
+      input.value = stringValue;
+    }
+
+    input.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "insertText",
+      data: stringValue
+    }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
+
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter", code: "Enter", bubbles: true }));
+
     input.blur();
+    await clickAway(input);
+    await wait(120);
   }
 
   async function selectDropdownValues(button, values) {
@@ -705,9 +736,54 @@
 
     if (option) {
       option.click();
+      await wait(80);
+      await clickAway(button);
+      await wait(120);
     } else {
-      document.body.click();
+      await clickAway(button);
     }
+
+    const digits = String(value).replace(/[^0-9-]/g, "");
+    return digits || "";
+  }
+
+  function extractStreet(address) {
+    if (!address) {
+      return "";
+    }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+  }
+
+
+  async function clickAway(sourceElement) {
+    const target = sourceElement.closest("[data-properties-card-id]")
+      || sourceElement.closest("[role='main']")
+      || document.body;
+
+    const rect = target.getBoundingClientRect();
+    const x = Math.max(5, Math.floor(rect.left + Math.min(20, rect.width - 5)));
+    const y = Math.max(5, Math.floor(rect.top + Math.min(20, rect.height - 5)));
+
+    target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
+    target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
+    await wait(40);
   }
 
   function inferBusinessMapping(activityText) {
