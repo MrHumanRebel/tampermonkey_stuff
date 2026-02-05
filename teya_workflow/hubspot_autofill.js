@@ -453,6 +453,16 @@
         continue;
       }
 
+      if (/Business Category/i.test(labelText) && context.businessCategory) {
+        await fillFieldForLabel(label, context.businessCategory);
+        continue;
+      }
+
+      if (/Business Activity/i.test(labelText) && context.businessActivity) {
+        await fillFieldForLabel(label, context.businessActivity);
+        continue;
+      }
+
       const rule = LABEL_RULES.find((entry) => entry.match.test(labelText));
       if (rule) {
         const value = data[rule.key];
