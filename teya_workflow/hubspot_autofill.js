@@ -16,6 +16,8 @@
   const OVERLAY_ID = "teya-fill-json-overlay";
   const LOG_PREFIX = "[TEYA Fill JSON]";
   const DEBUG_ENABLED = true;
+  const HUMAN_DELAY_MIN_MS = 220;
+  const HUMAN_DELAY_MAX_MS = 520;
 
   const STATIC_VALUES = {
     "Deal type": "New Customer",
@@ -537,6 +539,8 @@
           debug("Label mapping skipped (no source value)", { labelText, sourceKey: rule.key });
         }
       }
+
+      await humanPause();
     }
   }
 
@@ -563,6 +567,11 @@
 
   async function applySmartDefaults(label, labelText, data, context, contact) {
     if (/NSR Acquiring/i.test(labelText)) {
+      return true;
+    }
+
+    if (/Other Products of Interest/i.test(labelText)) {
+      debug("Smart default skipped", { labelText, reason: "Must stay empty" });
       return true;
     }
 
@@ -734,6 +743,7 @@
 
       debug("Property selector fill", { propertyId, value });
       await fillElementValue(field, value);
+      await humanPause();
     }
   }
 
@@ -850,7 +860,7 @@
 
     input.focus();
     input.click();
-    await wait(40);
+    await humanPause(80, 180);
 
     const prototype = input.tagName === "TEXTAREA"
       ? window.HTMLTextAreaElement.prototype
@@ -876,7 +886,7 @@
 
     input.blur();
     await clickAway(input);
-    await wait(120);
+    await humanPause();
     debug("Input committed", { field: input.getAttribute("id") || input.getAttribute("data-selenium-test") || input.name || input.tagName, value: stringValue });
   }
 
@@ -888,14 +898,14 @@
       }
 
       await selectDropdownValue(button, value);
-      await wait(120);
+      await humanPause();
     }
   }
 
   async function selectDropdownValue(button, value) {
     button.click();
 
-    await wait(120);
+    await humanPause(120, 240);
 
     const normalizedTarget = normalizeText(value);
     const options = Array.from(document.querySelectorAll("[data-option-text='true']"));
@@ -909,11 +919,28 @@
       debug("Dropdown option selected", { target: value, optionText: option.textContent?.trim() || "" });
       await wait(80);
       await clickAway(button);
-      await wait(120);
+      await humanPause();
     } else {
       debug("Dropdown option not found", { target: value });
       await clickAway(button);
     }
+
+    const parts = address.split(",");
+    return parts.length > 1 ? parts.slice(1).join(",").trim() : address;
+  }
+
+  function extractPostalCode(address) {
+    const match = String(address || "").match(/\b(\d{4})\b/);
+    return match ? match[1] : "";
+  }
+
+  function normalizeText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
   }
 
 
@@ -929,7 +956,7 @@
     target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, clientX: x, clientY: y }));
     target.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, clientX: x, clientY: y }));
     target.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: x, clientY: y }));
-    await wait(40);
+    await humanPause(80, 180);
   }
 
   function inferBusinessMapping(activityText) {
@@ -1032,6 +1059,12 @@
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  }
+
+  async function humanPause(min = HUMAN_DELAY_MIN_MS, max = HUMAN_DELAY_MAX_MS) {
+    const jitter = Math.floor(Math.random() * Math.max(1, (max - min + 1)));
+    const ms = min + jitter;
+    await wait(ms);
   }
 
   function wait(ms) {
