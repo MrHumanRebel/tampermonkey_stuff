@@ -13,7 +13,7 @@
   "use strict";
 
   const BUTTON_CLASS = "teya-fill-json-button";
-  const BUTTON_WIDE_CLASS = "teya-fill-json-button-wide";
+  const BUTTON_FLOATING_CLASS = "teya-fill-json-button-floating";
   const BUTTON_TOPBAR_CLASS = "teya-fill-json-button-topbar";
   const OVERLAY_ID = "teya-fill-json-overlay";
   const LOG_PREFIX = "[TEYA Fill JSON]";
@@ -142,13 +142,6 @@
     .${BUTTON_CLASS}:active {
       transform: translateY(0);
     }
-    .${BUTTON_WIDE_CLASS} {
-      width: 100%;
-      margin-top: 8px;
-      justify-content: center;
-      padding: 10px 14px;
-      font-size: 13px;
-    }
     .${BUTTON_TOPBAR_CLASS} {
       margin-left: 8px;
       margin-right: 0;
@@ -159,6 +152,16 @@
       line-height: 36px;
       white-space: nowrap;
       flex: 0 0 auto;
+    }
+    .${BUTTON_FLOATING_CLASS} {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 10000;
+      padding: 10px 16px;
+      font-size: 13px;
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(255, 90, 31, 0.35);
     }
     #${OVERLAY_ID} {
       position: fixed;
@@ -255,13 +258,22 @@
   }
 
   function addFillButtons() {
-    const activityInserted = addCreateActivityButtonsBlockButton();
+    const dealInserted = addDealViewButton();
+    const propertiesInserted = addPropertiesCardButton();
+
+    const activityInserted = typeof addCreateActivityButtonsBlockButton === "function"
+      ? addCreateActivityButtonsBlockButton()
+      : false;
     if (!activityInserted) {
-      const topbarInserted = addTopbarCreateButton();
-      if (!topbarInserted) {
+      const topbarInserted = typeof addTopbarCreateButton === "function"
+        ? addTopbarCreateButton()
+        : false;
+      if (!topbarInserted && typeof addActivityBarButton === "function") {
         addActivityBarButton();
       }
     }
+
+    addFloatingFallbackButton(dealInserted || propertiesInserted || activityInserted);
 
     const closeButtons = document.querySelectorAll(
       [
@@ -308,48 +320,91 @@
   function addDealViewButton() {
     const aboutHeading = findAboutDealHeading();
     if (!aboutHeading) {
-      return;
+      return false;
     }
 
-    const actionKeywords = ["note", "notes", "email", "emails", "call", "calls", "task", "tasks", "meeting", "meetings", "more"];
-    const clickable = Array.from(document.querySelectorAll("button, a, [role='button']"));
-
-    const actionButtons = clickable.filter((element) => {
-      const text = normalizeText(element.textContent || "");
-      return actionKeywords.some((keyword) => text === keyword || text.startsWith(`${keyword} `));
-    });
-
-    const targetRow = actionButtons
-      .map((button) => button.closest("div, section, nav"))
-      .find((container) => {
-        if (!container) {
-          return false;
-        }
-
-        const content = normalizeText(container.textContent || "");
-        const found = ["note", "email", "call", "task", "meeting"]
-          .filter((keyword) => content.includes(keyword));
-        return found.length >= 4;
-      });
-
-    if (!targetRow) {
-      debug("Activity action row not found for wide Fill JSON button");
-      return;
+    const headerRow = aboutHeading.closest("header")
+      || aboutHeading.closest("[data-test-id*='header']")
+      || aboutHeading.parentElement;
+    if (!headerRow || headerRow.querySelector(`.${BUTTON_CLASS}`)) {
+      return !!headerRow?.querySelector(`.${BUTTON_CLASS}`);
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.id = "teya-fill-json-wide-wrapper";
-    wrapper.style.width = "100%";
     const fillButton = createFillButton();
-    fillButton.classList.add(BUTTON_WIDE_CLASS);
-    wrapper.appendChild(fillButton);
-    targetRow.insertAdjacentElement("afterend", wrapper);
-    debug("Inserted wide Fill JSON button under activity actions");
+    const actionsButton = headerRow.querySelector("[data-test-id*='actions']")
+      || headerRow.querySelector("button[aria-label*='Actions']")
+      || headerRow.querySelector("button[aria-haspopup='menu']");
+
+    if (actionsButton && actionsButton.parentElement === headerRow) {
+      headerRow.insertBefore(fillButton, actionsButton);
+      return true;
+    }
+
+    headerRow.insertBefore(fillButton, aboutHeading);
+    return true;
+  }
+
+  function addPropertiesCardButton() {
+    const card = document.querySelector("[data-sidebar-card-type='PropertiesCard']")
+      || document.querySelector("[data-card-type='PROPERTIES']")
+      || document.querySelector("[data-test-id*='properties']");
+
+    if (!card) {
+      return false;
+    }
+
+    const actions = card.querySelector("[data-selenium-test='crm-card-actions']");
+    const header = card.querySelector("header")
+      || card.querySelector("[data-test-id*='header']")
+      || card.querySelector(".ExpandableSection__ExpandableHeader-hBFtMA");
+    const target = actions?.parentElement || header;
+
+    if (!target || target.querySelector(`.${BUTTON_CLASS}`)) {
+      return !!target?.querySelector(`.${BUTTON_CLASS}`);
+    }
+
+    const fillButton = createFillButton();
+    if (actions && actions.parentElement) {
+      actions.parentElement.insertBefore(fillButton, actions);
+      return true;
+    }
+
+    target.appendChild(fillButton);
+    return true;
+  }
+
+  function addFloatingFallbackButton(shouldSkip) {
+    if (shouldSkip || document.querySelector(`.${BUTTON_CLASS}`) || document.querySelector(`.${BUTTON_FLOATING_CLASS}`)) {
+      return;
+    }
+
+    const fillButton = createFillButton();
+    fillButton.classList.add(BUTTON_FLOATING_CLASS);
+    document.body.appendChild(fillButton);
   }
 
   function findAboutDealHeading() {
     const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, [role='heading']"));
-    return headings.find((heading) => heading.textContent.trim().toLowerCase() === "about this deal");
+    const labels = [
+      "about this deal",
+      "about the deal",
+      "az uzletrol",
+      "az ugyletrol"
+    ];
+
+    const matchHeading = headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return labels.includes(text);
+    });
+
+    if (matchHeading) {
+      return matchHeading;
+    }
+
+    return headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return text.includes("about") && text.includes("deal");
+    });
   }
 
   function createFillButton(closeButton) {
