@@ -261,10 +261,14 @@
     const dealInserted = addDealViewButton();
     const propertiesInserted = addPropertiesCardButton();
 
-    const activityInserted = addCreateActivityButtonsBlockButton();
+    const activityInserted = typeof addCreateActivityButtonsBlockButton === "function"
+      ? addCreateActivityButtonsBlockButton()
+      : false;
     if (!activityInserted) {
-      const topbarInserted = addTopbarCreateButton();
-      if (!topbarInserted) {
+      const topbarInserted = typeof addTopbarCreateButton === "function"
+        ? addTopbarCreateButton()
+        : false;
+      if (!topbarInserted && typeof addActivityBarButton === "function") {
         addActivityBarButton();
       }
     }
