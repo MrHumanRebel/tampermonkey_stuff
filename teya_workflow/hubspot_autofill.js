@@ -621,25 +621,25 @@
 
       if (CONTACT_LABELS.firstName.test(labelText) && contact.firstName) {
         debugField("Contact mapping", labelText, contact.firstName);
-      await fillFieldForLabel(label, contact.firstName);
+        await fillFieldForLabel(label, contact.firstName);
         continue;
       }
 
       if (CONTACT_LABELS.lastName.test(labelText) && contact.lastName) {
         debugField("Contact mapping", labelText, contact.lastName);
-      await fillFieldForLabel(label, contact.lastName);
+        await fillFieldForLabel(label, contact.lastName);
         continue;
       }
 
       if (/Business Category/i.test(labelText) && context.businessCategory) {
         debugField("Business mapping", labelText, context.businessCategory);
-      await fillFieldForLabel(label, context.businessCategory);
+        await fillFieldForLabel(label, context.businessCategory);
         continue;
       }
 
       if (/Business Activity/i.test(labelText) && context.businessActivity) {
         debugField("Business mapping", labelText, context.businessActivity);
-      await fillFieldForLabel(label, context.businessActivity);
+        await fillFieldForLabel(label, context.businessActivity);
         continue;
       }
 
@@ -652,12 +652,9 @@
         } else {
           debug("Label mapping skipped (no source value)", { labelText, sourceKey: rule.key });
         }
-
-        return `${key}: ${String(value).trim()}`;
-      })
-      .filter(Boolean);
-
-    return lines.join("\n");
+        continue;
+      }
+    }
   }
 
   function buildContext(data, selection) {
