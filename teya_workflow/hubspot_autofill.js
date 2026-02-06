@@ -1457,8 +1457,6 @@
       await waitForSaveConfirmation(fieldNameHint || resolveFieldName(button));
       await humanPause();
     }
-
-    return element?.getAttribute?.("data-selenium-test") || element?.name || element?.tagName || "field";
   }
 
   function getToastTexts() {
