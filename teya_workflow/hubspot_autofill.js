@@ -13,7 +13,6 @@
   "use strict";
 
   const BUTTON_CLASS = "teya-fill-json-button";
-  const BUTTON_WIDE_CLASS = "teya-fill-json-button-wide";
   const BUTTON_TOPBAR_CLASS = "teya-fill-json-button-topbar";
   const OVERLAY_ID = "teya-fill-json-overlay";
   const LOG_PREFIX = "[TEYA Fill JSON]";
@@ -142,13 +141,6 @@
     .${BUTTON_CLASS}:active {
       transform: translateY(0);
     }
-    .${BUTTON_WIDE_CLASS} {
-      width: 100%;
-      margin-top: 8px;
-      justify-content: center;
-      padding: 10px 14px;
-      font-size: 13px;
-    }
     .${BUTTON_TOPBAR_CLASS} {
       margin-left: 8px;
       margin-right: 0;
@@ -255,6 +247,8 @@
   }
 
   function addFillButtons() {
+    addDealViewButton();
+
     const activityInserted = addCreateActivityButtonsBlockButton();
     if (!activityInserted) {
       const topbarInserted = addTopbarCreateButton();
@@ -311,45 +305,48 @@
       return;
     }
 
-    const actionKeywords = ["note", "notes", "email", "emails", "call", "calls", "task", "tasks", "meeting", "meetings", "more"];
-    const clickable = Array.from(document.querySelectorAll("button, a, [role='button']"));
-
-    const actionButtons = clickable.filter((element) => {
-      const text = normalizeText(element.textContent || "");
-      return actionKeywords.some((keyword) => text === keyword || text.startsWith(`${keyword} `));
-    });
-
-    const targetRow = actionButtons
-      .map((button) => button.closest("div, section, nav"))
-      .find((container) => {
-        if (!container) {
-          return false;
-        }
-
-        const content = normalizeText(container.textContent || "");
-        const found = ["note", "email", "call", "task", "meeting"]
-          .filter((keyword) => content.includes(keyword));
-        return found.length >= 4;
-      });
-
-    if (!targetRow) {
-      debug("Activity action row not found for wide Fill JSON button");
+    const headerRow = aboutHeading.closest("header")
+      || aboutHeading.closest("[data-test-id*='header']")
+      || aboutHeading.parentElement;
+    if (!headerRow || headerRow.querySelector(`.${BUTTON_CLASS}`)) {
       return;
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.id = "teya-fill-json-wide-wrapper";
-    wrapper.style.width = "100%";
     const fillButton = createFillButton();
-    fillButton.classList.add(BUTTON_WIDE_CLASS);
-    wrapper.appendChild(fillButton);
-    targetRow.insertAdjacentElement("afterend", wrapper);
-    debug("Inserted wide Fill JSON button under activity actions");
+    const actionsButton = headerRow.querySelector("[data-test-id*='actions']")
+      || headerRow.querySelector("button[aria-label*='Actions']")
+      || headerRow.querySelector("button[aria-haspopup='menu']");
+
+    if (actionsButton && actionsButton.parentElement === headerRow) {
+      headerRow.insertBefore(fillButton, actionsButton);
+      return;
+    }
+
+    headerRow.insertBefore(fillButton, aboutHeading);
   }
 
   function findAboutDealHeading() {
     const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, [role='heading']"));
-    return headings.find((heading) => heading.textContent.trim().toLowerCase() === "about this deal");
+    const labels = [
+      "about this deal",
+      "about the deal",
+      "az uzletrol",
+      "az ugyletrol"
+    ];
+
+    const matchHeading = headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return labels.includes(text);
+    });
+
+    if (matchHeading) {
+      return matchHeading;
+    }
+
+    return headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return text.includes("about") && text.includes("deal");
+    });
   }
 
   function createFillButton(closeButton) {
