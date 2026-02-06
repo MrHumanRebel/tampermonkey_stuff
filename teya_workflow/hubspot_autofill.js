@@ -305,18 +305,48 @@
       return;
     }
 
-    const container = aboutHeading.parentElement;
-    if (!container || container.querySelector(`.${BUTTON_CLASS}`)) {
+    const headerRow = aboutHeading.closest("header")
+      || aboutHeading.closest("[data-test-id*='header']")
+      || aboutHeading.parentElement;
+    if (!headerRow || headerRow.querySelector(`.${BUTTON_CLASS}`)) {
       return;
     }
 
     const fillButton = createFillButton();
-    container.insertBefore(fillButton, aboutHeading);
+    const actionsButton = headerRow.querySelector("[data-test-id*='actions']")
+      || headerRow.querySelector("button[aria-label*='Actions']")
+      || headerRow.querySelector("button[aria-haspopup='menu']");
+
+    if (actionsButton && actionsButton.parentElement === headerRow) {
+      headerRow.insertBefore(fillButton, actionsButton);
+      return;
+    }
+
+    headerRow.insertBefore(fillButton, aboutHeading);
   }
 
   function findAboutDealHeading() {
     const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4, [role='heading']"));
-    return headings.find((heading) => heading.textContent.trim().toLowerCase() === "about this deal");
+    const labels = [
+      "about this deal",
+      "about the deal",
+      "az uzletrol",
+      "az ugyletrol"
+    ];
+
+    const matchHeading = headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return labels.includes(text);
+    });
+
+    if (matchHeading) {
+      return matchHeading;
+    }
+
+    return headings.find((heading) => {
+      const text = normalizeText(heading.textContent);
+      return text.includes("about") && text.includes("deal");
+    });
   }
 
   function createFillButton(closeButton) {
