@@ -13,6 +13,7 @@
   "use strict";
 
   const BUTTON_CLASS = "teya-fill-json-button";
+  const BUTTON_FLOATING_CLASS = "teya-fill-json-button-floating";
   const BUTTON_TOPBAR_CLASS = "teya-fill-json-button-topbar";
   const OVERLAY_ID = "teya-fill-json-overlay";
   const LOG_PREFIX = "[TEYA Fill JSON]";
@@ -152,6 +153,16 @@
       white-space: nowrap;
       flex: 0 0 auto;
     }
+    .${BUTTON_FLOATING_CLASS} {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 10000;
+      padding: 10px 16px;
+      font-size: 13px;
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(255, 90, 31, 0.35);
+    }
     #${OVERLAY_ID} {
       position: fixed;
       inset: 0;
@@ -247,7 +258,8 @@
   }
 
   function addFillButtons() {
-    addDealViewButton();
+    const dealInserted = addDealViewButton();
+    const propertiesInserted = addPropertiesCardButton();
 
     const activityInserted = addCreateActivityButtonsBlockButton();
     if (!activityInserted) {
@@ -256,6 +268,8 @@
         addActivityBarButton();
       }
     }
+
+    addFloatingFallbackButton(dealInserted || propertiesInserted || activityInserted);
 
     const closeButtons = document.querySelectorAll(
       [
@@ -302,14 +316,14 @@
   function addDealViewButton() {
     const aboutHeading = findAboutDealHeading();
     if (!aboutHeading) {
-      return;
+      return false;
     }
 
     const headerRow = aboutHeading.closest("header")
       || aboutHeading.closest("[data-test-id*='header']")
       || aboutHeading.parentElement;
     if (!headerRow || headerRow.querySelector(`.${BUTTON_CLASS}`)) {
-      return;
+      return !!headerRow?.querySelector(`.${BUTTON_CLASS}`);
     }
 
     const fillButton = createFillButton();
@@ -319,10 +333,50 @@
 
     if (actionsButton && actionsButton.parentElement === headerRow) {
       headerRow.insertBefore(fillButton, actionsButton);
-      return;
+      return true;
     }
 
     headerRow.insertBefore(fillButton, aboutHeading);
+    return true;
+  }
+
+  function addPropertiesCardButton() {
+    const card = document.querySelector("[data-sidebar-card-type='PropertiesCard']")
+      || document.querySelector("[data-card-type='PROPERTIES']")
+      || document.querySelector("[data-test-id*='properties']");
+
+    if (!card) {
+      return false;
+    }
+
+    const actions = card.querySelector("[data-selenium-test='crm-card-actions']");
+    const header = card.querySelector("header")
+      || card.querySelector("[data-test-id*='header']")
+      || card.querySelector(".ExpandableSection__ExpandableHeader-hBFtMA");
+    const target = actions?.parentElement || header;
+
+    if (!target || target.querySelector(`.${BUTTON_CLASS}`)) {
+      return !!target?.querySelector(`.${BUTTON_CLASS}`);
+    }
+
+    const fillButton = createFillButton();
+    if (actions && actions.parentElement) {
+      actions.parentElement.insertBefore(fillButton, actions);
+      return true;
+    }
+
+    target.appendChild(fillButton);
+    return true;
+  }
+
+  function addFloatingFallbackButton(shouldSkip) {
+    if (shouldSkip || document.querySelector(`.${BUTTON_CLASS}`) || document.querySelector(`.${BUTTON_FLOATING_CLASS}`)) {
+      return;
+    }
+
+    const fillButton = createFillButton();
+    fillButton.classList.add(BUTTON_FLOATING_CLASS);
+    document.body.appendChild(fillButton);
   }
 
   function findAboutDealHeading() {
