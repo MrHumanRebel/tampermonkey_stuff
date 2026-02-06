@@ -1377,22 +1377,18 @@
       data: ""
     }));
 
-    for (const ch of stringValue) {
-      const nextValue = `${input.value || ""}${ch}`;
-      if (descriptor?.set) {
-        descriptor.set.call(input, nextValue);
-      } else {
-        input.value = nextValue;
-      }
-
-      input.dispatchEvent(new InputEvent("input", {
-        bubbles: true,
-        cancelable: true,
-        inputType: "insertText",
-        data: ch
-      }));
-      await humanPause(14, 32);
+    if (descriptor?.set) {
+      descriptor.set.call(input, stringValue);
+    } else {
+      input.value = stringValue;
     }
+
+    input.dispatchEvent(new InputEvent("input", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "insertFromPaste",
+      data: stringValue
+    }));
 
     input.dispatchEvent(new Event("change", { bubbles: true }));
 
